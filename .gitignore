@@ -6,10 +6,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+paginas_utiles.md
 
 node_modules
 dist
 dist-ssr
+design
 *.local
 
 # Editor directories and files
