@@ -1,4 +1,4 @@
-/* #style - Estilos básicos de la página del usuario */
+/* #style .container */
 .container {
   max-width: 600px;
   margin: 2rem auto;
@@ -8,24 +8,28 @@
   background-color: #fafafa;
   font-family: sans-serif;
 }
-
+/* #end-style */
+/* #style .heading */
 .heading {
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
-
+/* #end-style */
+/* #style .infoBox */
 .infoBox {
   margin-bottom: 2rem;
   padding: 1rem;
   background: #f0f0f0;
   border-radius: 6px;
 }
-
+/* #end-style */
+/* #style .actions */
 .actions {
   display: flex;
   gap: 1rem;
 }
-
+/* #end-style */
+/* #style button */
 button {
   padding: 0.5rem 1rem;
   background-color: #444;

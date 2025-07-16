@@ -6,7 +6,7 @@
     Se crea el componente RegisterPage el cual contiene el formulario de registro de usuarios.
     </div>
 
-2. ✅ Conectar
+2. ✅ Conectar al usuario y redirigirlo a una sección donde configure su cuenta.
 ---
 ### Login de los usuarios
 

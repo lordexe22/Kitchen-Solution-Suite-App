@@ -1,11 +1,11 @@
-// #typedef - Datos ingresados por el usuario en el formulario de login
+/* src\pages\LoginPage\LoginPage.t.ts */
+// #typedef LoginFormDataType 
 export interface LoginFormDataType {
   email: string;
   password: string;
 }
 // #end-typedef
-
-// #typedef - Resultado esperado de la autenticación (actualizado)
+// #typedef AuthResponseType 
 export interface AuthResponseType {
   success: boolean;
   message: string;
@@ -18,4 +18,3 @@ export interface AuthResponseType {
   };
 }
 // #end-typedef
-
