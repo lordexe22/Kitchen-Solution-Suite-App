@@ -1,0 +1,37 @@
+/* #style - Estilos básicos de la página del usuario */
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fafafa;
+  font-family: sans-serif;
+}
+
+.heading {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.infoBox {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f0f0f0;
+  border-radius: 6px;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: not-allowed;
+}
+/* #end-style */

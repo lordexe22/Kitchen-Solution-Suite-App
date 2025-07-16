@@ -35,6 +35,7 @@ export async function loginRequest(data: LoginFormDataType): Promise<AuthRespons
       success: true,
       message: result.message,
       token: result.token, // si en el futuro se implementa JWT
+      user: result.user, // ✅ ahora sí se incluye
     };
 
   } catch (error: unknown) {

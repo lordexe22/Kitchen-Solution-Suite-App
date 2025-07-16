@@ -43,7 +43,7 @@ export const registerFormRunner = async (
     });
     // #end-step
     // #step 3 - send request to server
-    const response = await fetch("http://localhost:4000/api/usuarios/registrar", {
+    const response = await fetch("http://localhost:4000/api/usuarios/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),

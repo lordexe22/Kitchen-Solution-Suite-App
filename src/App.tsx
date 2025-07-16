@@ -4,6 +4,7 @@ import MainPage from "./pages/MainPage/MainPage"
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import {useStoreCurrentPage} from "./store/currentPage/currentPage"
+import UserPage from "./pages/UserPage/UserPage";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
       {currentPage === "main" && <MainPage />}
       {currentPage === "register" && <RegisterPage />}
       {currentPage === "login" && <LoginPage />}
+      {currentPage === "user" && <UserPage />}
     </>
   );
 }

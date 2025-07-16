@@ -3,6 +3,8 @@ import styles from "./LoginPage.module.css";
 import { useStoreCurrentPage } from "../../store/currentPage/currentPage";
 import { type LoginFormDataType } from "./LoginPage.t";
 import { validateLoginForm, loginRequest } from "./LoginPage.utils";
+import { useAuthStore } from "../../store/authUser/authUser";
+
 
 // #function - Componente funcional de la página de login
 export default function LoginPage() {
@@ -11,6 +13,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const setUser = useAuthStore((state) => state.setUser);
 
   // #event - Manejador de cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,8 +36,12 @@ export default function LoginPage() {
 
     if (response.success) {
       setMessage("¡Bienvenido!");
-      // Aquí iría guardar token, etc.
-      changeCurrentPage("main");
+      console.log("🔍 Respuesta del backend:", response);
+
+      if (response.success && response.user) {
+        setUser(response.user); // Guarda los datos del usuario autenticado
+        changeCurrentPage("user"); // Redirige a la vista correspondiente
+      }
     } else {
       setMessage(response.message);
     }

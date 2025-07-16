@@ -5,10 +5,17 @@ export interface LoginFormDataType {
 }
 // #end-typedef
 
-// #typedef - Resultado esperado de la autenticación (mock temporal)
+// #typedef - Resultado esperado de la autenticación (actualizado)
 export interface AuthResponseType {
   success: boolean;
   message: string;
   token?: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 // #end-typedef
+
