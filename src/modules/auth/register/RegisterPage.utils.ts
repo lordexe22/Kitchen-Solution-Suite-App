@@ -1,5 +1,7 @@
-/* src\pages\RegisterPage\RegisterPage.util.ts */
+// src\modules\auth\register\RegisterPage.utils.ts
+
 import { type FormattedUserToSaveType, type RegisterFormDataType } from "./RegisterPage.t";
+
 // #function registerFormRunner - Handles the registration form submission logic
 /**
  * Handles the logic for submitting the registration form.
@@ -12,10 +14,10 @@ import { type FormattedUserToSaveType, type RegisterFormDataType } from "./Regis
 export const registerFormRunner = async (
   form: HTMLFormElement,
   setError: (msg: string | null) => void,
-  setSuccessMessage: (msg: string | null) => void
+  navigate: (to: string) => void,
 ): Promise<void> => {
+
   setError(null);
-  setSuccessMessage(null);
 
   // #variable - form, formData, name, email, password, confirmPassword, phone, acceptedTerms
   const formData = new FormData(form);
@@ -55,10 +57,8 @@ export const registerFormRunner = async (
       throw new Error(data?.error || "Error al registrar el usuario.");
     }
     // #end-step
-    // #step 5 - handle successful response by showing message and resetting form
-    const data = await response.json();
-    setSuccessMessage(`✅ ${data.mensaje}`);
-    form.reset();
+    // #step 5 - handle successful response moving to main page
+    navigate("/");
     // #end-step
   } catch (err: unknown) {
     // #step 6 - handle exceptions showing error messages

@@ -1,14 +1,15 @@
+// src\modules\auth\login\LoginPage.tsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.css";
-import { useStoreCurrentPage } from "../../store/currentPage/currentPage";
 import { type LoginFormDataType } from "./LoginPage.t";
 import { validateLoginForm, loginRequest } from "./LoginPage.utils";
-import { useAuthStore } from "../../store/authUser/authUser";
+import { useAuthStore } from "../../../store/authUser/authUser";
 
 
 // #function - Componente funcional de la página de login
 export default function LoginPage() {
-  const { changeCurrentPage } = useStoreCurrentPage();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormDataType>({ email: "", password: "" });
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,14 +35,9 @@ export default function LoginPage() {
     const response = await loginRequest(formData);
     setLoading(false);
 
-    if (response.success) {
-      setMessage("¡Bienvenido!");
-      console.log("🔍 Respuesta del backend:", response);
-
-      if (response.success && response.user) {
-        setUser(response.user); // Guarda los datos del usuario autenticado
-        changeCurrentPage("user"); // Redirige a la vista correspondiente
-      }
+    if (response.success && response.user) {
+      setUser(response.user);
+      navigate("/user"); // redirige a la página user con React Router
     } else {
       setMessage(response.message);
     }

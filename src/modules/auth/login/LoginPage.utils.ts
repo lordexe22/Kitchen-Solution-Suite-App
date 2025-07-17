@@ -1,3 +1,4 @@
+// src\modules\auth\login\LoginPage.utils.ts
 import { type LoginFormDataType, type AuthResponseType } from "./LoginPage.t";
 
 // #function - Valida que los campos del formulario de login estén completos
@@ -30,6 +31,9 @@ export async function loginRequest(data: LoginFormDataType): Promise<AuthRespons
         message: result.message || "Error de autenticación",
       };
     }
+
+    
+    localStorage.setItem('jwt', JSON.stringify(result.token));
 
     return {
       success: true,

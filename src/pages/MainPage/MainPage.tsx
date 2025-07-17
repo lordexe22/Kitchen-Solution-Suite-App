@@ -1,17 +1,18 @@
 // src\pages\MainPage\MainPage.tsx
 
-import { useStoreCurrentPage } from "../../store/currentPage/currentPage";
+import { useNavigate } from "react-router-dom";
 
 const MainPage = () => {
-  const changeCurrentPage = useStoreCurrentPage((state) => state.changeCurrentPage);
+  const navigate = useNavigate();
+
   // #event - Navegación hacia el registro
   const handleRegister = () => {
-    changeCurrentPage("register");
+    navigate("/register");
   };
   // #end-event
   // #event - Navegación hacia el login
   const handleLogin = () => {
-    changeCurrentPage("login");
+    navigate("/login");
   };
   // #end-event
   return(

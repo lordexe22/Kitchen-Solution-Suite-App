@@ -1,17 +1,18 @@
-// src\pages\RegisterPage\RegisterPage.tsx
+// src\modules\auth\register\RegisterPage.tsx
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { registerFormRunner } from "./RegisterPage.utils";
 import styles from "./RegisterPage.module.css";
 
 const RegisterPage = () => {
-
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // #event handleRegisterForm - Handles submit event and delegates to runner
   const handleRegisterForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    registerFormRunner(e.currentTarget, setError, setSuccessMessage);
+    registerFormRunner(e.currentTarget, setError, navigate);
   };
   // #end-event
 
@@ -59,7 +60,6 @@ const RegisterPage = () => {
         <button type="submit" className={styles.submitButton}>Registrarse</button>
         {/* #end-section */}
         {error && <p className={`${styles.message} ${styles.error}`}>{error}</p>}
-        {successMessage && <p className={`${styles.message} ${styles.success}`}>{successMessage}</p>}
       </form>
     </div>
   );

@@ -1,21 +1,21 @@
 // src\App.tsx
 
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainPage from "./pages/MainPage/MainPage"
-import RegisterPage from "./pages/RegisterPage/RegisterPage";
-import LoginPage from "./pages/LoginPage/LoginPage";
+import RegisterPage from "./modules/auth/register/RegisterPage";
+import LoginPage from "./modules/auth/login/LoginPage";
 import UserPage from "./pages/UserPage/UserPage";
-import {useStoreCurrentPage} from "./store/currentPage/currentPage";
-
 
 function App() {
-  const currentPage = useStoreCurrentPage((state) => state.currentPage);
   return (
-    <>
-      {currentPage === "main" && <MainPage />}
-      {currentPage === "register" && <RegisterPage />}
-      {currentPage === "login" && <LoginPage />}
-      {currentPage === "user" && <UserPage />}
-    </>
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/user" element={<UserPage />} />
+      {/* Redireccionar cualquier ruta desconocida a la principal */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
