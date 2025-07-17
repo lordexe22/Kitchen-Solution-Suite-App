@@ -32,8 +32,7 @@ export async function loginRequest(data: LoginFormDataType): Promise<AuthRespons
       };
     }
 
-    
-    localStorage.setItem('jwt', JSON.stringify(result.token));
+    localStorage.setItem('jwt', result.token);
 
     return {
       success: true,

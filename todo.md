@@ -3,7 +3,7 @@
 ### 🔐 Autenticación y rutas protegidas
 1. [ ] Todas las rutas deben revisar si existe el JWT, si existe se debe obtener la informacion del usuario directamente desde ahi y redireccionar automaticamente al usuario
 2. [ ] Se deberia poner una fecha de expiracion en el jwt
-3. [ ] Como se usa react-router-dom, ya no se navega por medio del estado global creado en la store de zustand, se deberia actializar o borrar ese store
+3. [✅] Como se usa react-router-dom, ya no se navega por medio del estado global creado en la store de zustand, se deberia actializar o borrar ese store
 4. [ ] Crear un `PrivateRoute` que encapsule rutas protegidas como `/user`.
 
 ### 📦 Manejo de estado
@@ -17,7 +17,7 @@
 
 ## Server
 ### 🔐 JWT
-1. [ ] Incluir expiración en el token JWT (`expiresIn: "7d"` ya está hecho, verificar consistencia).
+1. [✅] Incluir expiración en el token JWT (`expiresIn: "7d"` ya está hecho, verificar consistencia).
 2. [ ] Asegurarse de que el payload del JWT tenga solo los campos necesarios (ej. `id`, `email`, `role`).
 3. [ ] Crear un middleware `verifyToken` para rutas protegidas que lea el token del header `Authorization`.
 4. [ ] Desde el middleware `verifyToken`, consultar la base de datos para validar:
