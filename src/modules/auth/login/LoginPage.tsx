@@ -1,29 +1,29 @@
-// src\modules\auth\login\LoginPage.tsx
+/* src\modules\auth\login\LoginPage.tsx */
+// #section Imports
+import styles from "./LoginPage.module.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./LoginPage.module.css";
 import { type LoginFormDataType } from "./LoginPage.t";
 import { validateLoginForm, loginRequest } from "./LoginPage.utils";
 import { useAuthStore } from "../../../store/authUser/authUser";
-
-
-// #function - Componente funcional de la página de login
+// #end-section
+// #function LoginPage
 export default function LoginPage() {
+  // #variable - navigate, formDatam errors, loading, message, setUser
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormDataType>({ email: "", password: "" });
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const setUser = useAuthStore((state) => state.setUser);
-
-  // #event - Manejador de cambios en los inputs
+  // #end-variable
+  // #event handleChange
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   // #end-event
-
-  // #event - Manejador del submit
+  // #event handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
@@ -43,7 +43,7 @@ export default function LoginPage() {
     }
   };
   // #end-event
-
+  // #section return
   return (
     <div className={styles.container}>
       <h2>Iniciar Sesión</h2>
@@ -79,5 +79,6 @@ export default function LoginPage() {
       </form>
     </div>
   );
+  // #end-section
 }
 // #end-function

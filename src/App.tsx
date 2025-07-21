@@ -1,12 +1,11 @@
 // src/App.tsx
-
-import { useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import MainPage from "./pages/MainPage/MainPage";
 import RegisterPage from "./modules/auth/register/RegisterPage";
 import LoginPage from "./modules/auth/login/LoginPage";
 import UserPage from "./pages/UserPage/UserPage";
-import { ClientPage } from "./pages/ClientPage/ClientPage";
+import ClientPage from "./pages/ClientPage/ClientPage";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 function App() {
   const navigate = useNavigate();

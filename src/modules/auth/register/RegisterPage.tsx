@@ -1,21 +1,21 @@
 // src\modules\auth\register\RegisterPage.tsx
-
+// #section imports
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerFormRunner } from "./RegisterPage.utils";
 import styles from "./RegisterPage.module.css";
-
+// #end-section
+// #function RegisterPage
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-
   // #event handleRegisterForm - Handles submit event and delegates to runner
   const handleRegisterForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     registerFormRunner(e.currentTarget, setError, navigate);
   };
   // #end-event
-
+  // #section return
   return (
     <div className={styles.container}>
       <h1 className={styles.formTitle}>Registro de Usuario</h1>
@@ -62,8 +62,8 @@ const RegisterPage = () => {
         {error && <p className={`${styles.message} ${styles.error}`}>{error}</p>}
       </form>
     </div>
+  // #end-section
   );
 };
-// #end-function
-
 export default RegisterPage;
+// #end-function
