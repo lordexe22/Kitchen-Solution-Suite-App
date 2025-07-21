@@ -20,12 +20,24 @@ const CONFIG_SECTIONS = [
   "Menú",
 ];
 
-const SOCIAL_MEDIA = ["Facebook", "Instagram", "X", "Tik Tok", "Threads"];
+const SOCIAL_MEDIA = [
+  { label: "Facebook", key: "facebook_url" },
+  { label: "Instagram", key: "instagram_url" },
+  { label: "X", key: "x_url" },
+  { label: "Tik Tok", key: "tiktok_url" },
+  { label: "Threads", key: "threads_url" },
+];
 
 const BusinessList = ({ businesses }: Props) => {
   const [expandedBusinessId, setExpandedBusinessId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({
+    facebook_url: "",
+    instagram_url: "",
+    x_url: "",
+    tiktok_url: "",
+    threads_url: "",
+  });
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +84,9 @@ const BusinessList = ({ businesses }: Props) => {
       }
 
       const data = await response.json();
+
+      console.log({data});
+
       setSocialLinks(data.socials || {});
       setLastUpdate(data.lastUpdate || null);
     } catch (err) {
@@ -99,6 +114,8 @@ const BusinessList = ({ businesses }: Props) => {
     try {
       const token = localStorage.getItem("jwt");
       if (!token) throw new Error("Token no encontrado");
+
+      console.log({socialLinks});
 
       const response = await fetch(`http://localhost:4000/api/businesses/${expandedBusinessId}/socials`, {
         method: "PUT",
@@ -154,14 +171,14 @@ const BusinessList = ({ businesses }: Props) => {
                           handleSocialSubmit();
                         }}
                       >
-                        {SOCIAL_MEDIA.map((platform) => (
-                          <div key={platform} className={styles.inputGroup}>
-                            <label>{platform}</label>
+                        {SOCIAL_MEDIA.map(({ label, key }) => (
+                          <div key={key} className={styles.inputGroup}>
+                            <label>{label}</label>
                             <input
                               type="url"
-                              placeholder={`https://${platform.toLowerCase()}.com/...`}
-                              value={socialLinks[platform] || ""}
-                              onChange={(e) => handleSocialChange(platform, e.target.value)}
+                              placeholder={`https://${label.toLowerCase()}.com/...`}
+                              value={socialLinks[key] || ""}
+                              onChange={(e) => handleSocialChange(key, e.target.value)}
                             />
                           </div>
                         ))}
