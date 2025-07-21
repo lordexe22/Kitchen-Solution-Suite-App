@@ -1,4 +1,3 @@
-// src/components/BusinessList/BusinessList.tsx
 import { useState } from "react";
 import styles from "./BusinessList.module.css";
 
@@ -21,28 +20,13 @@ const CONFIG_SECTIONS = [
   "Menú",
 ];
 
-// Claves alineadas con backend para redes sociales
-const SOCIAL_MEDIA_KEYS = [
-  { label: "Facebook", key: "facebook_url" },
-  { label: "Instagram", key: "instagram_url" },
-  { label: "X", key: "x_url" },
-  { label: "Tik Tok", key: "tiktok_url" },
-  { label: "Threads", key: "threads_url" },
-];
+const SOCIAL_MEDIA = ["Facebook", "Instagram", "X", "Tik Tok", "Threads"];
 
 const BusinessList = ({ businesses }: Props) => {
   const [expandedBusinessId, setExpandedBusinessId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-
-  // Inicializar socialLinks con claves correctas y valores vacíos
-  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({
-    facebook_url: "",
-    instagram_url: "",
-    x_url: "",
-    tiktok_url: "",
-    threads_url: "",
-  });
-
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -62,11 +46,37 @@ const BusinessList = ({ businesses }: Props) => {
     return `${label} - [ configure la dirección del local ]`;
   };
 
-  const toggleBusiness = (id: string) => {
-    setExpandedBusinessId((prev) => (prev === id ? null : id));
+  const toggleBusiness = async (id: string) => {
+    const isSame = expandedBusinessId === id;
+    setExpandedBusinessId(isSame ? null : id);
     setExpandedSection(null);
     setSuccess(false);
     setError(null);
+
+    if (isSame) return;
+
+    try {
+      const token = localStorage.getItem("jwt");
+      if (!token) throw new Error("Token no encontrado");
+
+      const response = await fetch(`http://localhost:4000/api/businesses/${id}/socials`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Error al obtener redes sociales:", await response.text());
+        return;
+      }
+
+      const data = await response.json();
+      setSocialLinks(data.socials || {});
+      setLastUpdate(data.lastUpdate || null);
+    } catch (err) {
+      console.error("Error al hacer fetch de redes sociales:", err);
+    }
   };
 
   const toggleSection = (title: string) => {
@@ -75,15 +85,12 @@ const BusinessList = ({ businesses }: Props) => {
     setError(null);
   };
 
-  const handleSocialChange = (platformKey: string, value: string) => {
-    setSocialLinks((prev) => ({ ...prev, [platformKey]: value }));
+  const handleSocialChange = (platform: string, value: string) => {
+    setSocialLinks((prev) => ({ ...prev, [platform]: value }));
   };
 
   const handleSocialSubmit = async () => {
-    if (!expandedBusinessId) {
-      console.warn("No hay ID de negocio expandido.");
-      return;
-    }
+    if (!expandedBusinessId) return;
 
     setSaving(true);
     setError(null);
@@ -91,15 +98,7 @@ const BusinessList = ({ businesses }: Props) => {
 
     try {
       const token = localStorage.getItem("jwt");
-      if (!token) {
-        console.error("Token JWT no encontrado en localStorage.");
-        throw new Error("Token no encontrado");
-      }
-
-      console.log("Enviando datos al servidor:", {
-        businessId: expandedBusinessId,
-        body: socialLinks,
-      });
+      if (!token) throw new Error("Token no encontrado");
 
       const response = await fetch(`http://localhost:4000/api/businesses/${expandedBusinessId}/socials`, {
         method: "PUT",
@@ -112,15 +111,11 @@ const BusinessList = ({ businesses }: Props) => {
 
       if (!response.ok) {
         const text = await response.text();
-        console.error("Respuesta del servidor con error:", text);
-        throw new Error(`Error al guardar redes sociales: ${response.status}`);
+        throw new Error(`Error al guardar redes sociales: ${text}`);
       }
 
-      console.log("Respuesta OK del servidor");
       setSuccess(true);
     } catch (err: unknown) {
-      console.error("Error en handleSocialSubmit:", err);
-
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -159,14 +154,14 @@ const BusinessList = ({ businesses }: Props) => {
                           handleSocialSubmit();
                         }}
                       >
-                        {SOCIAL_MEDIA_KEYS.map(({ label, key }) => (
-                          <div key={key} className={styles.inputGroup}>
-                            <label>{label}</label>
+                        {SOCIAL_MEDIA.map((platform) => (
+                          <div key={platform} className={styles.inputGroup}>
+                            <label>{platform}</label>
                             <input
                               type="url"
-                              placeholder={`https://${label.toLowerCase()}.com/...`}
-                              value={socialLinks[key] || ""}
-                              onChange={(e) => handleSocialChange(key, e.target.value)}
+                              placeholder={`https://${platform.toLowerCase()}.com/...`}
+                              value={socialLinks[platform] || ""}
+                              onChange={(e) => handleSocialChange(platform, e.target.value)}
                             />
                           </div>
                         ))}
@@ -175,6 +170,11 @@ const BusinessList = ({ businesses }: Props) => {
                         </button>
                         {success && <p className={styles.successMsg}>Guardado correctamente.</p>}
                         {error && <p className={styles.errorMsg}>{error}</p>}
+                        {lastUpdate && (
+                          <p className={styles.lastUpdateMsg}>
+                            Última actualización: {new Date(lastUpdate).toLocaleString()}
+                          </p>
+                        )}
                       </form>
                     )}
                   </li>
