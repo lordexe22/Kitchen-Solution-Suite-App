@@ -1,42 +1,30 @@
-// src/pages/ClientPage/ClientPage.tsx
-import { useEffect, useState } from "react";
-import AddBusiness from "../../components/AddBusiness/AddBusiness";
-import BusinessList from "../../components/BusinessList/BusinessList";
-import { fetchUserBusinesses } from "../../components/BusinessList/BusinessList.utils";
+/* src/pages/ClientPage/ClientPage.tsx */
 
-type Business = {
-  id: string;
-  name: string;
-  alias?: string;
-  address?: string;
-};
+// #section Importaciones
+import AddBusiness from "../../components/AddCompany/AddCompany";
+import CompanyArray from "../../components/CompanyArray/CompanyArray";
+import { useLoadUserCompanies } from "../../modules/company/company.hooks";
+// #end-section
 
+// #function ClientPage - Página principal del cliente
+/**
+ * Página principal del cliente.
+ * Muestra el listado de negocios asociados y un formulario para agregar nuevos.
+ */
 const ClientPage = () => {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const token = localStorage.getItem("jwt");
-      if (!token) return;
-
-      try {
-        const data = await fetchUserBusinesses(token);
-        setBusinesses(data);
-      } catch (err) {
-        console.error("Error cargando negocios:", err);
-      }
-    };
-
-    load();
-  }, []);
-
+  // #variable businesses - Estado de negocios del usuario obtenido desde el hook
+  const { businesses } = useLoadUserCompanies();
+  // #end-variable
+  // #section return
   return (
     <>
       <h1>Cliente</h1>
-      <AddBusiness setBusinesses={setBusinesses} />
-      <BusinessList businesses={businesses} />
+      <AddBusiness setBusinesses={() => {}} />
+      <CompanyArray companies={businesses} />
     </>
   );
+  // #end-section
 };
 
 export default ClientPage;
+// #end-function

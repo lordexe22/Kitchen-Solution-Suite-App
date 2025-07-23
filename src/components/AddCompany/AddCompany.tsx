@@ -1,11 +1,11 @@
-// src/components/AddBusiness/AddBusiness.tsx
+/* src\components\AddCompany\AddCompany.tsx */
 import { useState } from "react";
-import styles from "./AddBusiness.module.css";
-import { fetchUserBusinesses } from "../BusinessList/BusinessList.utils";
-import { type Business } from "../../modules/company/company.t";
+import styles from "./AddCompany.module.css";
+import { fetchUserCompanyArray } from "../../modules/company/company.utils";
+import { type CompanyBaseDataType } from "../../modules/company/company.t";
 
 type Props = {
-  setBusinesses: (b: Business[]) => void;
+  setBusinesses: (b: CompanyBaseDataType[]) => void;
 };
 
 const AddBusiness = ({ setBusinesses }: Props) => {
@@ -51,7 +51,7 @@ const AddBusiness = ({ setBusinesses }: Props) => {
       }
 
       // → Fetch actualizada
-      const updated = await fetchUserBusinesses(token);
+      const updated = await fetchUserCompanyArray(token);
       setBusinesses(updated);
 
       setBusinessName("");
