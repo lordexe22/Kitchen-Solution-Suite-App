@@ -11,8 +11,6 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // const publicRoutes = ["/", "/login", "/register"];
-
   useEffect(() => {
     const verificarToken = async () => {
       const jwt = localStorage.getItem("jwt");

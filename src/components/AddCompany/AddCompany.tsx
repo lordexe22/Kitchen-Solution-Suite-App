@@ -8,7 +8,7 @@ type Props = {
   setBusinesses: (b: CompanyBaseDataType[]) => void;
 };
 
-const AddBusiness = ({ setBusinesses }: Props) => {
+const AddCompany = ({ setBusinesses }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [businessName, setBusinessName] = useState("");
   const [businessAlias, setBusinessAlias] = useState("");
@@ -111,4 +111,4 @@ const AddBusiness = ({ setBusinesses }: Props) => {
   );
 };
 
-export default AddBusiness;
+export default AddCompany;

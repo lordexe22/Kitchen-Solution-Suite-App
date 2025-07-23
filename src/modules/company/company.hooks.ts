@@ -11,7 +11,9 @@ import { type CompanyBaseDataType } from "./company.t";
  * Si no se encuentra el token o falla la carga, redirige al login.
  * Devuelve negocios, error y estado de carga.
  */
-export const useLoadUserCompanies = () => {
+export const useLoadUserCompanies = (
+  setExternal?: React.Dispatch<React.SetStateAction<CompanyBaseDataType[]>>
+) => {
   // #variable companyArray, error, isLoading, navigate - Estado interno y navegación
   const [companyArray, setCompanyArray] = useState<CompanyBaseDataType[]>([]);
   const [error, setError] = useState<Error | null>(null);
@@ -20,6 +22,7 @@ export const useLoadUserCompanies = () => {
   // #end-variable
 
   // #event useEffect - Captura todos los negocios del usuario al montar el componente
+
   useEffect(() => {
     const loadUserCompanyArray = async () => {
       try {
@@ -27,6 +30,7 @@ export const useLoadUserCompanies = () => {
         if (!token) throw new Error("Token no encontrado");
         const data = await fetchUserCompanyArray(token);
         setCompanyArray(data);
+        if (setExternal) setExternal(data);
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Error desconocido"));
         navigate("/login");
@@ -36,7 +40,7 @@ export const useLoadUserCompanies = () => {
     };
 
     loadUserCompanyArray();
-  }, [navigate]);
+  }, [navigate, setExternal]);
   // #end-event
 
   return { businesses: companyArray, error, isLoading };

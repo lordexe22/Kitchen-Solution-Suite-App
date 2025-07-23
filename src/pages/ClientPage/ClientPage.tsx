@@ -1,9 +1,11 @@
 /* src/pages/ClientPage/ClientPage.tsx */
 
 // #section Importaciones
-import AddBusiness from "../../components/AddCompany/AddCompany";
+import AddCompany from "../../components/AddCompany/AddCompany";
 import CompanyArray from "../../components/CompanyArray/CompanyArray";
 import { useLoadUserCompanies } from "../../modules/company/company.hooks";
+import { useState } from "react";
+import { type CompanyBaseDataType } from "../../modules/company/company.t";
 // #end-section
 
 // #function ClientPage - Página principal del cliente
@@ -13,15 +15,15 @@ import { useLoadUserCompanies } from "../../modules/company/company.hooks";
  */
 const ClientPage = () => {
   // #variable businesses - Estado de negocios del usuario obtenido desde el hook
-  const { businesses } = useLoadUserCompanies();
+  const [businesses, setBusinesses] = useState<CompanyBaseDataType[]>([]);
+  useLoadUserCompanies(setBusinesses);
   // #end-variable
   // #section return
   return (
     <>
       <h1>Cliente</h1>
-      <AddBusiness setBusinesses={() => {}} />
       <CompanyArray companies={businesses} />
-    </>
+      <AddCompany setBusinesses={setBusinesses} />    </>
   );
   // #end-section
 };
