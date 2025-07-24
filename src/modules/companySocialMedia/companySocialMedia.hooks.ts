@@ -1,9 +1,14 @@
-// src\modules\companySocialMedia\companySocialMedia.hooks.ts
+/* src\modules\companySocialMedia\companySocialMedia.hooks.ts */
+// #section imports
 import { useState } from "react";
-// #function useCompanySocialMediaController - Hook para manejar redes sociales de una empresa
+import { fetchWithJWT } from "../../utils/fetch";
+// #end-section
+// #function useCompanySocialMediaController - Hook for managing company social media links
 /**
- * Hook para manejar la lógica de redes sociales de una empresa.
- * Se encarga de cargar, modificar y guardar los links sociales desde/hacia la API.
+ * Hook for managing company social media links.
+ * Provides functions to fetch, save, and update social media links for a company.
+ * @returns An object containing social media links, last update timestamp, saving state, error state, success state,
+ * and functions to fetch, save, and update social media links.
  */
 export const useCompanySocialMediaController = () => {
   // #variable socialLinks, lastUpdate, saving, error, success
@@ -23,32 +28,23 @@ export const useCompanySocialMediaController = () => {
   /**
    * Obtiene los datos de redes sociales de una empresa desde la API.
    *
-   * @param businessId - ID de la empresa para consultar.
+   * @param companyId - ID de la empresa para consultar.
    */
-  const fetchSocialLinks = async (businessId: string) => {
+  const fetchSocialMediaLinks = async (companyId: string) => {
     setSuccess(false);
     setError(null);
 
     try {
-      const token = localStorage.getItem("jwt");
-      if (!token) throw new Error("Token no encontrado");
-
-      const response = await fetch(`http://localhost:4000/api/businesses/${businessId}/socials`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Error al obtener redes sociales: ${text}`);
-      }
-
-      const data = await response.json();
-
+      // #step 1 - Fetch the social media links for the given company ID
+      const data = await fetchWithJWT<{ socials?: Record<string, string>, lastUpdate?: string }>(
+        `http://localhost:4000/api/businesses/${companyId}/socials`,
+        "GET"
+      );
+      // #end-step
+      // #step 2 - Set the social links and last update state
       setSocialLinks(data.socials || {});
       setLastUpdate(data.lastUpdate || null);
+      // #end-step
     } catch (err) {
       console.error("Error al hacer fetch de redes sociales:", err);
     }
@@ -61,39 +57,38 @@ export const useCompanySocialMediaController = () => {
    * @param businessId - ID de la empresa que se desea actualizar.
    */
   const saveSocialLinks = async (businessId: string) => {
+    // #step 1 - Validate the business ID 
     if (!businessId) return;
-
+    // #end-step
+    // #step 2 - Prepare the saving state and reset error and success states
     setSaving(true);
     setError(null);
     setSuccess(false);
-
+    // #end-step
     try {
-      const token = localStorage.getItem("jwt");
-      if (!token) throw new Error("Token no encontrado");
-
-      const response = await fetch(`http://localhost:4000/api/businesses/${businessId}/socials`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(socialLinks),
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Error al guardar redes sociales: ${text}`);
-      }
-
+      // #step 3 - Validate the social links object
+      await fetchWithJWT(
+        `http://localhost:4000/api/businesses/${businessId}/socials`,
+        "PUT",
+        socialLinks
+      );
+      // #end-step
+      // #step 4 - Set success state to true after saving
       setSuccess(true);
+      // #end-step
     } catch (err: unknown) {
+      // #step 5 - Handle errors and set the error message
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("Error desconocido al guardar redes sociales");
       }
+      console.error("Error al guardar redes sociales:", err);
+      // #end-step
     } finally {
+      // #step 6 - Reset saving state
       setSaving(false);
+      // #end-step
     }
   };
   // #end-function
@@ -115,7 +110,7 @@ export const useCompanySocialMediaController = () => {
     saving,
     error,
     success,
-    fetchSocialLinks,
+    fetchSocialLinks: fetchSocialMediaLinks,
     saveSocialLinks,
     handleChange,
     setSuccess,
