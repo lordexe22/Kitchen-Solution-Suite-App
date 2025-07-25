@@ -42,7 +42,7 @@ const AddCompany = ({ setBusinesses }: Props) => {
       // #end-step
       // #step 4 - Make the request to create the companies, passing the name, alias, and user ID
       await fetchWithJWT(
-        "http://localhost:4000/api/businesses/create",
+        "http://localhost:4000/api/companies/create",
         "POST",
         {
           name: trimmedName,

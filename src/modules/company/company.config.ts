@@ -10,6 +10,6 @@ export const CONFIG_SECTIONS = [
 // #end-variable
 // #variable API_URL_LIST - URLs de la API relacionadas con los negocios
 export const API_URL_LIST = {
-  getMyCompanies: "http://localhost:4000/api/businesses/mine"
+  getMyCompanies: "http://localhost:4000/api/companies/mine"
 }
 // #end-variable
