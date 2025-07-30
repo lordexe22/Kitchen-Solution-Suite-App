@@ -16,6 +16,6 @@ export const fetchUserCompanyArray = async (token: string) => {
   }
 
   const data = await response.json();
-  return data.businesses;
+  return data.companies;
 };
 // #end-function

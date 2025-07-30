@@ -35,7 +35,7 @@ export const registerFormRunner = async (
   }
   // #end-step
   try {
-    // #step 2 - create newUser object for send to the server
+    // #step 2 - create newUser object for send to the server >> newUser
     const newUser = prepareUserForSaving({
       name,
       email,
