@@ -1,7 +1,8 @@
 // src\modules\auth\register\RegisterPage.utils.ts
-
+// #section Import
 import { type FormattedUserToSaveType, type RegisterFormDataType } from "./RegisterPage.t";
-
+import { API_FETCH_ACTIONS } from "../../company/company.config";
+// #end-section
 // #function registerFormRunner - Handles the registration form submission logic
 /**
  * Handles the logic for submitting the registration form.
@@ -25,7 +26,6 @@ export const registerFormRunner = async (
   const email = formData.get("email")?.toString() || "";
   const password = formData.get("password")?.toString() || "";
   const confirmPassword = formData.get("confirmPassword")?.toString() || "";
-  const phone = formData.get("phone")?.toString() || "";
   const acceptedTerms = formData.get("terms") === "on";
   // #end-variable
   // #step 1 - validate that password and confirmPassword matc
@@ -40,13 +40,15 @@ export const registerFormRunner = async (
       name,
       email,
       password,
-      phone,
       acceptedTerms,
     });
     // #end-step
+    // #test >> log newUser 
+    console.log({newUser})
+    // #end-test
     // #step 3 - send request to server
-    const response = await fetch("http://localhost:4000/api/usuarios/register", {
-      method: "POST",
+    const response = await fetch(API_FETCH_ACTIONS.registerNewUser.url, {
+      method: API_FETCH_ACTIONS.registerNewUser.method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),
     });
@@ -92,11 +94,9 @@ export const prepareUserForSaving  = (data: RegisterFormDataType): FormattedUser
     name: data.name.trim(),
     email: data.email.toLowerCase().trim(),
     password: data.password,
-    phone: data.phone?.trim(),
-    companyName: data.companyName?.trim(),
     registerDate: new Date().toISOString(),
     role: 'admin',
-    accountStatus: 'free',
+    accountStatus: 'active',
   };
   // #end-section
 }

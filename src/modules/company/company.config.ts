@@ -20,6 +20,12 @@ export const API_FETCH_ACTIONS = {
   getUserByJWT: {
     method: 'GET',
     url: 'http://localhost:4000/api/auth/me'
+  },
+  // #end-section
+  // #section - registerNewUser
+  registerNewUser: {
+    method: 'POST',
+    url: 'http://localhost:4000/api/usuarios/register'
   }
   // #end-section
 } as Record<string, FetchActionType>

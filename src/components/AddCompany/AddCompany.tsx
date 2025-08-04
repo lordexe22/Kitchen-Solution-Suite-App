@@ -4,7 +4,6 @@ import type { AddCompanyProps } from "../../modules/addCompany/addCompany.t";
 import { useAddCompany } from "../../modules/addCompany/addCompany.hooks";
 import styles from "./AddCompany.module.css";
 // #end-section
-
 // #component AddCompany - Component to add a new company
 const AddCompany = ({ setCompanies }: AddCompanyProps) => {
   // #hook useAddCompany(setCompanies) - showModal, setShowModal, companyName, setCompanyName, companyAlias, setCompanyAlias, loading, error, handleCreate
