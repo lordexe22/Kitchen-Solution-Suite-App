@@ -1,3 +1,4 @@
+// src\modules\companyLocation\companyLocation.utils.ts
 import { type LocationData, type GetCompanyLocationResponse } from "./companyLocation.t";
 import { fetchWithJWT } from "../../utils/fetch";
 

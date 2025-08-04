@@ -6,7 +6,8 @@ import { useCompanyAccordion,} from "../../modules/company/company.hooks";
 import { useCompanySocialMediaController } from "../../modules/companySocialMedia/companySocialMedia.hooks";
 import { useCompanyLocationController } from "../../modules/companyLocation/companyLocation.hooks";
 import CompanySocialMedia from "../CompanySocialMedia/CompanySocialmedia";
-import CompanyLocation from "../CompanyLocation/companyLocation";
+import CompanyLocation from "../CompanyLocation/CompanyLocation";
+import CompanySchedule from "../CompanySchedule/CompanySchedule";
 import styles from "./CompanyArray.module.css";
 // #end-section
 
@@ -104,7 +105,7 @@ const CompanyArray = ({ companies: businesses }: Props) => {
   };
   // #end-event
 
-
+  // #section return
   return (
     <ul className={styles.list}>
       {businesses.map((b, i) => (
@@ -154,6 +155,11 @@ const CompanyArray = ({ companies: businesses }: Props) => {
                       />
                     )}
                     {/* #end-section */}
+                    {/* #section - show inputs for social media */}
+                    {expandedSection === section && section === "Horarios de apertura" && (
+                      <CompanySchedule companyId={expandedCompanyId}/>
+                    )}
+                    {/* #end-section */}
                   </li>
                 ))}
               </ul>
@@ -163,6 +169,7 @@ const CompanyArray = ({ companies: businesses }: Props) => {
       ))}
     </ul>
   );
+  // #end-section
 };
 export default CompanyArray;
 // #end-function
