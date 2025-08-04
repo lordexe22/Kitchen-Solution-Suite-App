@@ -1,9 +1,16 @@
 /* src\modules\company\company.t.ts */
-// #typedef - CompanyBaseDataType
-export type CompanyBaseDataType = {
+// #type CompanyBaseDataType
+export interface CompanyBaseDataType {
   id: string;
   name: string;
   alias?: string;
   address?: string;
 };
-// #end-typedef
+// #end-type
+// #type FetchActionType
+
+export interface FetchActionType{
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | undefined
+  url: string
+}
+// #end-type

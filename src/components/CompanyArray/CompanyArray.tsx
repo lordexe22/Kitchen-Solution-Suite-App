@@ -1,7 +1,8 @@
 /* src/components/CompanyArray/CompanyArray.tsx */
 // #section Imports
-import { CONFIG_SECTIONS } from "../../modules/company/company.config";
-import { type CompanyBaseDataType } from "../../modules/company/company.t";
+import type { CompanyBaseDataType } from "../../modules/company/company.t";
+import type { CompanyArrayProps } from "../../modules/companyArray/companyArray.t";
+import { CONFIG_SECTIONS } from "../../modules/companyArray/companyArray.config";
 import { useCompanyAccordion,} from "../../modules/company/company.hooks";
 import { useCompanySocialMediaController } from "../../modules/companySocialMedia/companySocialMedia.hooks";
 import { useCompanyLocationController } from "../../modules/companyLocation/companyLocation.hooks";
@@ -11,12 +12,8 @@ import CompanySchedule from "../CompanySchedule/CompanySchedule";
 import styles from "./CompanyArray.module.css";
 // #end-section
 
-type Props = {
-  companies: CompanyBaseDataType[];
-};
-
 // #function CompanyArray - This component renders a list of companies with expandable sections for configuration
-const CompanyArray = ({ companies: businesses }: Props) => {
+const CompanyArray = ({ companies }: CompanyArrayProps) => {
   /* #function useCompanyAccordion - Hook para manejar el acordeón de empresas */
   // #variable expandedCompanyId, expandedSection, toggleCompany, toggleSection
   const {
@@ -62,7 +59,7 @@ const CompanyArray = ({ companies: businesses }: Props) => {
     if (alias) return `${name} - ${alias}`;
     if (address) return `${name} - ${address}`;
 
-    const sameNameNoAliasNoAddressBefore = businesses
+    const sameNameNoAliasNoAddressBefore = companies
       .slice(0, index)
       .filter((x) => x.name === name && !x.alias && !x.address).length;
 
@@ -108,8 +105,9 @@ const CompanyArray = ({ companies: businesses }: Props) => {
   // #section return
   return (
     <ul className={styles.list}>
-      {businesses.map((b, i) => (
+      {companies.map((b, i) => (
         <li key={b.id} className={styles.item}>
+
           <button className={styles.header} onClick={() => handleToggleCompany(b.id)}>
             {getDisplayName(b, i)}
           </button>
@@ -117,20 +115,23 @@ const CompanyArray = ({ companies: businesses }: Props) => {
           {expandedCompanyId === b.id && (
             <div className={styles.configPanel}>
               <ul>
+                {/* #section - for every company section, show one button for expand and see more options */}
                 {CONFIG_SECTIONS.map((section) => (
-                  <li key={section} className={styles.configItem}>
+                  <li key={section.id} className={styles.configItem}>
+                    {/* #section - button with the name of the section, allow collapse for see the company options */}
                     <button
                       className={styles.sectionHeader}
                       onClick={() => {
-                        toggleSection(section);
+                        toggleSection(section.id);
                         setSocialMediaSuccess(false);
                         setSocialMediaError(null);
                       }}
                     >
-                      {section}
+                      {section.label}
                     </button>
-                    {/* #section - show inputs for social media */}
-                    {expandedSection === section && section === "Redes sociales" && (
+                    {/* #end-section */}
+                    {/* #section - (if expanded) show inputs for social media */}
+                    {expandedSection === section.id && section.id === "socialMedia" && (
                       <CompanySocialMedia
                         socialLinks={socialMediaLinks}
                         saving={socialMediaSaving}
@@ -142,8 +143,8 @@ const CompanyArray = ({ companies: businesses }: Props) => {
                       />
                     )}
                     {/* #end-section */}
-                    {/* #section - show inputs for location */}
-                    {expandedSection === section && section === "Localización" && (
+                    {/* #section - (if expanded) show inputs for location */}
+                    {expandedSection === section.id && section.id === "location" && (
                       <CompanyLocation
                         location={location}
                         saving={locationSaving}
@@ -155,13 +156,14 @@ const CompanyArray = ({ companies: businesses }: Props) => {
                       />
                     )}
                     {/* #end-section */}
-                    {/* #section - show inputs for social media */}
-                    {expandedSection === section && section === "Horarios de apertura" && (
+                    {/* #section - (if expanded) show inputs for social media */}
+                    {expandedSection === section.id && section.id === "schedule" && (
                       <CompanySchedule companyId={expandedCompanyId}/>
                     )}
                     {/* #end-section */}
                   </li>
                 ))}
+                {/* #end-section */}
               </ul>
             </div>
           )}

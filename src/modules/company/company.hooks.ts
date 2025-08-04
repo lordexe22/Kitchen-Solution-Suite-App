@@ -1,94 +1,136 @@
-// src/modules/company/hooks/useLoadUserCompanies.ts
-// #section Importaciones
+/* src\modules\company\company.hooks.ts */
+// #section Imports
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchUserCompanyArray } from "./company.utils";
 import { type CompanyBaseDataType } from "./company.t";
 // #end-section
-// #function useLoadUserCompanies - Hook para obtener negocios del usuario
+// #hook useLoadUserCompanies - Hook to fetch user's businesses
 /**
- * Hook que carga los negocios del usuario autenticado.
- * Si no se encuentra el token o falla la carga, redirige al login.
- * Devuelve negocios, error y estado de carga.
+ * Hook that loads the businesses associated with the authenticated user.
+ *
+ * It retrieves the JWT token from local storage, fetches the business array,
+ * and handles loading and error states. If the token is not found or the request fails,
+ * the user is redirected to the login page.
+ * 
+ * @param {React.Dispatch<React.SetStateAction<CompanyBaseDataType[]>>} [setCompaniesExternal] Optional setter to mirror the company list externally
+ * @returns {object} An object with:
+ * - businesses: CompanyBaseDataType[] — The list of fetched businesses.
+ * - error: Error | null — Any error occurred during the request.
+ * - isLoading: boolean — Indicates whether the request is in progress.
  */
 export const useLoadUserCompanies = (
-  setExternal?: React.Dispatch<React.SetStateAction<CompanyBaseDataType[]>>
+  setCompaniesExternal?: React.Dispatch<React.SetStateAction<CompanyBaseDataType[]>>
 ) => {
-  // #variable companyArray, error, isLoading, navigate - Estado interno y navegación
-  const [companyArray, setCompanyArray] = useState<CompanyBaseDataType[]>([]);
+  // #state [companies, setCompanies] - Stores the fetched list of businesses
+  const [companies, setCompanies] = useState<CompanyBaseDataType[]>([]);
+  // #end-state
+  // #state [error, setError] - Captures any error during the request
   const [error, setError] = useState<Error | null>(null);
+  // #end-state
+  // #state [isLoading, setIsLoading] - Indicates whether the request is currently running
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // #end-state
+  // #hook navigate = useNavigate() - 
   const navigate = useNavigate();
-  // #end-variable
+  // #end-hook
 
-  // #event useEffect - Captura todos los negocios del usuario al montar el componente
-
+  // #event useEffect [navigate, setExternal] - Loads the user's businesses on component mount
   useEffect(() => {
     const loadUserCompanyArray = async () => {
       try {
+        // #step 1 - Try to get JWT from localStorage 
         const token = localStorage.getItem("jwt");
         if (!token) throw new Error("Token no encontrado");
+        // #end-step
+        // #step 2 - Fetch company data using the JWT >> data
         const data = await fetchUserCompanyArray(token);
-        setCompanyArray(data);
-        if (setExternal) setExternal(data);
+        // #end-step
+        // #step 3 - Update internal and optional external state
+        setCompanies(data);
+        if (setCompaniesExternal) setCompaniesExternal(data);
+        // #end-step
       } catch (err) {
+        // #step 4 - Set error and redirect to login 
         setError(err instanceof Error ? err : new Error("Error desconocido"));
         navigate("/login");
+        // #end-step
       } finally {
+        // #step 5 - Mark loading as complete
         setIsLoading(false);
+        // #end-step
       }
     };
-
     loadUserCompanyArray();
-  }, [navigate, setExternal]);
+  }, [navigate, setCompaniesExternal]);
   // #end-event
 
-  return { businesses: companyArray, error, isLoading };
+  // #section return
+  return { 
+    companies, 
+    error, 
+    isLoading 
+  };
+  // #end-section
 };
-// #end-function
-// #function useCompanyAccordion - Hook para manejar el estado del acordeón de empresas
+// #end-hook
+// #hook useCompanyAccordion - Hook para manejar el estado del acordeón de empresas
 /**
- * Hook que gestiona el comportamiento de un acordeón de empresas y sus secciones internas.
+ * Hook that manages the accordion state for companies and their internal sections.
  *
- * Permite alternar qué empresa está expandida, y dentro de esa empresa,
- * qué sección (como "Redes sociales", "Dirección", etc.) está actualmente visible.
+ * It allows toggling which company is expanded, and within that company,
+ * which section (e.g., "Social Media", "Location") is currently visible.
  *
- * Si se vuelve a hacer clic sobre la misma empresa o sección, estas se colapsan.
- * Cuando se selecciona una empresa distinta, la sección expandida se resetea.
+ * Clicking the same company or section again collapses it.
+ * Selecting a different company resets the expanded section.
  *
- * @returns {object} Objeto con estado y acciones para controlar el acordeón:
- * - expandedCompanyId: string | null → ID de la empresa actualmente expandida.
- * - expandedSection: string | null → Nombre de la sección actualmente expandida dentro de la empresa.
- * - toggleCompany(id): Alterna la expansión de una empresa. Si es otra empresa, colapsa la anterior y resetea la sección.
- * - toggleSection(section): Alterna la expansión de una sección dentro de la empresa seleccionada.
+ * @returns {object} An object containing the state and actions to control the accordion:
+ * - expandedCompanyId: string | null — ID of the currently expanded company.
+ * - expandedSection: string | null — Name of the currently expanded section within the company.
+ * - toggleCompany(id: string): void — Toggles the expansion of a company.
+ * - toggleSection(section: string): void — Toggles the expansion of a section inside the selected company.
  */
-export const useCompanyAccordion = () => {
-  // #variable expandedCompanyId, expandedSection
+export const useCompanyAccordion = () : {
+  expandedCompanyId: string | null;
+  expandedSection: string | null;
+  toggleCompany: (id: string) => void;
+  toggleSection: (section: string) => void;
+} => {
+  // #state [expandedCompanyId, setExpandedCompanyId] - The ID of the currently expanded company, null means no company was expanded
   const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(null);
+  // #end-state
+  // #state [expandedSection, setExpandedSection] - The key/name of the currently expanded section inside the expanded company. Null means no section is expanded.
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  // #end-variable
-  // #function toggleCompany - Alterna la expansión de una empresa
-    /**
-   * Alterna la expansión de una empresa.
-   * Si la empresa está expandida, la colapsa; si no, la expande.
-   * Resetea la sección expandida a null.
+  // #end-state
+  // #function toggleCompany - Toggles the expansion state of a company
+  /**
+   * Toggles the expansion state of a company.
+   * If the given company ID is already expanded, it collapses it.
+   * Otherwise, expands the new company and resets the expanded section.
    *
-   * @param {string} id - Id de la empresa a alternar.
+   * @param {string} companyId - Company ID for toggle
    */
-  const toggleCompany = (id: string) => {
-    setExpandedCompanyId((prevId) => (prevId === id ? null : id));
+  const toggleCompany = (companyId: string) => {
+    // #step 1 - If the given company ID is already expanded, it collapses it. Otherwise, expands the new company and resets the expanded section.
+    setExpandedCompanyId((prevId) => (prevId === companyId ? null : companyId));
+    // #end-step
+    // #step 2 - Close all the expanded sections
     setExpandedSection(null);
+    // #end-step
   };
   // #end-function
-  // #function toggleSection - Alterna la expansión de una sección
-    /**
-   * Alterna la expansión de una sección dentro de la empresa expandida.
-   * Si la sección está expandida, la colapsa; si no, la expande.
+  // #function toggleSection - oggles the expansion state of a section inside the currently expanded company.
+  /**
+   * Toggles the expansion state of a section inside the currently expanded company.
+   * If the section is already expanded, it collapses it.
+   * Otherwise, expands the new section.
    *
-   * @param {string} section - Nombre de la sección a alternar.
+   * @param {string} sectionId - Section ID for toggle.
    */
-  const toggleSection = (section: string) => {
-    setExpandedSection((prev) => (prev === section ? null : section));
+  const toggleSection = (sectionId: string) => {
+    // #step 1 - If the section is already expanded, it collapses it. Otherwise, expands the new section.
+    setExpandedSection((prev) => (prev === sectionId ? null : sectionId));
+    // #end-step
   };
   // #end-function
   // #section return
@@ -100,9 +142,5 @@ export const useCompanyAccordion = () => {
   };
   // #end-section
 };
-// #end-function
-
-
-
-
+// #end-hook
 

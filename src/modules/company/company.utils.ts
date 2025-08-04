@@ -1,10 +1,10 @@
 // src\components\BusinessList\BusinessList.utils.ts
 
-import { API_URL_LIST } from "./company.config";
+import { API_FETCH_ACTIONS } from "./company.config";
 
 // #function fetchUserCompanyArray
 export const fetchUserCompanyArray = async (token: string) => {
-  const response = await fetch(API_URL_LIST.getMyCompanies, {
+  const response = await fetch(API_FETCH_ACTIONS.getMyCompanies.url, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
