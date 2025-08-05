@@ -4,8 +4,6 @@ import type { CompanyBaseDataType } from "../../modules/company/company.t";
 import type { CompanyArrayProps } from "../../modules/companyArray/companyArray.t";
 import { CONFIG_SECTIONS } from "../../modules/companyArray/companyArray.config";
 import { useCompanyAccordion,} from "../../modules/company/company.hooks";
-import { useCompanySocialMediaController } from "../../modules/companySocialMedia/companySocialMedia.hooks";
-import { useCompanyLocationController } from "../../modules/companyLocation/companyLocation.hooks";
 import CompanySocialMedia from "../CompanySocialMedia/CompanySocialmedia";
 import CompanyLocation from "../CompanyLocation/CompanyLocation";
 import CompanySchedule from "../CompanySchedule/CompanySchedule";
@@ -21,34 +19,6 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
     toggleCompany,
     toggleSection,
   } = useCompanyAccordion();
-  // #end-hook
-  // #hook useCompanySocialMediaController - socialMediaLinks, socialMediaLastUpdate, socialMediaSaving, socialMediaError, socialMediaSuccess, fetchSocialMediaLinks, saveSocialMediaLinks, handleSocialMediaChange, setSocialMediaError, setSocialMediaSuccess
-  const {
-    socialMediaLinks,
-    socialMediaLastUpdate,
-    socialMediaSaving,
-    socialMediaError,
-    socialMediaSuccess,
-    fetchSocialMediaLinks,
-    saveSocialMediaLinks,
-    handleSocialMediaChange,
-    setSocialMediaSuccess,
-    setSocialMediaError,
-  } = useCompanySocialMediaController();
-  // #end-hook
-  // #hook useCompanyLocationController - location, locationLastUpdate, locationSaving, locationError, locationSuccess, fetchLocation, saveLocation, handleLocationChange, setLocationSuccess, setLocationError
-  const {
-    location,
-    locationSaving,
-    locationSuccess,
-    locationError,
-    locationLastUpdate,
-    fetchLocation,
-    saveLocation,
-    handleLocationChange,
-    setLocationSuccess,
-    setLocationError,
-  } = useCompanyLocationController();
   // #end-hook
   // #function getDisplayName - Generates a display name for a company based on its properties
   const getDisplayName = (b: CompanyBaseDataType, index: number) => {
@@ -67,35 +37,14 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
   };
   // #end-function
   // #event handleToggleCompany - Toggles the expansion of a business section and fetches social links if necessary
-  const handleToggleCompany = async (id: string) => {
+  const handleToggleCompany = (id: string) => {
     const isSame = expandedCompanyId === id;
 
     toggleCompany(id);
 
-    setSocialMediaSuccess(false);
-    setSocialMediaError(null);
-    setLocationSuccess(false);
-    setLocationError(null);
-
+    // Se elimina el manejo de location aquí,
+    // ya que pasará al componente hijo.
     if (isSame) return;
-
-    await Promise.all([
-      fetchSocialMediaLinks(id),
-      fetchLocation(id),
-    ]);
-    console.log("[handleToggleCompany] fetchLocation y fetchSocialMediaLinks completados");
-  };
-  // #end-event
-  // #event handleSocialMediaSubmit - Handles the submission of social media links for the expanded company
-  const handleSocialMediaSubmit = async () => {
-    if (!expandedCompanyId) return;
-    await saveSocialMediaLinks(expandedCompanyId);
-  };
-  // #end-event
-  // #event handleLocationSubmit - Handles the submission of location data for the expanded company
-  const handleLocationSubmit = async () => {
-    if (!expandedCompanyId) return;
-    await saveLocation(expandedCompanyId);
   };
   // #end-event
   // #section return
@@ -119,37 +68,19 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
                       className={styles.sectionHeader}
                       onClick={() => {
                         toggleSection(section.id);
-                        setSocialMediaSuccess(false);
-                        setSocialMediaError(null);
                       }}
                     >
                       {section.label}
                     </button>
                     {/* #end-section */}
                     {/* #section - (if expanded) show inputs for social media */}
-                    {expandedSection === section.id && section.id === "socialMedia" && (
-                      <CompanySocialMedia
-                        socialLinks={socialMediaLinks}
-                        saving={socialMediaSaving}
-                        success={socialMediaSuccess}
-                        error={socialMediaError}
-                        lastUpdate={socialMediaLastUpdate}
-                        onChange={handleSocialMediaChange}
-                        onSubmit={handleSocialMediaSubmit}
-                      />
+                    {expandedSection === section.id && section.id === "socialMedia" && expandedCompanyId && (
+                      <CompanySocialMedia companyId={expandedCompanyId} />
                     )}
                     {/* #end-section */}
                     {/* #section - (if expanded) show inputs for location */}
-                    {expandedSection === section.id && section.id === "location" && (
-                      <CompanyLocation
-                        location={location}
-                        saving={locationSaving}
-                        success={locationSuccess}
-                        error={locationError}
-                        lastUpdate={locationLastUpdate}
-                        onChange={handleLocationChange}
-                        onSubmit={handleLocationSubmit}
-                      />
+                    {expandedSection === section.id && section.id === "location" && expandedCompanyId && (
+                      <CompanyLocation companyId={expandedCompanyId} />
                     )}
                     {/* #end-section */}
                     {/* #section - (if expanded) show inputs for social media */}

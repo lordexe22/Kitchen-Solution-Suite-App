@@ -1,6 +1,6 @@
 /* src\modules\companySocialMedia\companySocialMedia.hooks.ts */
 // #section imports
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { fetchWithJWT } from "../../utils/fetch";
 // #end-section
 // #function useCompanySocialMediaController - Hook for managing company social media links
@@ -30,25 +30,22 @@ export const useCompanySocialMediaController = () => {
    *
    * @param companyId - ID de la empresa para consultar.
    */
-  const fetchSocialMediaLinks = async (companyId: string) => {
+  const fetchSocialMediaLinks = useCallback(async (companyId: string) => {
     setSocialMediaSuccess(false);
     setSocialMediaError(null);
 
     try {
-      // #step 1 - Fetch the social media links for the given company ID
       const data = await fetchWithJWT<{ socials?: Record<string, string>, lastUpdate?: string }>(
         `http://localhost:4000/api/companies/${companyId}/socials`,
         "GET"
       );
-      // #end-step
-      // #step 2 - Set the social links and last update state
+
       setSocialMediaLinks(data.socials || {});
       setSocialMediaLastUpdate(data.lastUpdate || null);
-      // #end-step
     } catch (err) {
       console.error("Error al hacer fetch de redes sociales:", err);
     }
-  };
+  }, []);
   // #end-function
   // #function saveSocialMediaLinks - Guarda los links de las redes sociales en la API
   /**

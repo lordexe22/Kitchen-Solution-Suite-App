@@ -1,25 +1,37 @@
+// src/components/CompanyLocation/CompanyLocation.tsx
+
+import { useEffect } from "react";
 import styles from "./CompanyLocation.module.css";
-import { type LocationData } from "../../modules/companyLocation/companyLocation.t";
+import { useCompanyLocationController } from "../../modules/companyLocation/companyLocation.hooks";
 
 type Props = {
-  location: LocationData;
-  saving: boolean;
-  success: boolean;
-  error: string | null;
-  lastUpdate: string | null;
-  onChange: (field: keyof LocationData, value: string) => void;
-  onSubmit: () => void;
+  companyId: string;
 };
 
-const CompanyLocation = ({
-  location,
-  saving,
-  success,
-  error,
-  lastUpdate,
-  onChange,
-  onSubmit,
-}: Props) => {
+const CompanyLocation = ({ companyId }: Props) => {
+  const {
+    location,
+    locationSaving,
+    locationSuccess,
+    locationError,
+    locationLastUpdate,
+    fetchLocation,
+    saveLocation,
+    handleLocationChange,
+  } = useCompanyLocationController();
+
+  useEffect(() => {
+    if (companyId) {
+      fetchLocation(companyId);
+    }
+  }, [companyId, fetchLocation]);
+
+  const handleSubmit = () => {
+    if (companyId) {
+      saveLocation(companyId);
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <label>
@@ -27,7 +39,7 @@ const CompanyLocation = ({
         <input
           type="text"
           value={location.address}
-          onChange={(e) => onChange("address", e.target.value)}
+          onChange={(e) => handleLocationChange("address", e.target.value)}
         />
       </label>
 
@@ -36,7 +48,7 @@ const CompanyLocation = ({
         <input
           type="text"
           value={location.city}
-          onChange={(e) => onChange("city", e.target.value)}
+          onChange={(e) => handleLocationChange("city", e.target.value)}
         />
       </label>
 
@@ -45,17 +57,21 @@ const CompanyLocation = ({
         <input
           type="text"
           value={location.province}
-          onChange={(e) => onChange("province", e.target.value)}
+          onChange={(e) => handleLocationChange("province", e.target.value)}
         />
       </label>
 
-      <button onClick={onSubmit} disabled={saving}>
-        {saving ? "Guardando..." : "Guardar ubicación"}
+      <button onClick={handleSubmit} disabled={locationSaving}>
+        {locationSaving ? "Guardando..." : "Guardar ubicación"}
       </button>
 
-      {success && <p className={styles.success}>Ubicación guardada correctamente.</p>}
-      {error && <p className={styles.error}>{error}</p>}
-      {lastUpdate && <p className={styles.meta}>Última actualización: {lastUpdate}</p>}
+      {locationSuccess && <p className={styles.success}>Ubicación guardada correctamente.</p>}
+      {locationError && <p className={styles.error}>{locationError}</p>}
+      {locationLastUpdate && (
+        <p className={styles.meta}>
+          Última actualización: {new Date(locationLastUpdate).toLocaleString()}
+        </p>
+      )}
     </div>
   );
 };
