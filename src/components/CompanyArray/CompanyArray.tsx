@@ -14,17 +14,15 @@ import styles from "./CompanyArray.module.css";
 
 // #function CompanyArray - This component renders a list of companies with expandable sections for configuration
 const CompanyArray = ({ companies }: CompanyArrayProps) => {
-  /* #function useCompanyAccordion - Hook para manejar el acordeón de empresas */
-  // #variable expandedCompanyId, expandedSection, toggleCompany, toggleSection
+  // #hook useCompanyAccordion - expandedCompanyId, expandedSection, toggleCompany, toggleSection
   const {
     expandedCompanyId,
     expandedSection,
     toggleCompany,
     toggleSection,
   } = useCompanyAccordion();
-  // #end-variable
-  /* #function useCompanySocialMediaController - Hook para manejar redes sociales de una empresa */
-  // #variable socialMediaLinks, socialMediaLastUpdate, socialMediaSaving, socialMediaError, socialMediaSuccess, fetchSocialMediaLinks, saveSocialMediaLinks, handleSocialMediaChange, setSocialMediaError, setSocialMediaSuccess
+  // #end-hook
+  // #hook useCompanySocialMediaController - socialMediaLinks, socialMediaLastUpdate, socialMediaSaving, socialMediaError, socialMediaSuccess, fetchSocialMediaLinks, saveSocialMediaLinks, handleSocialMediaChange, setSocialMediaError, setSocialMediaSuccess
   const {
     socialMediaLinks,
     socialMediaLastUpdate,
@@ -37,9 +35,8 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
     setSocialMediaSuccess,
     setSocialMediaError,
   } = useCompanySocialMediaController();
-  // #end-variable
-  /* #function useCompanyLocationController - Hook para manejar la ubicación de una empresa */
-  // #variable location, locationLastUpdate, locationSaving, locationError, locationSuccess, fetchLocation, saveLocation, handleLocationChange, setLocationSuccess, setLocationError
+  // #end-hook
+  // #hook useCompanyLocationController - location, locationLastUpdate, locationSaving, locationError, locationSuccess, fetchLocation, saveLocation, handleLocationChange, setLocationSuccess, setLocationError
   const {
     location,
     locationSaving,
@@ -52,7 +49,7 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
     setLocationSuccess,
     setLocationError,
   } = useCompanyLocationController();
-  // #end-variable
+  // #end-hook
   // #function getDisplayName - Generates a display name for a company based on its properties
   const getDisplayName = (b: CompanyBaseDataType, index: number) => {
     const { name, alias, address } = b;
@@ -101,7 +98,6 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
     await saveLocation(expandedCompanyId);
   };
   // #end-event
-
   // #section return
   return (
     <ul className={styles.list}>
