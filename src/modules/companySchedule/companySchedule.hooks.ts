@@ -26,20 +26,19 @@ export const useCompanyScheduleController = (companyId: string) => {
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>(initialSchedule);
   // #end-state
   // #section - useEffect para cargar horario desde backend
-
-useEffect(() => {
-  if (!companyId) return;
-  (async () => {
-    try {
-      const data = await fetchCompanySchedule(companyId);
-      setWeeklySchedule(data);
-    } catch (err) {
-      console.error('Error cargando el horario:', err);
-      // Opcional: resetear al horario inicial o mantener el estado actual
-    }
-  })();
-}, [companyId]);
-// #end-section
+  useEffect(() => {
+    if (!companyId) return;
+    (async () => {
+      try {
+        const data = await fetchCompanySchedule(companyId);
+        setWeeklySchedule(data);
+      } catch (err) {
+        console.error('Error cargando el horario:', err);
+        // Opcional: resetear al horario inicial o mantener el estado actual
+      }
+    })();
+  }, [companyId]);
+  // #end-section
   // #function toggleDayClosed(day) - toggle the isClosed state for a day of the week 
   const toggleDayClosed = (day: DayOfWeek) => {
     setWeeklySchedule(prev => ({

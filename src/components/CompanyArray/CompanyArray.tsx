@@ -4,7 +4,7 @@ import type { CompanyBaseDataType } from "../../modules/company/company.t";
 import type { CompanyArrayProps } from "../../modules/companyArray/companyArray.t";
 import { CONFIG_SECTIONS } from "../../modules/companyArray/companyArray.config";
 import { useCompanyAccordion,} from "../../modules/company/company.hooks";
-import CompanySocialMedia from "../CompanySocialMedia/CompanySocialmedia";
+import CompanySocialMedia from "../CompanySocialMedia/CompanySocialMedia";
 import CompanyLocation from "../CompanyLocation/CompanyLocation";
 import CompanySchedule from "../CompanySchedule/CompanySchedule";
 import styles from "./CompanyArray.module.css";

@@ -12,6 +12,7 @@ type Props = {
 // #end-type
 // #component CompanySocialMedia
 const CompanySocialMedia = ({ companyId }: Props) => {
+  console.log('Creando CompanySocialMedia')
   // #hook useCompanySocialMediaController() - socialMediaLinks, socialMediaLastUpdate, socialMediaSaving, socialMediaError, socialMediaSuccess, fetchSocialMediaLinks, saveSocialMediaLinks, handleSocialMediaChange
   const {
     socialMediaLinks,
