@@ -41,3 +41,8 @@ export const updateCompanySchedule = async (
   await fetchWithJWT<void>(`${BASE_URL}/${companyId}/schedule`, "PUT", schedule);
 };
 // #end-function
+// #function
+export const fetchCompanySchedule = async (companyId: string): Promise<WeeklySchedule> => {
+  return fetchWithJWT<WeeklySchedule>(`${BASE_URL}/${companyId}/schedule`, 'GET');
+};
+// #end-function

@@ -39,11 +39,7 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
   // #event handleToggleCompany - Toggles the expansion of a business section and fetches social links if necessary
   const handleToggleCompany = (id: string) => {
     const isSame = expandedCompanyId === id;
-
     toggleCompany(id);
-
-    // Se elimina el manejo de location aquí,
-    // ya que pasará al componente hijo.
     if (isSame) return;
   };
   // #end-event
@@ -87,7 +83,7 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
                     {expandedSection === section.id && section.id === "schedule" && (
                       <CompanySchedule companyId={expandedCompanyId}/>
                     )}
-                    {/* #end-section */}
+                    {/* #end-section */}                  
                   </li>
                 ))}
                 {/* #end-section */}

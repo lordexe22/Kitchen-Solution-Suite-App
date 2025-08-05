@@ -5,7 +5,6 @@ export const CONFIG_SECTIONS = [
   { id: "location", label: "Localización" },
   { id: "schedule", label: "Horarios de apertura" },
   { id: "socialMedia", label: "Redes sociales" },
-  { id: "contactMethods", label: "Medios de contacto" },
   { id: "menu", label: "Menú" },
 ];
 // #end-variable

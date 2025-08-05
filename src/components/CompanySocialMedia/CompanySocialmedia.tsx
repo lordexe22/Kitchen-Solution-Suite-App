@@ -1,15 +1,18 @@
 // src/components/CompanySocialMedia/CompanySocialMedia.tsx
+// #section Imports
 import { useEffect } from "react";
 import { SOCIAL_MEDIA } from "../../modules/companySocialMedia/companySocialMedia.config";
 import { useCompanySocialMediaController } from "../../modules/companySocialMedia/companySocialMedia.hooks";
 import styles from "../CompanyArray/CompanyArray.module.css";
-
+// #end-section
+// #type Props
 type Props = {
   companyId: string;
 };
-
+// #end-type
+// #component CompanySocialMedia
 const CompanySocialMedia = ({ companyId }: Props) => {
-
+  // #hook useCompanySocialMediaController() - socialMediaLinks, socialMediaLastUpdate, socialMediaSaving, socialMediaError, socialMediaSuccess, fetchSocialMediaLinks, saveSocialMediaLinks, handleSocialMediaChange
   const {
     socialMediaLinks,
     socialMediaLastUpdate,
@@ -20,20 +23,23 @@ const CompanySocialMedia = ({ companyId }: Props) => {
     saveSocialMediaLinks,
     handleSocialMediaChange,
   } = useCompanySocialMediaController();
-
+  // #end-hook
+  // #event useeffect [companyId, fetchSocialMediaLinks]
   useEffect(() => {
     if (companyId) {
       fetchSocialMediaLinks(companyId);
     }
   }, [companyId, fetchSocialMediaLinks]);
-
+  // #end-event
+  // #event handleSubmit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (companyId) {
       saveSocialMediaLinks(companyId);
     }
   };
-
+  // #end-event
+  // #section return
   return (
     <form className={styles.socialForm} onSubmit={handleSubmit}>
       {SOCIAL_MEDIA.map(({ label, key }) => (
@@ -59,6 +65,7 @@ const CompanySocialMedia = ({ companyId }: Props) => {
       )}
     </form>
   );
+  // #end-section
 };
-
 export default CompanySocialMedia;
+// #end-component

@@ -7,7 +7,6 @@ import {
 } from "./companyLocation.utils";
 import { type LocationData, type GetCompanyLocationResponse } from "./companyLocation.t";
 // #end-section
-
 // #hook useCompanyLocationController
 export const useCompanyLocationController = () => {
   // #state [location, setLocation]
@@ -56,8 +55,7 @@ export const useCompanyLocationController = () => {
     }
   }, []);
   // #end-function
-
-
+  // #function saveLocation
   const saveLocation = async (companyId: string) => {
     try {
       setLocationSaving(true);
@@ -73,11 +71,13 @@ export const useCompanyLocationController = () => {
       setLocationSaving(false);
     }
   };
-
+  // #end-function
+  // #event handleLocationChange
   const handleLocationChange = (field: keyof LocationData, value: string) => {
     setLocation((prev) => ({ ...prev, [field]: value }));
   };
-
+  // #end-event
+  // #section return
   return {
     location,
     locationSaving,
@@ -90,5 +90,6 @@ export const useCompanyLocationController = () => {
     setLocationError,
     setLocationSuccess,
   };
+  // #end-section
 };
 // #end-hook
