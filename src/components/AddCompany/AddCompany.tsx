@@ -14,6 +14,8 @@ const AddCompany = ({ setCompanies }: AddCompanyProps) => {
     setCompanyName,
     companyAlias,
     setCompanyAlias,
+    // logoFile, 
+    setLogoFile,
     loading,
     error,
     handleCreate,
@@ -56,6 +58,28 @@ const AddCompany = ({ setCompanies }: AddCompanyProps) => {
       value={companyAlias}
       onChange={(e) => setCompanyAlias(e.target.value)}
       placeholder="Alias / etiqueta (opcional)"
+      className={styles.inputField}
+      disabled={loading}
+    />
+  );
+  // #end-function
+  // #function renderCompanyLogoInput - Return JSX for render the company logo input
+  /**
+   * renderCompanyLogoInput - Renders the file input for the company logo.
+   * 
+   * This input:
+   * - Only accepts image files.
+   * - Updates the `logoFile` state on file selection.
+   * - Is disabled while the `loading` state is true.
+   */
+  const renderCompanyLogoInput = () => (
+    <input
+      type="file"
+      accept="image/*"
+      onChange={(e) => {
+        const file = e.target.files?.[0] || null;
+        setLogoFile(file); // estado que deberás definir en el hook
+      }}
       className={styles.inputField}
       disabled={loading}
     />
@@ -108,6 +132,7 @@ const AddCompany = ({ setCompanies }: AddCompanyProps) => {
             <h2>Agregar nuevo negocio</h2>
             {renderCompanyNameInput()}
             {renderCompanyAliasInput()}
+            {renderCompanyLogoInput()}
             {renderError()}
             {renderModalButtons()}
           </div>

@@ -7,6 +7,7 @@ import { useCompanyAccordion,} from "../../modules/company/company.hooks";
 import CompanySocialMedia from "../CompanySocialMedia/CompanySocialMedia";
 import CompanyLocation from "../CompanyLocation/CompanyLocation";
 import CompanySchedule from "../CompanySchedule/CompanySchedule";
+import CompanyGeneralConfig from "../CompanyGeneralConfig/CompanyGeneralConfig";
 import styles from "./CompanyArray.module.css";
 // #end-section
 
@@ -48,18 +49,18 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
     <ul className={styles.list}>
       {companies.map((b, i) => (
         <li key={b.id} className={styles.item}>
-
+          {/* #section - button that show the company name */}
           <button className={styles.header} onClick={() => handleToggleCompany(b.id)}>
             {getDisplayName(b, i)}
           </button>
-
+          {/* #end-section */}
           {expandedCompanyId === b.id && (
             <div className={styles.configPanel}>
               <ul>
                 {/* #section - for every company section, show one button for expand and see more options */}
                 {CONFIG_SECTIONS.map((section) => (
                   <li key={section.id} className={styles.configItem}>
-                    {/* #section - button with the name of the section, allow collapse for see the company options */}
+                    {/* #section - button that show the section name, allow collapse for see the company options */}
                     <button
                       className={styles.sectionHeader}
                       onClick={() => {
@@ -69,17 +70,22 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
                       {section.label}
                     </button>
                     {/* #end-section */}
-                    {/* #section - (if expanded) show inputs for social media */}
+                    {/* #section - CompanyGeneralConfig >> (if expanded) show general config of the company */}
+                    {expandedSection === section.id && section.id === "basicConfig" && expandedCompanyId && (
+                      <CompanyGeneralConfig companyId={expandedCompanyId} />
+                    )}
+                    {/* #end-section */}
+                    {/* #section - CompanySocialMedia >> (if expanded) show inputs for social media */}
                     {expandedSection === section.id && section.id === "socialMedia" && expandedCompanyId && (
                       <CompanySocialMedia companyId={expandedCompanyId} />
                     )}
                     {/* #end-section */}
-                    {/* #section - (if expanded) show inputs for location */}
+                    {/* #section - CompanyLocation (if expanded) show inputs for location */}
                     {expandedSection === section.id && section.id === "location" && expandedCompanyId && (
                       <CompanyLocation companyId={expandedCompanyId} />
                     )}
                     {/* #end-section */}
-                    {/* #section - (if expanded) show inputs for social media */}
+                    {/* #section - CompanySchedule (if expanded) show inputs for config schedule */}
                     {expandedSection === section.id && section.id === "schedule" && (
                       <CompanySchedule companyId={expandedCompanyId}/>
                     )}

@@ -6,6 +6,7 @@ import { fetchUserCompanyArray } from "../company/company.utils";
 import { fetchWithJWT } from "../../utils/fetch";
 import { decodeJWTPayload } from "../../utils/jwt";
 import { API_FETCH_ACTIONS } from "../company/company.config";
+import { uploadImageAndGetURL } from "./addCompany.utils";
 // #end-section
 // #hook useAddCompany - Hook to manage adding a new company
 export const useAddCompany = (setCompanies: (b: CompanyBaseDataType[]) => void) => {
@@ -17,6 +18,9 @@ export const useAddCompany = (setCompanies: (b: CompanyBaseDataType[]) => void) 
   // #end-state
   // #state [companyAlias, setCompanyAlias] - Text input value for the new company's alias, optional label
   const [companyAlias, setCompanyAlias] = useState("");
+  // #end-state
+  // #state [logoFile, setLogoFile] - Holds the selected logo file for the new company
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   // #end-state
   // #state [loading, setLoading] - Boolean that indicates whether the company creation request is in progress
   const [loading, setLoading] = useState(false);
@@ -56,7 +60,17 @@ export const useAddCompany = (setCompanies: (b: CompanyBaseDataType[]) => void) 
       const userId = payload?.id;
       if (!userId) throw new Error("User ID not found in token");
       // #end-step
-      // #step 4 - Make the request to create the companies, passing the name, alias, and user ID
+      // #step 4 - Try to create the url for the image logo
+      let logoUrl: string | undefined;
+      if (logoFile) {
+        try {
+          logoUrl = await uploadImageAndGetURL(logoFile);
+        } catch (uploadError: unknown) {
+          throw new Error(`Error al subir el logo. Inténtalo nuevamente. Error: ${uploadError}`);
+        }
+      }
+      // #end-step
+      // #step 5 - Make the request to create the company
       await fetchWithJWT(
         API_FETCH_ACTIONS.createCompany.url,
         API_FETCH_ACTIONS.createCompany.method,
@@ -64,20 +78,21 @@ export const useAddCompany = (setCompanies: (b: CompanyBaseDataType[]) => void) 
           name: trimmedName,
           alias: trimmedAlias,
           userId,
+          logo_url: logoUrl
         }
       );
       // #end-step
-      // #step 5 - Fetch the updated list of companies and update the state
+      // #step 6 - Fetch the updated list of companies and update the state
       const updated = await fetchUserCompanyArray(token);
       setCompanies(updated);
       // #end-step
-      // #step 6 - Reset the input fields and close the modal
+      // #step 7 - Reset the input fields and close the modal
       setCompanyName("");
       setCompanyAlias("");
       setShowModal(false);
       // #end-step
       } catch (e: unknown) {
-      // #step 7 - Handle errors and set the error message
+      // #step 8 - Handle errors and set the error message
       if (e instanceof Error) {
         setError(e.message);
       } else {
@@ -85,7 +100,7 @@ export const useAddCompany = (setCompanies: (b: CompanyBaseDataType[]) => void) 
       }
       // #end-step
     } finally {
-      // #step 8 - Reset loading state
+      // #step 9 - Reset loading state
       setLoading(false);
       // #end-step
     }
@@ -99,6 +114,8 @@ export const useAddCompany = (setCompanies: (b: CompanyBaseDataType[]) => void) 
     setCompanyName,
     companyAlias,
     setCompanyAlias,
+    logoFile,
+    setLogoFile,
     loading,
     error,
     handleCreate,
