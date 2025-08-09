@@ -5,6 +5,7 @@ export interface CompanyBaseDataType {
   name: string;
   alias?: string;
   address?: string;
+  logo_url?: string;
 };
 // #end-type
 // #type FetchActionType

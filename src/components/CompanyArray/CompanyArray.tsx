@@ -51,6 +51,11 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
         <li key={b.id} className={styles.item}>
           {/* #section - button that show the company name */}
           <button className={styles.header} onClick={() => handleToggleCompany(b.id)}>
+            <img
+              src={b.logo_url || "/public/no-logo.png"}
+              alt={`Logo de ${b.name}`}
+              style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", marginRight: "8px" }}
+            />
             {getDisplayName(b, i)}
           </button>
           {/* #end-section */}
