@@ -85,12 +85,12 @@ const CompanyArray = ({ companies }: CompanyArrayProps) => {
                       <CompanySocialMedia companyId={expandedCompanyId} />
                     )}
                     {/* #end-section */}
-                    {/* #section - CompanyLocation (if expanded) show inputs for location */}
+                    {/* #section - CompanyLocation >> (if expanded) show inputs for location */}
                     {expandedSection === section.id && section.id === "location" && expandedCompanyId && (
                       <CompanyLocation companyId={expandedCompanyId} />
                     )}
                     {/* #end-section */}
-                    {/* #section - CompanySchedule (if expanded) show inputs for config schedule */}
+                    {/* #section - CompanySchedule >> (if expanded) show inputs for config schedule */}
                     {expandedSection === section.id && section.id === "schedule" && (
                       <CompanySchedule companyId={expandedCompanyId}/>
                     )}

@@ -26,6 +26,12 @@ export const API_FETCH_ACTIONS = {
   registerNewUser: {
     method: 'POST',
     url: 'http://localhost:4000/api/usuarios/register'
+  },
+  // #end-section
+  // #section - editCompanyBaseData
+  editCompanyBaseData: {
+    method: 'PUT',
+    url: 'http://localhost:4000/api/companies/${companyID}/basic'
   }
   // #end-section
 } as Record<string, FetchActionType>

@@ -4,3 +4,11 @@ export interface companyGeneralConfigPropsType{
   companyId: string
 }
 // #end-type
+// #type CompanyBasicDataType
+export interface CompanyBasicDataType {
+  id: number
+  name: string
+  alias: string
+  logo_url: string
+}
+// #end-type
