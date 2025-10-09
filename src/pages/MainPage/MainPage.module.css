@@ -1,0 +1,73 @@
+/* src\pages\MainPage\MainPage.module.css */
+/* #style .page-container - Displays content using all the screen size */
+.page-container{
+  box-sizing: border-box;
+  width: 100dvw;
+  height: 100dvh;
+  padding: 0;
+  margin: 0;
+}
+/* #end-style */
+/* #style .header-buttons */
+.header-buttons{
+  display: flex;
+  gap: 10px;
+}
+/* #end-style */
+/* #style .register-modal-container */
+.register-modal-container, .login-modal-container{
+  position: fixed;      /* Se fija respecto a la ventana */
+  top: 0;
+  left: 0;
+  width: 100vw;         /* Ocupa todo el ancho de la ventana */
+  height: 100vh;        /* Ocupa todo el alto de la ventana */
+  background-color: rgba(0, 0, 0, 0.7); /* Negro semi-transparente */
+  display: flex;        /* Para centrar el contenido del modal */
+  align-items: center;  /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  z-index: 1000;        /* Asegura que esté encima de todo */
+}
+/* #end-style */
+/* #style .register-modal */
+.register-modal, .login-modal{
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  min-height: 200px; /* asegura que se vea */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;                       
+  align-items: stretch;
+  justify-content: center;
+}
+/* #end-style */
+/* #style .modal-logo */
+.modal-logo {
+  background-image: url('/public/page_icon.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* #end-style */
+/* #style .logo-lg */
+.logo-lg{
+  width: 128px;   
+  height: 128px;
+}
+/* #end-style */
+/* #style .logo-md */
+.logo-md{
+  width: 64px;   
+  height: 64px;
+}
+/* #end-style */
+/* #style .logo-sm */
+.logo-sm{
+  width: 32px;   
+  height: 32px;
+}
+/* #end-style */

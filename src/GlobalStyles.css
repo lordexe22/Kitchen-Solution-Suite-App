@@ -1,0 +1,142 @@
+/* #variable - globals */
+:root{
+  --primary-light-bg-color: #4a90e2;
+  --primary-light-color: #ffffff;
+  --primary-dark-bg-color: #4a90e2;
+  --primary-dark-color: #000000;
+}
+/* #end-variable */
+
+/* #style :root, html, body - Global default config */
+:root, html, body, body *{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+:root{
+  min-width: 100dvw;
+  min-height: 100dvh;
+}
+/* #end-style */
+/* #style header */
+header {
+  display: flex;
+  flex-direction: row;
+  border: thin solid black;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+/* #end-style */
+/* #style .button-sm */
+.button-sm {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+}
+/* #end-style */
+/* #style .button-md */
+.button-md {
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+}
+/* #end-style */
+/* #style .button-lg */
+.button-lg {
+  font-size: 1.2rem;
+  padding: 0.8rem 1.6rem;
+}
+/* #end-style */
+/* #style .button-primary */
+.button-primary {
+  background-color: var(--primary-light-bg-color);
+  color: var(--primary-light-color);
+  
+  &:hover {
+    background-color: #357ABD;
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+  }
+
+  &:active {
+    background-color: #2C5AA0;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+  }
+}
+/* #end-style */
+/* #style .button-secondary */
+.button-secondary {
+  background-color: #f5f5f5;
+  color: #333333;
+  border: 1px solid #ddd;
+
+  &:hover {
+    background-color: #eaeaea;
+  }
+  
+  &:active {
+    background-color: #dcdcdc;
+  }
+}
+/* #end-style */
+/* #style .button-close */
+button.button-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+
+  width: 2rem;
+  height: 2rem;
+  background-color: transparent;       /* fondo blanco puro */
+  color: #333;                  /* color de la X */
+  font-size: 1.2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover{
+    background-color: #f0f0f0;
+  }
+}
+
+
+/* #end-style */
+/* #style .button */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* espacio entre icono y texto */
+  padding: 0.6rem 1.2rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 6px; /* más redondeado */
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  user-select: none;
+
+  &:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+/* #end-style */
+/* #style .button svg */
+.button svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  fill: currentColor; /* hereda el color del texto */
+}
+/* #end-style */
