@@ -6,6 +6,7 @@ import '/src/styles/modal.css';
 import { AuthenticatorWithGoogle } from '../../modules/authenticatorWithGoogle';
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle';
 import { useEffect, useState } from 'react';
+import AppHeader from '../../components/AppHeader';
 // #end-section
 
 // #component MainPage
@@ -29,14 +30,14 @@ const MainPage = () => {
     console.log({ user });
   }, [user]);
 
-  const userLogoUrl = `${import.meta.env.BASE_URL}${`user.svg`}`;
+  // const userLogoUrl = `${import.meta.env.BASE_URL}${`user.svg`}`;
   const appLogoUrl = `${import.meta.env.BASE_URL}${`page_icon.jpg`}`;
 
   // #section return
   return (
     <div className={styles['page-container']}>
       {/* #section Header */}
-      <header>
+      {/* <header>
         <div className={styles['header-logo']}>
           <img src={appLogoUrl} alt="App Logo" />
         </div>
@@ -52,7 +53,14 @@ const MainPage = () => {
             <span>Login</span>
           </button>
         </div>
-      </header>
+      </header> */}
+      <AppHeader 
+        appLogoUrl={appLogoUrl} 
+        appName='Kitchen Solutions' 
+        user={{name:'Walter Puig', email:'walterezequielpuig@gmail.com', avatarUrl:''}}
+        onLoginClick={()=>{}}
+        onLogout={()=>{}}
+      />
       {/* #end-section */}
       {/* #section Modal */}
       {showModal && (
