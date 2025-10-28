@@ -68,7 +68,7 @@
 /* #variable Modals */
 :root {
   /* #section Overlay config */
-  --overlay-bgcolor: rgba(15, 15, 15, 0.6);
+  --overlay-bg-color: rgba(15, 15, 15, 0.6);
   --overlay-blur: 3px; /* Desenfoca el fondo */
   --modal-z-index: 1000;
   /* #end-section */

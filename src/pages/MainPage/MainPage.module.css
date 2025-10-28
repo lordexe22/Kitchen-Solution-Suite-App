@@ -33,36 +33,3 @@ header{
   align-items: center;
 }
 /* #end-style */
-/* #style .tabs-container */
-.tabs-container{
-  display: flex;
-  flex-direction: row;
-  gap: 15px;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  font-size: 1.2rem;
-}
-/* #end-style */
-/* #style .tab */
-.tab{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  height: 100%;
-  flex: 1;
-  color: black;
-  transition: border .5s ease;
-
-  &:hover:not(.active) {
-    border-bottom: thin solid black;
-  }
-  
-  &.active {
-    color:whitesmoke;
-    background-color: #1d4ed8;
-    border-radius: 12px;
-  }
-}
-/* #end-style */

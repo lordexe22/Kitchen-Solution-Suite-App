@@ -1,17 +1,4 @@
 /* src\components\AppHeader\AppHeader.types.ts */
-// #interface AppHeaderUser
-/**
- * Representa la información simplificada del usuario para mostrar en el header
- */
-export interface AppHeaderUser {
-  /** Nombre completo o nombre de usuario */
-  name: string;
-  /** Dirección de correo electrónico */
-  email: string;
-  /** URL de la imagen de perfil (opcional) */
-  avatarUrl?: string;
-}
-// #end-interface
 // #interface AppHeaderProps
 /**
  * Props del componente AppHeader
@@ -21,18 +8,10 @@ export interface AppHeaderProps {
   appLogoUrl: string;
   /** Nombre/título de la aplicación */
   appName: string;
-  /** Usuario actual (null si no está autenticado) */
-  user: AppHeaderUser | null;
   /** Callback cuando se hace clic en "Iniciar sesión / Registrarse" */
-  onLoginClick: () => void;
+  onLogin: () => void;
   /** Callback cuando se hace clic en "Cerrar sesión" */
   onLogout: () => void;
-  /** Callback cuando se hace clic en el botón de notificaciones (botón separado) */
-  onNotificationsClick?: () => void;
-  /** Callback cuando se hace clic en "Mi Perfil" (opcional - deshabilitado por defecto) */
-  onProfileClick?: () => void;
-  /** Callback cuando se hace clic en "Configuración" (opcional - deshabilitado por defecto) */
-  onSettingsClick?: () => void;
 }
 // #end-interface
 // #interface DropdownMenuItem

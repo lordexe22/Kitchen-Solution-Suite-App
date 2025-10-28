@@ -33,6 +33,6 @@ export interface AuthenticatorWithGoogleProps {
   /** Callback que recibe el usuario decodificado luego de un login exitoso. */
   onAuth: (user: GoogleUser | null) => void;
   /** Modo de uso del botón, que define si se está logueando o creando una nueva cuenta. */
-  mode: "login" | "signup";
+  mode: "login" | "register";
 }
 // #end-interface

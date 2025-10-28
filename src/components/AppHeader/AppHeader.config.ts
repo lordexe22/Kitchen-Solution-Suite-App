@@ -5,7 +5,8 @@ import type { DropdownMenuItem, UserDisplayMode } from './AppHeader.types';
  * Textos por defecto del AppHeader
  */
 export const APP_HEADER_TEXTS = {
-  loginButton: 'Ingresar',
+  loginButton: 'Login',
+  registerButton: 'Register',
   logoutButton: 'Cerrar sesión',
   profileMenu: 'Mi perfil',
   settingsMenu: 'Configuración',

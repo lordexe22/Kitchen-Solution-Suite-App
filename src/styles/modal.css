@@ -1,3 +1,4 @@
+/* src\styles\modal.css */
 /* #section Imports */
 @import url('_variables.css');
 /* #end-section */
@@ -31,6 +32,7 @@
 /* #style .modal-container */
 .modal-container {
   /* #section general */
+  padding: 10px;
   background-color: var(--modal-bg-color);
   border-radius: var(--modal-bd-radius);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
@@ -91,7 +93,8 @@
   color: var(--modal-body-color);
   background-color: var(--modal-body-bg-color);
   line-height: 1.4;
-  border: thin solid red;
+  align-items: center;
+  justify-content: center;
   /* #end-section */
   /* #section scrollbar */
   &::-webkit-scrollbar {
@@ -141,3 +144,14 @@
   flex: 1;
 }
 /* #end-style */
+
+.modal-title{
+  margin: 10px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+hr.separator{
+  width: 100%;
+  color: #000000a0;
+}

@@ -1,0 +1,21 @@
+/* #style .form-container */
+.form-container{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+
+  input {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+/* #end-style */
+/* #style .error */
+.error{
+  color: red;
+  font-size: 0.75rem;
+}
+/* #end-style */
