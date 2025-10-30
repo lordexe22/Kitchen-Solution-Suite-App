@@ -184,14 +184,13 @@ const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
 // #end-function
 // #function validateLoginUserData
 /**
- * Valida los datos necesarios para el inicio de sesión de un usuario.
- * Verifica que los campos existan, cumplan con formatos válidos y
- * retorna los datos normalizados y procesados.
- * Soporta login local (email/password) y mediante Google (token).
+ * Valida y normaliza los datos de login.
+ * NO realiza validaciones exhaustivas (eso lo hace react-hook-form en el frontend).
+ * Solo verifica que los campos requeridos existan y normaliza el email.
  *
  * @param {UserLoginData} data - Datos del usuario para iniciar sesión.
  * @returns {UserLoginData} Datos validados y procesados.
- * @throws {Error} Si los datos no son válidos o faltan campos requeridos.
+ * @throws {Error} Si faltan campos requeridos.
  */
 const validateLoginUserData = (data: UserLoginData): UserLoginData => {
   // #step 1 - Validación de datos de login (plataforma local)
@@ -205,12 +204,8 @@ const validateLoginUserData = (data: UserLoginData): UserLoginData => {
       throw new Error('Email and password are required');
     }
 
-    // #variable processedEmail - Email validado y normalizado a minúsculas
-    const processedEmail = validateAndProcessEmail(email);
-    // #end-variable
-
-    // Validar contraseña (solo que exista y tenga formato válido)
-    validatePassword(password);
+    // Normalizar email a minúsculas
+    const processedEmail = email.trim().toLowerCase();
 
     // Retornar datos procesados
     return {
@@ -223,19 +218,23 @@ const validateLoginUserData = (data: UserLoginData): UserLoginData => {
 
   // #step 2 - Validación de datos de login (plataforma Google)
   else if (data.platform === 'google') {
-    // #variable token - Token de autenticación de Google
-    const { token } = data;
+    // #variable email, platformToken - Datos de autenticación de Google
+    const { email, platformToken } = data;
     // #end-variable
 
-    // Validar que el token exista
-    if (!token) {
-      throw new Error('Token is required');
+    // Validar que todos los campos existan
+    if (!email || !platformToken) {
+      throw new Error('Email and token are required');
     }
+
+    // Normalizar email a minúsculas
+    const processedEmail = email.trim().toLowerCase();
 
     // Retornar datos procesados
     return {
       platform: 'google',
-      token
+      email: processedEmail,
+      platformToken
     };
   }
   // #end-step

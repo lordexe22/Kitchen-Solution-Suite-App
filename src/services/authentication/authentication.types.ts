@@ -51,7 +51,9 @@ export type UserLoginData =
   | {
       /** Plataforma de inicio de sesión. */
       platform: 'google';
+      /** Dirección de correo electrónico. */
+      email: string;
       /** Token de autenticación de Google. */
-      token: string;
+      platformToken: string;
     };
 // #end-type

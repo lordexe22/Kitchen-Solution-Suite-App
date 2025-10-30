@@ -2,6 +2,9 @@
 // #section imports
 import { useForm } from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
+import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
+import { loginUser } from '../../services/authentication/authentication'
+import type { UserLoginData } from '../../services/authentication/authentication.types'
 import styles from './AuthLoginModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
@@ -81,10 +84,61 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     ));
   };
   // #end-function
+  // #function handleGoogleAuth - Maneja la autenticación con Google
+  const handleGoogleAuth = async (googleUser: GoogleUser | null) => {
+    if (!googleUser) {
+      console.error('Google authentication failed: no user data received');
+      return;
+    }
+
+    try {
+      console.log('🔐 Attempting login with Google...');
+      
+      // #variable loginData - Datos de login para Google
+      const loginData: UserLoginData = {
+        platform: 'google',
+        email: googleUser.email,
+        platformToken: googleUser.jti
+      };
+      // #end-variable
+
+      // #variable response - Respuesta del servidor
+      const response = await loginUser(loginData);
+      // #end-variable
+
+      console.log('✅ Login with Google successful:', response);
+      
+      // TODO: Actualizar store y cerrar modal (próximo paso)
+      
+    } catch (error) {
+      console.error('❌ Login with Google failed:', error);
+    }
+  };
+  // #end-function
   // #event onSubmit
-  const onSubmit = handleSubmit((data) => {
-    console.log('Se intento enviar el formulario de login');
-    console.log({data});
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      console.log('🔐 Attempting login with form...');
+      
+      // #variable loginData - Datos de login para plataforma local
+      const loginData: UserLoginData = {
+        platform: 'local',
+        email: data.email,
+        password: data.password
+      };
+      // #end-variable
+
+      // #variable response - Respuesta del servidor
+      const response = await loginUser(loginData);
+      // #end-variable
+
+      console.log('✅ Login with form successful:', response);
+      
+      // TODO: Actualizar store y cerrar modal (próximo paso)
+      
+    } catch (error) {
+      console.error('❌ Login with form failed:', error);
+    }
   })
   // #end-event
   // #event onCloseModal  
@@ -143,10 +197,10 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
               <hr className="separator" />
               <h3 className="modal-title">Login with Google</h3>
               <div style={{width:'100%', margin:'2px 0'}}>
-                <AuthenticatorWithGoogle
-                  mode="register"
-                  onAuth={()=>{}}
-                />
+              <AuthenticatorWithGoogle
+                mode="login"
+                onAuth={handleGoogleAuth}
+              />
               </div>
             </div>
             {/* #end-section */}
