@@ -96,7 +96,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       
       // #variable loginData - Datos de login para Google
       const loginData: UserLoginData = {
-        platform: 'google',
+        platformName: 'google',
         email: googleUser.email,
         platformToken: googleUser.jti
       };
@@ -122,12 +122,11 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       
       // #variable loginData - Datos de login para plataforma local
       const loginData: UserLoginData = {
-        platform: 'local',
+        platformName: 'local',
         email: data.email,
         password: data.password
       };
       // #end-variable
-
       // #variable response - Respuesta del servidor
       const response = await loginUser(loginData);
       // #end-variable

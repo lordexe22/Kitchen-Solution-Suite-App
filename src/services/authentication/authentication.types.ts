@@ -7,7 +7,7 @@
 export type RegisterUserData =
   | {
       /** Plataforma de registro. */
-      platform: 'local';
+      platformName: 'local';
       /** Dirección de correo electrónico. */
       email: string;
       /** Nombre del usuario. */
@@ -21,7 +21,7 @@ export type RegisterUserData =
     }
   | {
       /** Plataforma de registro. */
-      platform: 'google';
+      platformName: 'google';
       /** Token de autenticación de Google. */
       token: string;
       /** Nombre del usuario. */
@@ -42,7 +42,7 @@ export type RegisterUserData =
 export type UserLoginData =
   | {
       /** Plataforma de inicio de sesión. */
-      platform: 'local';
+      platformName: 'local';
       /** Dirección de correo electrónico. */
       email: string;
       /** Contraseña del usuario. */
@@ -50,7 +50,7 @@ export type UserLoginData =
     }
   | {
       /** Plataforma de inicio de sesión. */
-      platform: 'google';
+      platformName: 'google';
       /** Dirección de correo electrónico. */
       email: string;
       /** Token de autenticación de Google. */

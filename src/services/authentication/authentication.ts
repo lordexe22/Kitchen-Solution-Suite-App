@@ -64,7 +64,9 @@ export const loginUser = async (loginUserData: UserLoginData) => {
   // #end-variable
   // #end-step
   // #step 2 - Realizar petición POST a la API de login
-  // #variable response - Respuesta HTTP del servidor
+  console.log('🔄 Sending login request to:', `${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`);
+  console.log('📦 Login payload:', validatedData);
+
   const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`, {
     method: 'POST',
     headers: {
@@ -73,7 +75,6 @@ export const loginUser = async (loginUserData: UserLoginData) => {
     credentials: 'include',
     body: JSON.stringify(validatedData),
   });
-  // #end-variable
   // #end-step
   // #step 3 - Procesar y validar respuesta de la API
   // #variable responseData - Datos parseados de la respuesta del servidor
@@ -102,7 +103,7 @@ export const loginUser = async (loginUserData: UserLoginData) => {
  */
 const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
   // #step 1 - Validación de datos de registro (plataforma local)
-  if (data.platform === 'local') {
+  if (data.platformName === 'local') {
     // #variable email, name, lastName, password, confirmPassword - Campos del formulario de registro local
     const { email, name, lastName, password, confirmPassword } = data;
     // #end-variable
@@ -134,7 +135,7 @@ const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
 
     // Retornar datos procesados
     return {
-      platform: 'local',
+      platformName: 'local',
       email: processedEmail,
       name: processedName,
       lastName: processedLastName,
@@ -145,7 +146,7 @@ const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
   // #end-step
 
   // #step 2 - Validación de datos de registro (plataforma Google)
-  else if (data.platform === 'google') {
+  else if (data.platformName === 'google') {
     // #variable email, name, lastName, token - Campos del registro mediante Google
     const { email, name, lastName, token } = data;
     // #end-variable
@@ -169,7 +170,7 @@ const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
 
     // Retornar datos procesados
     return {
-      platform: 'google',
+      platformName: 'google',
       email: processedEmail,
       name: processedName,
       lastName: processedLastName,
@@ -194,7 +195,7 @@ const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
  */
 const validateLoginUserData = (data: UserLoginData): UserLoginData => {
   // #step 1 - Validación de datos de login (plataforma local)
-  if (data.platform === 'local') {
+  if (data.platformName === 'local') {
     // #variable email, password - Credenciales del usuario para login local
     const { email, password } = data;
     // #end-variable
@@ -209,15 +210,14 @@ const validateLoginUserData = (data: UserLoginData): UserLoginData => {
 
     // Retornar datos procesados
     return {
-      platform: 'local',
+      platformName: 'local',
       email: processedEmail,
       password
     };
   }
   // #end-step
-
   // #step 2 - Validación de datos de login (plataforma Google)
-  else if (data.platform === 'google') {
+  else if (data.platformName === 'google') {
     // #variable email, platformToken - Datos de autenticación de Google
     const { email, platformToken } = data;
     // #end-variable
@@ -232,13 +232,12 @@ const validateLoginUserData = (data: UserLoginData): UserLoginData => {
 
     // Retornar datos procesados
     return {
-      platform: 'google',
+      platformName: 'google',
       email: processedEmail,
       platformToken
     };
   }
   // #end-step
-
   throw new Error('Invalid platform');
 };
 // #end-function
