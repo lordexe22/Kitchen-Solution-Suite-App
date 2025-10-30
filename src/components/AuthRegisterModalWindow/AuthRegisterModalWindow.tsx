@@ -4,6 +4,7 @@ import {useForm} from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
 import { API_CONFIG } from '../../config/config'
+import { useUserDataStore } from '../../store/UserData.store'
 import styles from './AuthRegisterModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
@@ -190,7 +191,23 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     try {
       console.log('Attempting to register with form...');
       const userPayload = buildUserPayload(data);
-      await sendRegisterToServer(userPayload);
+      const response = await sendRegisterToServer(userPayload);
+      
+      console.log('✅ Registration successful:', response);
+      
+      // Actualizar el store con los datos del usuario
+      useUserDataStore.getState().setFirstName(response.data.user.firstName);
+      useUserDataStore.getState().setLastName(response.data.user.lastName);
+      useUserDataStore.getState().setEmail(response.data.user.email);
+      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
+      useUserDataStore.getState().setType(response.data.user.type);
+      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setIsAuthenticated(true);
+      
+      console.log('✅ Store actualizado');
+      
+      // Cerrar el modal
+      onCloseModal();
     } catch (error) {
       console.error('Registration with form failed:', error);
     }
@@ -201,7 +218,23 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     try {
       console.log('Attempting to register with Google...');
       const userPayload = buildUserPayload(undefined, googleUser);
-      await sendRegisterToServer(userPayload);
+      const response = await sendRegisterToServer(userPayload);
+      
+      console.log('✅ Registration successful:', response);
+      
+      // Actualizar el store con los datos del usuario
+      useUserDataStore.getState().setFirstName(response.data.user.firstName);
+      useUserDataStore.getState().setLastName(response.data.user.lastName);
+      useUserDataStore.getState().setEmail(response.data.user.email);
+      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
+      useUserDataStore.getState().setType(response.data.user.type);
+      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setIsAuthenticated(true);
+      
+      console.log('✅ Store actualizado');
+      
+      // Cerrar el modal
+      onCloseModal();
     } catch (error) {
       console.error('Registration with Google failed:', error);
     }

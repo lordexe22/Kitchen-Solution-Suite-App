@@ -6,6 +6,7 @@ import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
 import { loginUser } from '../../services/authentication/authentication'
 import type { UserLoginData } from '../../services/authentication/authentication.types'
 import styles from './AuthLoginModalWindow.module.css'
+import { useUserDataStore } from '../../store/UserData.store'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
 // #end-section
@@ -92,7 +93,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     }
 
     try {
-      console.log('🔐 Attempting login with Google...');
+      console.log('🔍 Attempting login with Google...');
       
       // #variable loginData - Datos de login para Google
       const loginData: UserLoginData = {
@@ -108,7 +109,19 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
 
       console.log('✅ Login with Google successful:', response);
       
-      // TODO: Actualizar store y cerrar modal (próximo paso)
+      // Actualizar el store con los datos del usuario
+      useUserDataStore.getState().setFirstName(response.data.user.firstName);
+      useUserDataStore.getState().setLastName(response.data.user.lastName);
+      useUserDataStore.getState().setEmail(response.data.user.email);
+      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
+      useUserDataStore.getState().setType(response.data.user.type);
+      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setIsAuthenticated(true);
+      
+      console.log('✅ Store actualizado');
+      
+      // Cerrar el modal
+      onCloseModal();
       
     } catch (error) {
       console.error('❌ Login with Google failed:', error);
@@ -118,7 +131,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
   // #event onSubmit
   const onSubmit = handleSubmit(async (data) => {
     try {
-      console.log('🔐 Attempting login with form...');
+      console.log('🔍 Attempting login with form...');
       
       // #variable loginData - Datos de login para plataforma local
       const loginData: UserLoginData = {
@@ -127,13 +140,26 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
         password: data.password
       };
       // #end-variable
+
       // #variable response - Respuesta del servidor
       const response = await loginUser(loginData);
       // #end-variable
 
       console.log('✅ Login with form successful:', response);
       
-      // TODO: Actualizar store y cerrar modal (próximo paso)
+      // Actualizar el store con los datos del usuario
+      useUserDataStore.getState().setFirstName(response.data.user.firstName);
+      useUserDataStore.getState().setLastName(response.data.user.lastName);
+      useUserDataStore.getState().setEmail(response.data.user.email);
+      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
+      useUserDataStore.getState().setType(response.data.user.type);
+      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setIsAuthenticated(true);
+      
+      console.log('✅ Store actualizado');
+      
+      // Cerrar el modal
+      onCloseModal();
       
     } catch (error) {
       console.error('❌ Login with form failed:', error);

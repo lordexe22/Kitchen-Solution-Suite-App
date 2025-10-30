@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import type { UserDataStore } from './UserData.types';
 
-export const useUserDataStore = create<UserDataStore | null>()((set) => ({
-  name: null,
+export const useUserDataStore = create<UserDataStore>()((set) => ({
+  firstName: null,
   lastName: null,
   email: null,
   imageUrl: null,
@@ -10,21 +10,22 @@ export const useUserDataStore = create<UserDataStore | null>()((set) => ({
   state: null,
   isAuthenticated: false,
 
-  setName: (name) => set({ name }),
+  setFirstName: (firstName) => set({ firstName }),
   setLastName: (lastName) => set({ lastName }),
   setEmail: (email) => set({ email }),
-  setimageUrl: (url) => set({ imageUrl: url }),
+  setImageUrl: (url) => set({ imageUrl: url }),
   setType: (type) => set({ type }),
   setState: (state) => set({ state }),
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
 
   reset: () => set({
-    name: null,
+    firstName: null,
     lastName: null,
     email: null,
     imageUrl: null,
     state: null,
     type: null,
+    isAuthenticated: false,
   })
 
 }))
