@@ -31,7 +31,7 @@ export type RegisterUserData =
       /** Dirección de correo electrónico. */
       email: string;
       /** URL de la foto de perfil. */
-      pictureUrl?: string;
+      imageUrl?: string;
     };
 // #end-type
 // #type UserLoginData

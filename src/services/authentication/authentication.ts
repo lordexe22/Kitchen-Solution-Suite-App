@@ -174,7 +174,7 @@ const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
       name: processedName,
       lastName: processedLastName,
       token,
-      pictureUrl: data.pictureUrl
+      imageUrl: data.imageUrl
     };
   }
   // #end-step

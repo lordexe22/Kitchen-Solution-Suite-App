@@ -1,7 +1,9 @@
-// src\components\AuthRegisterModalWindow\AuthRegisterModalWindow.tsx
+/* src\components\AuthRegisterModalWindow\AuthRegisterModalWindow.tsx */
 // #section imports
 import {useForm} from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
+import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
+import { API_CONFIG } from '../../config/config'
 import styles from './AuthRegisterModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
@@ -13,6 +15,17 @@ interface RegisterFormData{
   email: string;
   password: string;
   confirmPassword: string;
+}
+// #end-interface
+// #interface RegisterUserPayload - data to send to server
+interface RegisterUserPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string | null;
+  imageUrl: string | null;
+  platformToken: string | null;
+  platformName: 'local' | 'google';
 }
 // #end-interface
 // #interface AuthRegisterModalWindowProp
@@ -29,8 +42,8 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     formState: { errors },
     watch,
   } = useForm<RegisterFormData>({
-    mode: 'onSubmit', // Valida al enviar el formulario
-    criteriaMode: 'all' // CLAVE: Captura TODOS los errores, no solo el primero
+    mode: 'onSubmit',
+    criteriaMode: 'all'
   });
   // #end-variable
   // #state firstName
@@ -91,13 +104,71 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     }
   )
   // #end-state
+  // #function buildUserPayload - creates user object to send to server
+  const buildUserPayload = (
+    formData?: RegisterFormData,
+    googleUser?: GoogleUser | null
+  ): RegisterUserPayload => {
+    if (googleUser) {
+      // Registration with Google
+      return {
+        firstName: googleUser.given_name,
+        lastName: googleUser.family_name,
+        email: googleUser.email,
+        password: null,
+        imageUrl: googleUser.picture,
+        platformToken: googleUser.jti,
+        platformName: 'google'
+      };
+    } else if (formData) {
+      // Registration with form
+      return {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        imageUrl: null,
+        platformToken: null,
+        platformName: 'local'
+      };
+    }
+    throw new Error('No data provided for user payload');
+  };
+  // #end-function
+  // #function sendRegisterToServer - sends registration data to server
+  const sendRegisterToServer = async (userPayload: RegisterUserPayload) => {
+    try {
+
+      console.log({userPayload});
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`, {
+        credentials: 'include',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Registration failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Registration successful:', data);
+      return data;
+    } catch (error) {
+      console.error('Error during registration:', error);
+      throw error;
+    }
+  };
+  // #end-function
   // #function renderErrors - Renderiza todos los errores de un campo
   const renderErrors = (fieldErrors: import('react-hook-form').FieldError | undefined) => {
     if (!fieldErrors) return null;
     
     const errorMessages: string[] = [];
     
-    // Si hay múltiples validaciones (validate object), usar solo esos
     if (fieldErrors.types) {
       Object.values(fieldErrors.types).forEach((msg) => {
         if (typeof msg === 'string' && !errorMessages.includes(msg)) {
@@ -105,7 +176,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
         }
       });
     } 
-    // Si no hay types, usar el mensaje simple
     else if (fieldErrors.message) {
       errorMessages.push(fieldErrors.message);
     }
@@ -115,13 +185,29 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     ));
   };
   // #end-function
-  // #event onSubmit
-  const onSubmit = handleSubmit((data) => {
-    console.log('Se intento enviar el formulario de registro');
-    console.log({data});
+  // #event onSubmit - handles form submission
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      console.log('Attempting to register with form...');
+      const userPayload = buildUserPayload(data);
+      await sendRegisterToServer(userPayload);
+    } catch (error) {
+      console.error('Registration with form failed:', error);
+    }
   })
   // #end-event
-  // #event onCloseModal  
+  // #event handleGoogleAuth - handles Google authentication
+  const handleGoogleAuth = async (googleUser: GoogleUser | null) => {
+    try {
+      console.log('Attempting to register with Google...');
+      const userPayload = buildUserPayload(undefined, googleUser);
+      await sendRegisterToServer(userPayload);
+    } catch (error) {
+      console.error('Registration with Google failed:', error);
+    }
+  };
+  // #end-event
+  // #event onCloseModal - handles modal close  
   const {
     onCloseModal,
   } = prop;
@@ -131,7 +217,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     <>
         <div className="modal-overlay" onClick={onCloseModal}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            {/* #section logo */}
+            {/* #section Button-close */}
             <button
               className="btn-close"
               style={{position:'absolute', top:0, right:0}}
@@ -144,7 +230,11 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
             {/* #section Body */}
             <div className='modal-body' style={{marginTop:'20px'}}>
               <h3 className="modal-title">Register with Form</h3>
-              <form onSubmit={onSubmit} style={{width:'100%'}}>
+              {/* #section form */}
+              <form 
+                onSubmit={onSubmit} 
+                style={{width:'100%'}}
+              >
                 <div className={styles['form-container']}>
                   {/* #section First Name Input */}
                   <input
@@ -155,7 +245,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                   />
                   {renderErrors(errors.firstName)}
                   {/* #end-section */}
-                  
                   {/* #section Last Name Input */}                  
                   <input 
                     type="text" 
@@ -165,7 +254,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                   />
                   {renderErrors(errors.lastName)}
                   {/* #end-section */}
-                  
                   {/* #section Email Input */}
                   <input 
                     type="email" 
@@ -175,7 +263,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                   />
                   {renderErrors(errors.email)}
                   {/* #end-section */}
-                  
                   {/* #section Password Input */}
                   <input
                     type="password" 
@@ -185,7 +272,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                   />
                   {renderErrors(errors.password)}
                   {/* #end-section */}
-                  
                   {/* #section Confirm Password Input */}
                   <input 
                     type="password"
@@ -195,27 +281,25 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                   />
                   {renderErrors(errors.confirmPassword)}
                   {/* #end-section */}
-                  
+                  {/* #section Submit Button */}
                   <input 
                     type="submit" 
                     className="btn-pri btn-md"                    
                     style={{margin:'10px 0'}}
                     value="Register"
                   />
+                  {/* #end-section */}
                 </div>
               </form>
+              {/* #end-section */}
               <hr className="separator" />
               <h3 className="modal-title">Register with Google</h3>
               <div style={{width:'100%', margin:'2px 0'}}>
                 <AuthenticatorWithGoogle
                   mode="register"
-                  onAuth={()=>{}}
+                  onAuth={handleGoogleAuth}
                 />
               </div>
-            </div>
-            {/* #end-section */}
-            {/* #section Footer */}
-            <div className='modal-footer'>
             </div>
             {/* #end-section */}
           </div>
