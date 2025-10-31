@@ -118,7 +118,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
         email: googleUser.email,
         password: null,
         imageUrl: googleUser.picture,
-        platformToken: googleUser.jti,
+        platformToken: googleUser.sub,
         platformName: 'google'
       };
     } else if (formData) {

@@ -99,7 +99,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       const loginData: UserLoginData = {
         platformName: 'google',
         email: googleUser.email,
-        platformToken: googleUser.jti
+        platformToken: googleUser.sub
       };
       // #end-variable
 
@@ -110,12 +110,12 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       console.log('✅ Login with Google successful:', response);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setFirstName(response.data.user.firstName);
-      useUserDataStore.getState().setLastName(response.data.user.lastName);
-      useUserDataStore.getState().setEmail(response.data.user.email);
-      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
-      useUserDataStore.getState().setType(response.data.user.type);
-      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setFirstName(response.user.firstName);
+      useUserDataStore.getState().setLastName(response.user.lastName);
+      useUserDataStore.getState().setEmail(response.user.email);
+      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
+      useUserDataStore.getState().setType(response.user.type);
+      useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
       console.log('✅ Store actualizado');
@@ -148,12 +148,12 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       console.log('✅ Login with form successful:', response);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setFirstName(response.data.user.firstName);
-      useUserDataStore.getState().setLastName(response.data.user.lastName);
-      useUserDataStore.getState().setEmail(response.data.user.email);
-      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
-      useUserDataStore.getState().setType(response.data.user.type);
-      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setFirstName(response.user.firstName);
+      useUserDataStore.getState().setLastName(response.user.lastName);
+      useUserDataStore.getState().setEmail(response.user.email);
+      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
+      useUserDataStore.getState().setType(response.user.type);
+      useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
       console.log('✅ Store actualizado');
