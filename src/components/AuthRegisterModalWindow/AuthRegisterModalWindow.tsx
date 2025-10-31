@@ -1,5 +1,6 @@
 /* src\components\AuthRegisterModalWindow\AuthRegisterModalWindow.tsx */
 // #section imports
+import { useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
@@ -8,6 +9,9 @@ import { useUserDataStore } from '../../store/UserData.store'
 import styles from './AuthRegisterModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
+import ServerErrorBanner from '../ServerErrorBanner';
+import { fetchWithTimeout } from '../../utils/fetchWithTimeout/fetchWithTimeout'
+import { getServerErrorMessage, detectServerErrorType } from '../../utils/detectServerError/detectServerError'
 // #end-section
 // #interface RegisterFormData
 interface RegisterFormData{
@@ -42,6 +46,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     handleSubmit,
     formState: { errors },
     watch,
+    setError
   } = useForm<RegisterFormData>({
     mode: 'onSubmit',
     criteriaMode: 'all'
@@ -105,6 +110,12 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     }
   )
   // #end-state
+  // #state serverError - Para errores de servidor/red
+  const [serverError, setServerError] = useState<string | null>(null);
+  // #end-state
+  // #state isLoading - Indica si está procesando el registro
+  const [isLoading, setIsLoading] = useState(false);
+  // #end-state
   // #function buildUserPayload - creates user object to send to server
   const buildUserPayload = (
     formData?: RegisterFormData,
@@ -139,23 +150,39 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   // #function sendRegisterToServer - sends registration data to server
   const sendRegisterToServer = async (userPayload: RegisterUserPayload) => {
     try {
-
-      console.log({userPayload});
-
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`, {
-        credentials: 'include',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetchWithTimeout(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`,
+        {
+          credentials: 'include',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userPayload),
         },
-        body: JSON.stringify(userPayload),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Registration failed: ${response.statusText}`);
-      }
+        10000 // 10 segundos timeout
+      );
 
       const data = await response.json();
+
+      if (!response.ok) {
+        // Errores de servidor (500+)
+        if (response.status >= 500) {
+          const errorType = detectServerErrorType({ status: response.status });
+          const errorMessage = getServerErrorMessage(errorType);
+          throw new Error(errorMessage);
+        }
+
+        // Manejar errores específicos del backend (400, 409)
+        if (response.status === 409) {
+          throw new Error('This email is already registered. Please login instead.');
+        } else if (response.status === 400) {
+          throw new Error(data.error || 'Invalid registration data. Please check your information.');
+        } else {
+          throw new Error(data.error || `Registration failed: ${response.statusText}`);
+        }
+      }
+
       console.log('Registration successful:', data);
       return data;
     } catch (error) {
@@ -188,6 +215,10 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   // #end-function
   // #event onSubmit - handles form submission
   const onSubmit = handleSubmit(async (data) => {
+    // Limpiar errores previos
+    setServerError(null);
+    setIsLoading(true); // ← AGREGAR
+
     try {
       console.log('Attempting to register with form...');
       const userPayload = buildUserPayload(data);
@@ -210,11 +241,61 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       onCloseModal();
     } catch (error) {
       console.error('Registration with form failed:', error);
+      
+      // Detectar si es error de servidor/red
+      const errorType = detectServerErrorType(error);
+      
+      if (errorType === 'network' || errorType === 'timeout' || errorType === 'server') {
+        // Error de infraestructura → Banner
+        const errorMessage = getServerErrorMessage(errorType);
+        setServerError(errorMessage);
+      } else {
+        // Error de validación → Debajo del campo
+        if (error instanceof Error) {
+          setError('email', {
+            type: 'server',
+            message: error.message
+          });
+        } else {
+          setError('email', {
+            type: 'server',
+            message: 'Registration failed. Please try again.'
+          });
+        }
+      }
+    } finally {
+      setIsLoading(false); // ← AGREGAR
     }
   })
   // #end-event
   // #event handleGoogleAuth - handles Google authentication
   const handleGoogleAuth = async (googleUser: GoogleUser | null) => {
+    // Limpiar errores previos
+    setServerError(null);
+
+    // Si el usuario canceló, no hacer nada
+    if (!googleUser) {
+      console.log('User cancelled Google authentication');
+      return;
+    }
+
+    // Validar que Google retornó los datos mínimos necesarios
+    if (!googleUser.sub || !googleUser.email || !googleUser.given_name || !googleUser.family_name) {
+      console.error('Invalid Google user data:', googleUser);
+      setError('email', {
+        type: 'oauth',
+        message: 'Invalid data received from Google. Please try again or use email registration.'
+      });
+      return;
+    }
+
+    // Validar que el email esté verificado por Google (advertencia, no bloqueo)
+    if (!googleUser.email_verified) {
+      console.warn('Google email not verified:', googleUser.email);
+    }
+
+    setIsLoading(true); // ← AGREGAR
+
     try {
       console.log('Attempting to register with Google...');
       const userPayload = buildUserPayload(undefined, googleUser);
@@ -237,6 +318,30 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       onCloseModal();
     } catch (error) {
       console.error('Registration with Google failed:', error);
+      
+      // Detectar si es error de servidor/red
+      const errorType = detectServerErrorType(error);
+      
+      if (errorType === 'network' || errorType === 'timeout' || errorType === 'server') {
+        // Error de infraestructura → Banner
+        const errorMessage = getServerErrorMessage(errorType);
+        setServerError(errorMessage);
+      } else {
+        // Error de validación → Debajo del campo
+        if (error instanceof Error) {
+          setError('email', {
+            type: 'server',
+            message: error.message
+          });
+        } else {
+          setError('email', {
+            type: 'server',
+            message: 'Registration failed. Please try again.'
+          });
+        }
+      }
+    } finally {
+      setIsLoading(false); // ← AGREGAR
     }
   };
   // #end-event
@@ -262,6 +367,11 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
             {/* #end-section */}
             {/* #section Body */}
             <div className='modal-body' style={{marginTop:'20px'}}>
+              {/* #section Server Error Banner */}
+              <ServerErrorBanner 
+                message={serverError} 
+                onClose={() => setServerError(null)} 
+              />
               <h3 className="modal-title">Register with Form</h3>
               {/* #section form */}
               <form 
@@ -274,6 +384,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                     type="text"
                     placeholder="First Name" 
                     aria-invalid={errors.firstName ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("firstName")}
                   />
                   {renderErrors(errors.firstName)}
@@ -283,6 +394,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                     type="text" 
                     placeholder="Last Name"
                     aria-invalid={errors.lastName ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("lastName")}
                   />
                   {renderErrors(errors.lastName)}
@@ -292,6 +404,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                     type="email" 
                     placeholder="Email Address"
                     aria-invalid={errors.email ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("email")}
                   />
                   {renderErrors(errors.email)}
@@ -301,6 +414,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                     type="password" 
                     placeholder="Password"
                     aria-invalid={errors.password ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("password")}
                   />
                   {renderErrors(errors.password)}
@@ -310,6 +424,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                     type="password"
                     placeholder="Confirm Password"
                     aria-invalid={errors.confirmPassword ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("confirmPassword")}
                   />
                   {renderErrors(errors.confirmPassword)}
@@ -319,7 +434,8 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                     type="submit" 
                     className="btn-pri btn-md"                    
                     style={{margin:'10px 0'}}
-                    value="Register"
+                    value={isLoading ? "Registering..." : "Register"}
+                    disabled={isLoading}
                   />
                   {/* #end-section */}
                 </div>
@@ -328,10 +444,16 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
               <hr className="separator" />
               <h3 className="modal-title">Register with Google</h3>
               <div style={{width:'100%', margin:'2px 0'}}>
-                <AuthenticatorWithGoogle
-                  mode="register"
-                  onAuth={handleGoogleAuth}
-                />
+                {!isLoading ? (
+                  <AuthenticatorWithGoogle
+                    mode="register"
+                    onAuth={handleGoogleAuth}
+                  />
+                ) : (
+                  <div style={{textAlign: 'center', padding: '10px', color: '#666'}}>
+                    Processing...
+                  </div>
+                )}
               </div>
             </div>
             {/* #end-section */}

@@ -1,6 +1,7 @@
 // src\components\AuthLoginModalWindow\AuthLoginModalWindow.tsx
 // #section imports
 import { useForm } from 'react-hook-form'
+import { useState } from 'react'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
 import { loginUser } from '../../services/authentication/authentication'
@@ -9,6 +10,8 @@ import styles from './AuthLoginModalWindow.module.css'
 import { useUserDataStore } from '../../store/UserData.store'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
+import ServerErrorBanner from '../ServerErrorBanner';
+import { detectServerErrorType, getServerErrorMessage } from '../../utils/detectServerError/detectServerError'
 // #end-section
 // #interface LoginFormData
 interface LoginFormData {
@@ -28,11 +31,18 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     register,
     handleSubmit,
     formState: { errors },
+    setError
   } = useForm<LoginFormData>({
     mode: 'onSubmit', // Valida al enviar el formulario
     criteriaMode: 'all' // Captura TODOS los errores, no solo el primero
   });
   // #end-variable
+  // #state isLoading - Indica si está procesando el login
+  const [isLoading, setIsLoading] = useState(false);
+  // #end-state
+  // #state serverError - Para errores de servidor/red
+  const [serverError, setServerError] = useState<string | null>(null);
+  // #end-state
   // #state email
   register(
     "email",
@@ -87,25 +97,36 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
   // #end-function
   // #function handleGoogleAuth - Maneja la autenticación con Google
   const handleGoogleAuth = async (googleUser: GoogleUser | null) => {
+    // Limpiar errores previos
+    setServerError(null);
+
     if (!googleUser) {
-      console.error('Google authentication failed: no user data received');
+      console.log('User cancelled Google authentication');
       return;
     }
+
+    // Validar datos mínimos de Google
+    if (!googleUser.sub || !googleUser.email) {
+      console.error('Invalid Google user data:', googleUser);
+      setError('email', {
+        type: 'oauth',
+        message: 'Invalid data received from Google. Please try again.'
+      });
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       console.log('🔍 Attempting login with Google...');
       
-      // #variable loginData - Datos de login para Google
       const loginData: UserLoginData = {
         platformName: 'google',
         email: googleUser.email,
         platformToken: googleUser.sub
       };
-      // #end-variable
 
-      // #variable response - Respuesta del servidor
       const response = await loginUser(loginData);
-      // #end-variable
 
       console.log('✅ Login with Google successful:', response);
       
@@ -125,25 +146,49 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       
     } catch (error) {
       console.error('❌ Login with Google failed:', error);
+      
+      // Detectar si es error de servidor/red
+      const errorType = detectServerErrorType(error);
+      
+      if (errorType === 'network' || errorType === 'timeout' || errorType === 'server') {
+        // Error de infraestructura → Banner
+        const errorMessage = getServerErrorMessage(errorType);
+        setServerError(errorMessage);
+      } else {
+        // Error de validación → Debajo del campo
+        if (error instanceof Error) {
+          setError('email', {
+            type: 'server',
+            message: error.message
+          });
+        } else {
+          setError('email', {
+            type: 'server',
+            message: 'Login failed. Please try again.'
+          });
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   // #end-function
   // #event onSubmit
   const onSubmit = handleSubmit(async (data) => {
+    // Limpiar errores previos
+    setServerError(null);
+    setIsLoading(true);
+
     try {
       console.log('🔍 Attempting login with form...');
       
-      // #variable loginData - Datos de login para plataforma local
       const loginData: UserLoginData = {
         platformName: 'local',
         email: data.email,
         password: data.password
       };
-      // #end-variable
 
-      // #variable response - Respuesta del servidor
       const response = await loginUser(loginData);
-      // #end-variable
 
       console.log('✅ Login with form successful:', response);
       
@@ -163,6 +208,30 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       
     } catch (error) {
       console.error('❌ Login with form failed:', error);
+      
+      // Detectar si es error de servidor/red
+      const errorType = detectServerErrorType(error);
+      
+      if (errorType === 'network' || errorType === 'timeout' || errorType === 'server') {
+        // Error de infraestructura → Banner
+        const errorMessage = getServerErrorMessage(errorType);
+        setServerError(errorMessage);
+      } else {
+        // Error de validación → Debajo del campo
+        if (error instanceof Error) {
+          setError('email', {
+            type: 'server',
+            message: error.message
+          });
+        } else {
+          setError('email', {
+            type: 'server',
+            message: 'Login failed. Please try again.'
+          });
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
   })
   // #end-event
@@ -188,6 +257,11 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
             {/* #end-section */}
             {/* #section Body */}
             <div className='modal-body' style={{marginTop:'20px'}}>
+              {/* Banner de error de servidor */}
+              <ServerErrorBanner 
+                message={serverError} 
+                onClose={() => setServerError(null)} 
+              />
               <h3 className="modal-title">Login with Form</h3>
               <form onSubmit={onSubmit} style={{width:'100%'}}>
                 <div className={styles['form-container']}>
@@ -196,6 +270,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
                     type="email" 
                     placeholder="Email Address"
                     aria-invalid={errors.email ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("email")}
                   />
                   {renderErrors(errors.email)}
@@ -206,6 +281,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
                     type="password" 
                     placeholder="Password"
                     aria-invalid={errors.password ? "true" : "false"}
+                    disabled={isLoading}
                     {...register("password")}
                   />
                   {renderErrors(errors.password)}
@@ -215,17 +291,24 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
                     type="submit" 
                     className="btn-pri btn-md"                    
                     style={{margin:'10px 0'}}
-                    value="Login"
+                    value={isLoading ? "Logging in..." : "Login"}
+                    disabled={isLoading}
                   />
                 </div>
               </form>
               <hr className="separator" />
               <h3 className="modal-title">Login with Google</h3>
               <div style={{width:'100%', margin:'2px 0'}}>
-              <AuthenticatorWithGoogle
-                mode="login"
-                onAuth={handleGoogleAuth}
-              />
+                {!isLoading ? (
+                  <AuthenticatorWithGoogle
+                    mode="login"
+                    onAuth={handleGoogleAuth}
+                  />
+                ) : (
+                  <div style={{textAlign: 'center', padding: '10px', color: '#666'}}>
+                    Processing...
+                  </div>
+                )}
               </div>
             </div>
             {/* #end-section */}

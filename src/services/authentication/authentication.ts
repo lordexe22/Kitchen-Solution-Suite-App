@@ -2,6 +2,7 @@
 import { validateAndProcessEmail, validateAndProcessName, validatePassword } from "../../utils/authenticationValidations/authenticationValidations";
 import { API_CONFIG } from "../../config/config";
 import type { RegisterUserData, UserLoginData } from "./authentication.types";
+import { fetchWithTimeout } from "../../utils/fetchWithTimeout/fetchWithTimeout";
 // #end-section
 // #function registerUser
 /**
@@ -16,33 +17,34 @@ import type { RegisterUserData, UserLoginData } from "./authentication.types";
  */
 export const registerUser = async (registerUserData: RegisterUserData) => {
   // #step 1 - Validación de datos de registro
-  // #variable validatedData - Datos validados y procesados del usuario
   const validatedData = validateRegisterUserData(registerUserData);
-  // #end-variable
   // #end-step
+  
   // #step 2 - Realizar petición POST a la API de registro
-  // #variable response - Respuesta HTTP del servidor
-  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetchWithTimeout(
+    `${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(validatedData),
     },
-    credentials: 'include', // Para recibir cookies HttpOnly del backend
-    body: JSON.stringify(validatedData),
-  });
-  // #end-variable
+    10000 // 10 segundos timeout
+  );
   // #end-step
+  
   // #step 3 - Procesar y validar respuesta de la API
-  // #variable responseData - Datos parseados de la respuesta del servidor
   const responseData = await response.json();
-  // #end-variable
 
   if (!response.ok || !responseData.success) {
     throw new Error(responseData.error?.message || 'Registration failed');
   }
   // #end-step
+  
   // #step 4 - Retornar datos del usuario y token
-  return responseData.data; // {user, token}
+  return responseData.data;
   // #end-step
 };
 // #end-function
@@ -59,32 +61,35 @@ export const registerUser = async (registerUserData: RegisterUserData) => {
  */
 export const loginUser = async (loginUserData: UserLoginData) => {
   // #step 1 - Validación de datos de login
-  // #variable validatedData - Datos validados y procesados del usuario
   const validatedData = validateLoginUserData(loginUserData);
-  // #end-variable
   // #end-step
+  
   // #step 2 - Realizar petición POST a la API de login
   console.log('🔄 Sending login request to:', `${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`);
   console.log('📦 Login payload:', validatedData);
 
-  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetchWithTimeout(
+    `${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(validatedData),
     },
-    credentials: 'include',
-    body: JSON.stringify(validatedData),
-  });
+    10000 // 10 segundos timeout
+  );
   // #end-step
+  
   // #step 3 - Procesar y validar respuesta de la API
-  // #variable responseData - Datos parseados de la respuesta del servidor
   const responseData = await response.json();
-  // #end-variable
 
   if (!response.ok || !responseData.success) {
     throw new Error(responseData.error?.message || 'Login failed');
   }
   // #end-step
+  
   // #step 4 - Retornar datos del usuario y token
   return responseData.data;
   // #end-step
