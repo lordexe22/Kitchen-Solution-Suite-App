@@ -1,5 +1,5 @@
+// src/services/authentication/authentication.ts
 // #section Imports
-import { validateAndProcessEmail, validateAndProcessName, validatePassword } from "../../utils/authenticationValidations/authenticationValidations";
 import { API_CONFIG } from "../../config/config";
 import type { RegisterUserData, UserLoginData } from "./authentication.types";
 import { fetchWithTimeout } from "../../utils/fetchWithTimeout/fetchWithTimeout";
@@ -7,20 +7,14 @@ import { fetchWithTimeout } from "../../utils/fetchWithTimeout/fetchWithTimeout"
 // #function registerUser
 /**
  * Registra un nuevo usuario en el sistema.
- * Valida los datos, realiza la petición POST al backend y retorna
- * la información del usuario registrado junto con su token de autenticación.
+ * Las validaciones se realizan en el backend.
  *
  * @async
  * @param {RegisterUserData} registerUserData - Datos del usuario a registrar.
- * @returns {Promise<{user: any, token: string}>} Datos del usuario y token de autenticación.
- * @throws {Error} Si los datos son inválidos o la solicitud al backend falla.
+ * @returns {Promise<{user: any}>} Datos del usuario registrado.
+ * @throws {Error} Si la solicitud al backend falla.
  */
 export const registerUser = async (registerUserData: RegisterUserData) => {
-  // #step 1 - Validación de datos de registro
-  const validatedData = validateRegisterUserData(registerUserData);
-  // #end-step
-  
-  // #step 2 - Realizar petición POST a la API de registro
   const response = await fetchWithTimeout(
     `${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`,
     {
@@ -29,45 +23,31 @@ export const registerUser = async (registerUserData: RegisterUserData) => {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify(validatedData),
+      body: JSON.stringify(registerUserData),
     },
-    10000 // 10 segundos timeout
+    10000
   );
-  // #end-step
-  
-  // #step 3 - Procesar y validar respuesta de la API
+
   const responseData = await response.json();
 
   if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error?.message || 'Registration failed');
+    throw new Error(responseData.error || 'Registration failed');
   }
-  // #end-step
-  
-  // #step 4 - Retornar datos del usuario y token
+
   return responseData.data;
-  // #end-step
 };
 // #end-function
 // #function loginUser
 /**
  * Inicia sesión de un usuario en el sistema.
- * Valida las credenciales, realiza la petición POST al backend y retorna
- * la información del usuario junto con su token de autenticación.
+ * Las validaciones se realizan en el backend.
  *
  * @async
  * @param {UserLoginData} loginUserData - Datos del usuario para iniciar sesión.
- * @returns {Promise<{user: any, token: string}>} Datos del usuario y token de autenticación.
- * @throws {Error} Si las credenciales son inválidas o la solicitud al backend falla.
+ * @returns {Promise<{user: any}>} Datos del usuario autenticado.
+ * @throws {Error} Si las credenciales son inválidas o la solicitud falla.
  */
 export const loginUser = async (loginUserData: UserLoginData) => {
-  // #step 1 - Validación de datos de login
-  const validatedData = validateLoginUserData(loginUserData);
-  // #end-step
-  
-  // #step 2 - Realizar petición POST a la API de login
-  console.log('🔄 Sending login request to:', `${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`);
-  console.log('📦 Login payload:', validatedData);
-
   const response = await fetchWithTimeout(
     `${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`,
     {
@@ -76,173 +56,17 @@ export const loginUser = async (loginUserData: UserLoginData) => {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify(validatedData),
+      body: JSON.stringify(loginUserData),
     },
-    10000 // 10 segundos timeout
+    10000
   );
-  // #end-step
-  
-  // #step 3 - Procesar y validar respuesta de la API
+
   const responseData = await response.json();
 
   if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error?.message || 'Login failed');
+    throw new Error(responseData.error || 'Login failed');
   }
-  // #end-step
-  
-  // #step 4 - Retornar datos del usuario y token
+
   return responseData.data;
-  // #end-step
-};
-// #end-function
-// #function validateRegisterUserData
-/**
- * Valida los datos necesarios para el registro de un usuario.
- * Verifica que los campos existan, cumplan con formatos válidos y
- * retorna los datos normalizados y procesados.
- * Soporta registro local (email/password) y mediante Google (token).
- *
- * @param {RegisterUserData} data - Datos del usuario a registrar.
- * @returns {RegisterUserData} Datos validados y procesados.
- * @throws {Error} Si los datos no son válidos o faltan campos requeridos.
- */
-const validateRegisterUserData = (data: RegisterUserData): RegisterUserData => {
-  // #step 1 - Validación de datos de registro (plataforma local)
-  if (data.platformName === 'local') {
-    // #variable email, name, lastName, password, confirmPassword - Campos del formulario de registro local
-    const { email, name, lastName, password, confirmPassword } = data;
-    // #end-variable
-
-    // Validar que todos los campos existan
-    if (!email || !name || !lastName || !password || !confirmPassword) {
-      throw new Error('All fields are required');
-    }
-
-    // #variable processedEmail - Email validado y normalizado a minúsculas
-    const processedEmail = validateAndProcessEmail(email);
-    // #end-variable
-
-    // #variable processedName - Nombre validado y capitalizado
-    const processedName = validateAndProcessName(name);
-    // #end-variable
-
-    // #variable processedLastName - Apellido validado y capitalizado
-    const processedLastName = validateAndProcessName(lastName);
-    // #end-variable
-
-    // Validar contraseña
-    validatePassword(password);
-
-    // Validar que las contraseñas coincidan
-    if (password !== confirmPassword) {
-      throw new Error('Passwords do not match');
-    }
-
-    // Retornar datos procesados
-    return {
-      platformName: 'local',
-      email: processedEmail,
-      name: processedName,
-      lastName: processedLastName,
-      password,
-      confirmPassword
-    };
-  }
-  // #end-step
-
-  // #step 2 - Validación de datos de registro (plataforma Google)
-  else if (data.platformName === 'google') {
-    // #variable email, name, lastName, token - Campos del registro mediante Google
-    const { email, name, lastName, token } = data;
-    // #end-variable
-
-    // Validar que todos los campos existan
-    if (!email || !name || !lastName || !token) {
-      throw new Error('All fields are required');
-    }
-
-    // #variable processedEmail - Email validado y normalizado a minúsculas
-    const processedEmail = validateAndProcessEmail(email);
-    // #end-variable
-
-    // #variable processedName - Nombre validado y capitalizado
-    const processedName = validateAndProcessName(name);
-    // #end-variable
-
-    // #variable processedLastName - Apellido validado y capitalizado
-    const processedLastName = validateAndProcessName(lastName);
-    // #end-variable
-
-    // Retornar datos procesados
-    return {
-      platformName: 'google',
-      email: processedEmail,
-      name: processedName,
-      lastName: processedLastName,
-      token,
-      imageUrl: data.imageUrl
-    };
-  }
-  // #end-step
-
-  throw new Error('Invalid platform');
-};
-// #end-function
-// #function validateLoginUserData
-/**
- * Valida y normaliza los datos de login.
- * NO realiza validaciones exhaustivas (eso lo hace react-hook-form en el frontend).
- * Solo verifica que los campos requeridos existan y normaliza el email.
- *
- * @param {UserLoginData} data - Datos del usuario para iniciar sesión.
- * @returns {UserLoginData} Datos validados y procesados.
- * @throws {Error} Si faltan campos requeridos.
- */
-const validateLoginUserData = (data: UserLoginData): UserLoginData => {
-  // #step 1 - Validación de datos de login (plataforma local)
-  if (data.platformName === 'local') {
-    // #variable email, password - Credenciales del usuario para login local
-    const { email, password } = data;
-    // #end-variable
-
-    // Validar que todos los campos existan
-    if (!email || !password) {
-      throw new Error('Email and password are required');
-    }
-
-    // Normalizar email a minúsculas
-    const processedEmail = email.trim().toLowerCase();
-
-    // Retornar datos procesados
-    return {
-      platformName: 'local',
-      email: processedEmail,
-      password
-    };
-  }
-  // #end-step
-  // #step 2 - Validación de datos de login (plataforma Google)
-  else if (data.platformName === 'google') {
-    // #variable email, platformToken - Datos de autenticación de Google
-    const { email, platformToken } = data;
-    // #end-variable
-
-    // Validar que todos los campos existan
-    if (!email || !platformToken) {
-      throw new Error('Email and token are required');
-    }
-
-    // Normalizar email a minúsculas
-    const processedEmail = email.trim().toLowerCase();
-
-    // Retornar datos procesados
-    return {
-      platformName: 'google',
-      email: processedEmail,
-      platformToken
-    };
-  }
-  // #end-step
-  throw new Error('Invalid platform');
 };
 // #end-function

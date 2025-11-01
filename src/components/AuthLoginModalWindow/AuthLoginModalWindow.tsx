@@ -213,7 +213,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       const errorType = detectServerErrorType(error);
       
       if (errorType === 'network' || errorType === 'timeout' || errorType === 'server') {
-        // Error de infraestructura → Banner
+    // Error de infraestructura → Banner
         const errorMessage = getServerErrorMessage(errorType);
         setServerError(errorMessage);
       } else {

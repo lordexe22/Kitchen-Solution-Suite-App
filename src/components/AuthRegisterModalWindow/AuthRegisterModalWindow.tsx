@@ -4,13 +4,13 @@ import { useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
-import { API_CONFIG } from '../../config/config'
 import { useUserDataStore } from '../../store/UserData.store'
+import { registerUser } from '../../services/authentication/authentication'
+import type { RegisterUserData } from '../../services/authentication/authentication.types'
 import styles from './AuthRegisterModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
-import { fetchWithTimeout } from '../../utils/fetchWithTimeout/fetchWithTimeout'
 import { getServerErrorMessage, detectServerErrorType } from '../../utils/detectServerError/detectServerError'
 // #end-section
 // #interface RegisterFormData
@@ -20,17 +20,6 @@ interface RegisterFormData{
   email: string;
   password: string;
   confirmPassword: string;
-}
-// #end-interface
-// #interface RegisterUserPayload - data to send to server
-interface RegisterUserPayload {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string | null;
-  imageUrl: string | null;
-  platformToken: string | null;
-  platformName: 'local' | 'google';
 }
 // #end-interface
 // #interface AuthRegisterModalWindowProp
@@ -120,7 +109,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   const buildUserPayload = (
     formData?: RegisterFormData,
     googleUser?: GoogleUser | null
-  ): RegisterUserPayload => {
+  ): RegisterUserData  => {
     if (googleUser) {
       // Registration with Google
       return {
@@ -145,50 +134,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       };
     }
     throw new Error('No data provided for user payload');
-  };
-  // #end-function
-  // #function sendRegisterToServer - sends registration data to server
-  const sendRegisterToServer = async (userPayload: RegisterUserPayload) => {
-    try {
-      const response = await fetchWithTimeout(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`,
-        {
-          credentials: 'include',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(userPayload),
-        },
-        10000 // 10 segundos timeout
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Errores de servidor (500+)
-        if (response.status >= 500) {
-          const errorType = detectServerErrorType({ status: response.status });
-          const errorMessage = getServerErrorMessage(errorType);
-          throw new Error(errorMessage);
-        }
-
-        // Manejar errores específicos del backend (400, 409)
-        if (response.status === 409) {
-          throw new Error('This email is already registered. Please login instead.');
-        } else if (response.status === 400) {
-          throw new Error(data.error || 'Invalid registration data. Please check your information.');
-        } else {
-          throw new Error(data.error || `Registration failed: ${response.statusText}`);
-        }
-      }
-
-      console.log('Registration successful:', data);
-      return data;
-    } catch (error) {
-      console.error('Error during registration:', error);
-      throw error;
-    }
   };
   // #end-function
   // #function renderErrors - Renderiza todos los errores de un campo
@@ -222,17 +167,17 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     try {
       console.log('Attempting to register with form...');
       const userPayload = buildUserPayload(data);
-      const response = await sendRegisterToServer(userPayload);
-      
+      const response = await registerUser(userPayload);
+
       console.log('✅ Registration successful:', response);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setFirstName(response.data.user.firstName);
-      useUserDataStore.getState().setLastName(response.data.user.lastName);
-      useUserDataStore.getState().setEmail(response.data.user.email);
-      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
-      useUserDataStore.getState().setType(response.data.user.type);
-      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setFirstName(response.user.firstName);
+      useUserDataStore.getState().setLastName(response.user.lastName);
+      useUserDataStore.getState().setEmail(response.user.email);
+      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
+      useUserDataStore.getState().setType(response.user.type);
+      useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
       console.log('✅ Store actualizado');
@@ -299,17 +244,17 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     try {
       console.log('Attempting to register with Google...');
       const userPayload = buildUserPayload(undefined, googleUser);
-      const response = await sendRegisterToServer(userPayload);
+      const response = await registerUser(userPayload);
       
       console.log('✅ Registration successful:', response);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setFirstName(response.data.user.firstName);
-      useUserDataStore.getState().setLastName(response.data.user.lastName);
-      useUserDataStore.getState().setEmail(response.data.user.email);
-      useUserDataStore.getState().setImageUrl(response.data.user.imageUrl);
-      useUserDataStore.getState().setType(response.data.user.type);
-      useUserDataStore.getState().setState(response.data.user.state);
+      useUserDataStore.getState().setFirstName(response.user.firstName);
+      useUserDataStore.getState().setLastName(response.user.lastName);
+      useUserDataStore.getState().setEmail(response.user.email);
+      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
+      useUserDataStore.getState().setType(response.user.type);
+      useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
       console.log('✅ Store actualizado');
