@@ -96,3 +96,31 @@ export const logoutUser = async (): Promise<void> => {
   }
 };
 // #end-function
+// #function autoLoginByToken
+/**
+ * Intenta autenticar al usuario automáticamente usando el JWT en cookie.
+ * Si el token es válido, retorna los datos del usuario.
+ *
+ * @async
+ * @returns {Promise<{user: any}>} Datos del usuario autenticado.
+ * @throws {Error} Si el token es inválido o expiró.
+ */
+export const autoLoginByToken = async () => {
+  const response = await fetchWithTimeout(
+    `${API_CONFIG.BASE_URL}${API_CONFIG.AUTO_LOGIN_BY_TOKEN_URL}`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
+    10000
+  );
+
+  const responseData = await response.json();
+
+  if (!response.ok || !responseData.success) {
+    throw new Error(responseData.error || 'Auto-login failed');
+  }
+
+  return responseData.data;
+};
+// #end-function
