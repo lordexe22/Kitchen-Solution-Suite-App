@@ -1,5 +1,5 @@
 /* src/components/ServerErrorBanner/ServerErrorBanner.module.css */
-
+/* #style .error-banner */
 .error-banner {
   display: flex;
   align-items: center;
@@ -12,19 +12,22 @@
   margin-bottom: 16px;
   animation: slideDown 0.3s ease-out;
 }
-
+/* #end-style */
+/* #style .error-icon */
 .error-icon {
   font-size: 1.25rem;
   flex-shrink: 0;
 }
-
+/* #end-style */
+/* #style .error-message */
 .error-message {
   flex: 1;
   font-size: 0.9rem;
   color: #991B1B;
   line-height: 1.5;
 }
-
+/* #end-style */
+/* #style .error-close */
 .error-close {
   background: transparent;
   border: none;
@@ -40,12 +43,13 @@
   border-radius: 4px;
   transition: background-color 0.2s ease;
   flex-shrink: 0;
-}
 
-.error-close:hover {
-  background-color: rgba(220, 38, 38, 0.1);
+  &:hover{
+    background-color: rgba(220, 38, 38, 0.1);
+  }
 }
-
+/* #end-style */
+/* #keyframe slideDown */
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -56,3 +60,4 @@
     transform: translateY(0);
   }
 }
+/* #end-keyframe */
