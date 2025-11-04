@@ -70,3 +70,29 @@ export const loginUser = async (loginUserData: UserLoginData) => {
   return responseData.data;
 };
 // #end-function
+// #function logoutUser
+/**
+ * Cierra la sesión del usuario llamando al endpoint de logout.
+ * Limpia la cookie HTTP-only del lado del servidor.
+ *
+ * @async
+ * @returns {Promise<void>}
+ * @throws {Error} Si la solicitud al backend falla.
+ */
+export const logoutUser = async (): Promise<void> => {
+  const response = await fetchWithTimeout(
+    `${API_CONFIG.BASE_URL}${API_CONFIG.LOGOUT_URL}`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
+    10000
+  );
+
+  const responseData = await response.json();
+
+  if (!response.ok || !responseData.success) {
+    throw new Error(responseData.error || 'Logout failed');
+  }
+};
+// #end-function

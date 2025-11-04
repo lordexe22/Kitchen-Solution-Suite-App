@@ -317,8 +317,9 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                 message={serverError} 
                 onClose={() => setServerError(null)} 
               />
+              {/* #end-section */}
+              {/* #section Register with form */}
               <h3 className="modal-title">Register with Form</h3>
-              {/* #section form */}
               <form 
                 onSubmit={onSubmit} 
                 style={{width:'100%'}}
@@ -386,6 +387,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                 </div>
               </form>
               {/* #end-section */}
+              {/* #section Separator and Google Auth */}
               <hr className="separator" />
               <h3 className="modal-title">Register with Google</h3>
               <div style={{width:'100%', margin:'2px 0'}}>
@@ -400,6 +402,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
                   </div>
                 )}
               </div>
+              {/* #end-section */}
             </div>
             {/* #end-section */}
           </div>

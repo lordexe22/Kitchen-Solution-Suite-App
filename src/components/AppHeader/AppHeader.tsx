@@ -1,16 +1,15 @@
 // #section Imports
+import { useState } from 'react';
 import type { AppHeaderProps } from './AppHeader.types';
-import {
-  APP_HEADER_TEXTS,
-} from './AppHeader.config';
+import { APP_HEADER_TEXTS } from './AppHeader.config';
 import styles from './AppHeader.module.css';
 import '/src/styles/button.css';
 import { useUserDataStore } from '../../store/UserData.store';
-import { useState } from 'react';
 import AuthRegisterModalWindow from '../AuthRegisterModalWindow/AuthRegisterModalWindow';
 import AuthLoginModalWindow from '../AuthLoginModalWindow/AuthLoginModalWindow';
 import { useDropdown } from './AppHeader.hooks';
 import { getInitials } from './AppHeader.utils';
+import { logoutUser } from '../../services/authentication/authentication';
 // #end-section
 // #component AppHeader
 /**
@@ -24,11 +23,44 @@ const AppHeader = (props: AppHeaderProps) => {
 
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   
-  // Hook para manejar el dropdown del menú de usuario
-  const { isOpen, toggle, dropdownRef, handleItemClick } = useDropdown();
+  const { isOpen, toggle, dropdownRef, handleItemClick, close } = useDropdown();
 
   console.log('📊 Store actual en AppHeader:', user);
+
+  // #function handleLogout
+  /**
+   * Maneja el cierre de sesión del usuario.
+   * 1. Llama al endpoint de logout
+   * 2. Limpia el store de Zustand
+   * 3. Cierra el dropdown
+   */
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      console.log('🚪 Cerrando sesión...');
+      
+      await logoutUser();
+      user.reset();
+      close();
+      
+      console.log('✅ Sesión cerrada exitosamente');
+      
+    } catch (error) {
+      console.error('❌ Error al cerrar sesión:', error);
+      
+      // Aún así limpiar el store local por seguridad
+      user.reset();
+      close();
+      
+      console.warn('⚠️ Error del servidor, pero sesión cerrada localmente');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+  // #end-function
 
   // #section return
   return (
@@ -66,10 +98,8 @@ const AppHeader = (props: AppHeaderProps) => {
           ) : (
             <>
               {/* #section Logged In */}
-              {/* Email del usuario */}
               <span className={styles['user-name']}>{user.email}</span>
               
-              {/* Avatar del usuario */}
               {user.imageUrl ? (
                 <img 
                   src={user.imageUrl} 
@@ -82,7 +112,6 @@ const AppHeader = (props: AppHeaderProps) => {
                 </div>
               )}
 
-              {/* Dropdown Menu */}
               <div className={styles['dropdown-container']} ref={dropdownRef}>
                 <button
                   className={styles['btn-dropdown']}
@@ -95,7 +124,6 @@ const AppHeader = (props: AppHeaderProps) => {
 
                 {isOpen && (
                   <div className={styles['dropdown-menu']}>
-                    {/* User Info en el dropdown */}
                     <div className={styles['dropdown-user-info']}>
                       <div className={styles['dropdown-user-name']}>
                         {user.firstName} {user.lastName}
@@ -105,18 +133,17 @@ const AppHeader = (props: AppHeaderProps) => {
                       </div>
                     </div>
 
-                    {/* Lista de opciones */}
                     <ul className={styles['dropdown-list']}>
                       <li>
                         <button
                           className={styles['dropdown-item']}
-                          onClick={() => handleItemClick(() => {
-                            // Por ahora no hace nada
-                            console.log('Logout clicked (no action yet)');
-                          })}
+                          onClick={() => handleItemClick(handleLogout)}
+                          disabled={isLoggingOut}
                         >
                           <span className={styles['dropdown-item-icon']}>🚪</span>
-                          <span className={styles['dropdown-item-label']}>Cerrar sesión</span>
+                          <span className={styles['dropdown-item-label']}>
+                            {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
+                          </span>
                         </button>
                       </li>
                     </ul>
