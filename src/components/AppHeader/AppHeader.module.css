@@ -2,7 +2,6 @@
 /* #section Imports */
 @import url('../../styles/_variables.css');
 /* #end-section */
-
 /* #style .header - Header principal */
 .header {
   width: 100%;
@@ -16,7 +15,6 @@
   z-index: 100;
 }
 /* #end-style */
-
 /* #style .header-left - Sección izquierda (logo + título) */
 .header-left {
   display: flex;
@@ -24,7 +22,6 @@
   gap: var(--header-left-gap, 12px);
 }
 /* #end-style */
-
 /* #style .header-logo - Logo de la aplicación */
 .header-logo {
   display: flex;
@@ -40,7 +37,6 @@
   border-radius: 50%;
 }
 /* #end-style */
-
 /* #style .header-title - Título de la aplicación */
 .header-title {
   margin: 0;
@@ -49,7 +45,6 @@
   color: var(--header-title-color, #111827);
 }
 /* #end-style */
-
 /* #style .header-right - Sección derecha (botones/usuario) */
 .header-right {
   display: flex;
@@ -57,7 +52,6 @@
   gap: var(--header-right-gap, 12px);
 }
 /* #end-style */
-
 /* #style .btn-login - Botón de login (usa clases globales en TSX) */
 .btn-login {
   display: flex;
@@ -66,7 +60,6 @@
   cursor: pointer;
 }
 /* #end-style */
-
 /* #style .user-info - Información del usuario */
 .user-info {
   display: flex;
@@ -74,7 +67,6 @@
   gap: var(--user-info-gap, 10px);
 }
 /* #end-style */
-
 /* #style .user-avatar - Avatar del usuario (con imagen) */
 .user-avatar {
   width: var(--user-avatar-size, 40px);
@@ -84,7 +76,6 @@
   border: 2px solid var(--user-avatar-border-color, #d1d5db);
 }
 /* #end-style */
-
 /* #style .user-avatar-placeholder - Avatar con iniciales */
 .user-avatar-placeholder {
   width: var(--user-avatar-size, 40px);
@@ -100,7 +91,6 @@
   border: 2px solid var(--user-avatar-border-color, #d1d5db);
 }
 /* #end-style */
-
 /* #style .user-name - Nombre/email del usuario */
 .user-name {
   font-size: var(--user-name-size, 1rem);
@@ -112,7 +102,6 @@
   white-space: nowrap;
 }
 /* #end-style */
-
 /* #style .btn-notifications - Botón de notificaciones */
 .btn-notifications {
   display: flex;
@@ -140,14 +129,12 @@
   transform: scale(0.98);
 }
 /* #end-style */
-
 /* #style .dropdown-container - Contenedor del dropdown */
 .dropdown-container {
   position: relative;
   display: inline-block;
 }
 /* #end-style */
-
 /* #style .btn-dropdown - Botón para abrir/cerrar dropdown */
 .btn-dropdown {
   display: flex;
@@ -172,7 +159,6 @@
   background-color: var(--btn-sec-bgcolor-active, #d1d5db);
 }
 /* #end-style */
-
 /* #style .dropdown-arrow - Flecha del dropdown */
 .dropdown-arrow {
   font-size: 0.75rem;
@@ -183,7 +169,6 @@
   transform: translateY(2px);
 }
 /* #end-style */
-
 /* #style .dropdown-menu - Menú desplegable */
 .dropdown-menu {
   position: absolute;
@@ -210,7 +195,6 @@
   }
 }
 /* #end-style */
-
 /* #style .dropdown-user-info - Info del usuario en dropdown */
 .dropdown-user-info {
   padding: 1rem;
@@ -230,7 +214,6 @@
   color: var(--btn-sec-color-disabled, #9ca3af);
 }
 /* #end-style */
-
 /* #style .dropdown-list - Lista de items del dropdown */
 .dropdown-list {
   list-style: none;
@@ -238,7 +221,6 @@
   padding: 0.5rem 0;
 }
 /* #end-style */
-
 /* #style .dropdown-item - Item individual del dropdown */
 .dropdown-item {
   width: 100%;
@@ -269,7 +251,6 @@
   opacity: 0.6;
 }
 /* #end-style */
-
 /* #style .dropdown-item-icon - Ícono del item */
 .dropdown-item-icon {
   font-size: 1.25rem;
@@ -279,13 +260,11 @@
   justify-content: center;
 }
 /* #end-style */
-
 /* #style .dropdown-item-label - Texto del item */
 .dropdown-item-label {
   flex: 1;
 }
 /* #end-style */
-
 /* #style .dropdown-divider - Divisor entre items */
 .dropdown-divider {
   height: 1px;
@@ -293,7 +272,6 @@
   background-color: var(--modal-bd-color, #e6e6e6);
 }
 /* #end-style */
-
 /* #section Responsive - Breakpoints */
 @media (max-width: 768px) {
   .header-title {

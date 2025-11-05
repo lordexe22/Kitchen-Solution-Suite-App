@@ -1,65 +1,11 @@
+/* src\components\AppHeader\AppHeader.hooks.ts */
+// #section imports
 import { useReducer, useEffect, useRef, useCallback } from 'react';
-
-// #interface DropdownState
+import type {DropdownState, DropdownAction, UseDropdownOptions, UseDropdownReturn} from './AppHeader.types'
+// #end-section
+// #function dropdownReducer
 /**
- * Estado del dropdown
- */
-interface DropdownState {
-  isOpen: boolean;
-}
-// #end-interface
-
-// #type DropdownAction
-/**
- * Acciones disponibles para el reducer del dropdown
- */
-type DropdownAction =
-  | { type: 'OPEN_DROPDOWN' }
-  | { type: 'CLOSE_DROPDOWN' }
-  | { type: 'TOGGLE_DROPDOWN' };
-// #end-type
-
-// #interface UseDropdownOptions
-/**
- * Opciones de configuración para el hook useDropdown
- */
-interface UseDropdownOptions {
-  /** Cerrar dropdown al hacer clic fuera (default: true) */
-  closeOnClickOutside?: boolean;
-  /** Cerrar dropdown al presionar ESC (default: true) */
-  closeOnEscape?: boolean;
-  /** Cerrar dropdown al hacer clic en un item (default: true) */
-  closeOnItemClick?: boolean;
-  /** Callback ejecutado cuando se abre el dropdown */
-  onOpen?: () => void;
-  /** Callback ejecutado cuando se cierra el dropdown */
-  onClose?: () => void;
-}
-// #end-interface
-
-// #interface UseDropdownReturn
-/**
- * Valor retornado por el hook useDropdown
- */
-interface UseDropdownReturn {
-  /** Estado actual del dropdown (abierto/cerrado) */
-  isOpen: boolean;
-  /** Función para abrir el dropdown */
-  open: () => void;
-  /** Función para cerrar el dropdown */
-  close: () => void;
-  /** Función para alternar el estado del dropdown */
-  toggle: () => void;
-  /** Ref al elemento del dropdown (para detectar clicks fuera) */
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
-  /** Función para manejar click en un item del dropdown */
-  handleItemClick: (onClick?: () => void) => void;
-}
-// #end-interface
-
-// #reducer dropdownReducer
-/**
- * Reducer para manejar el estado del dropdown
+ * Reducer logic for handle the drop-down state.
  */
 const dropdownReducer = (state: DropdownState, action: DropdownAction): DropdownState => {
   switch (action.type) {
@@ -73,8 +19,7 @@ const dropdownReducer = (state: DropdownState, action: DropdownAction): Dropdown
       return state;
   }
 };
-// #end-reducer
-
+// #end-function
 // #hook useDropdown
 /**
  * Hook personalizado para manejar el estado y comportamiento de un dropdown
@@ -105,31 +50,36 @@ export const useDropdown = (options: UseDropdownOptions = {}): UseDropdownReturn
   // Ref al elemento del dropdown para detectar clicks fuera
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Funciones para controlar el dropdown
+  // #function open - execute dropdown with type: 'OPEN_DROPDOWN'
   const open = useCallback(() => {
     dispatch({ type: 'OPEN_DROPDOWN' });
   }, []);
-
+  // #end-function
+  // #function close - execute dropdown with type: 'CLOSE_DROPDOWN'
   const close = useCallback(() => {
     dispatch({ type: 'CLOSE_DROPDOWN' });
   }, []);
-
+  // #end-function
+  // #function toggle - execute dropdown with type: 'TOGGLE_DROPDOWN'
   const toggle = useCallback(() => {
     dispatch({ type: 'TOGGLE_DROPDOWN' });
   }, []);
+  // #end-function
 
-  // Manejar click en un item del dropdown
+  // #event handleItemClick - handle when click in an item of the dropdown 
   const handleItemClick = useCallback((onClick?: () => void) => {
-    // Ejecutar el callback del item si existe
+    // #step 1 - if exists, execute callback function for the clicked button
     if (onClick) {
       onClick();
     }
-    
-    // Cerrar el dropdown si está configurado así
+    // #end-step
+    // #step 2 - if confgured, close dropdown after click
     if (closeOnItemClick) {
       close();
     }
+    // #end-step
   }, [closeOnItemClick, close]);
+  // #end-event
 
   // Ejecutar callbacks cuando cambia el estado
   useEffect(() => {

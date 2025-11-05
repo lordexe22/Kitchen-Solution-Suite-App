@@ -20,7 +20,6 @@ export const getInitials = (name: string): string => {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };
 // #end-function
-
 // #function truncateText
 /**
  * Trunca un texto si excede la longitud máxima
@@ -36,7 +35,6 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.slice(0, maxLength - 3) + '...';
 };
 // #end-function
-
 // #function buildFullUrl
 /**
  * Construye una URL completa a partir de una URL relativa o absoluta
@@ -68,7 +66,6 @@ export const buildFullUrl = (url: string, baseUrl?: string): string => {
   return `${cleanBaseUrl}${cleanUrl}`;
 };
 // #end-function
-
 // #function isValidUrl
 /**
  * Valida si una URL tiene un formato válido
@@ -91,7 +88,6 @@ export const isValidUrl = (url: string): boolean => {
   }
 };
 // #end-function
-
 // #function getUserDisplayText
 /**
  * Obtiene el texto a mostrar del usuario según el modo de visualización
@@ -112,7 +108,6 @@ export const getUserDisplayText = (
   return maxLength ? truncateText(text, maxLength) : text;
 };
 // #end-function
-
 // #function getAvatarSrc
 /**
  * Obtiene la URL final del avatar, con fallback al ícono por defecto

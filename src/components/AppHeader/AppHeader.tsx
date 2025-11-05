@@ -1,4 +1,5 @@
-// #section Imports
+/* src\components\AppHeader\AppHeader.tsx */
+// #section imports
 import { useState } from 'react';
 import type { AppHeaderProps } from './AppHeader.types';
 import { APP_HEADER_TEXTS } from './AppHeader.config';
@@ -17,18 +18,20 @@ import { logoutUser } from '../../services/authentication/authentication';
  * Muestra logo, título y opciones de autenticación/usuario
  */
 const AppHeader = (props: AppHeaderProps) => {
-
-  const user = useUserDataStore();
+  // #variable appLogoUrl, appName (props)
   const {appLogoUrl, appName} = props;
-
+  // #end-variable
+  // #state user (Zustand store)
+  const user = useUserDataStore();
+  // #end-state
+  // #state showRegisterModal, showLoginModal, isLoggingOut
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
-  
+  // #end-state
+  // #hook useDropdown - dropdown menu for user options
   const { isOpen, toggle, dropdownRef, handleItemClick, close } = useDropdown();
-
-  console.log('📊 Store actual en AppHeader:', user);
-
+  // #end-hook
   // #function handleLogout
   /**
    * Maneja el cierre de sesión del usuario.
@@ -38,30 +41,20 @@ const AppHeader = (props: AppHeaderProps) => {
    */
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
     try {
-      console.log('🚪 Cerrando sesión...');
-      
-      await logoutUser();
-      user.reset();
-      close();
-      
-      console.log('✅ Sesión cerrada exitosamente');
-      
+      await logoutUser(); // Call logout endpoint
+      user.reset(); // Reset user store data
+      close(); // Close dropdown
     } catch (error) {
       console.error('❌ Error al cerrar sesión:', error);
-      
-      // Aún así limpiar el store local por seguridad
-      user.reset();
-      close();
-      
+      user.reset(); // Clear store even if logout API fails
+      close(); // Close dropdown      
       console.warn('⚠️ Error del servidor, pero sesión cerrada localmente');
     } finally {
-      setIsLoggingOut(false);
+      setIsLoggingOut(false); // Reset logout state
     }
   };
   // #end-function
-
   // #section return
   return (
     <>
