@@ -1,10 +1,13 @@
 // src/hooks/useAutoLogin.ts
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { autoLoginByToken } from '../services/authentication/authentication';
 import { useUserDataStore } from '../store/UserData.store';
 
 export const useAutoLogin = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // ✅ Selectores de Zustand: retornan funciones estables
   const setFirstName = useUserDataStore(state => state.setFirstName);
@@ -31,6 +34,13 @@ export const useAutoLogin = () => {
         setIsAuthenticated(true);
 
         console.log('✅ Auto-login exitoso');
+
+        // ✅ NUEVA LÓGICA: Redirigir SOLO si está en la página principal
+        if (location.pathname === '/') {
+          console.log('🔄 Redirigiendo al dashboard...');
+          navigate('/dashboard', { replace: true });
+        }
+
       } catch (error) {
         console.log('ℹ️ No hay sesión activa', error);
       } finally {
@@ -47,6 +57,8 @@ export const useAutoLogin = () => {
     setType,
     setState,
     setIsAuthenticated,
+    navigate,
+    location,
   ]);
 
   return { isCheckingAuth };

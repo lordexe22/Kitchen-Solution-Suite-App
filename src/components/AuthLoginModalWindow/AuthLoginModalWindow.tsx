@@ -12,6 +12,7 @@ import '/src/styles/modal.css'
 import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
 import { detectServerErrorType, getServerErrorMessage } from '../../utils/detectServerError/detectServerError'
+import { useNavigate } from 'react-router-dom';
 // #end-section
 // #interface LoginFormData
 interface LoginFormData {
@@ -71,6 +72,9 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     }
   )
   // #end-state
+  // #hook navigate
+  const navigate = useNavigate();
+  // #end-hook
   // #function renderErrors - Renderiza todos los errores de un campo
   const renderErrors = (fieldErrors: import('react-hook-form').FieldError | undefined) => {
     if (!fieldErrors) return null;
@@ -141,7 +145,8 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       
       console.log('✅ Store actualizado');
       
-      // Cerrar el modal
+      navigate('/dashboard');
+
       onCloseModal();
       
     } catch (error) {
@@ -203,7 +208,8 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       
       console.log('✅ Store actualizado');
       
-      // Cerrar el modal
+      navigate('/dashboard');
+
       onCloseModal();
       
     } catch (error) {
@@ -257,11 +263,12 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
             {/* #end-section */}
             {/* #section Body */}
             <div className='modal-body' style={{marginTop:'20px'}}>
-              {/* Banner de error de servidor */}
+              {/* #section Banner de error de servidor */}
               <ServerErrorBanner 
                 message={serverError} 
                 onClose={() => setServerError(null)} 
               />
+              {/* #end-section */}
               <h3 className="modal-title">Login with Form</h3>
               <form onSubmit={onSubmit} style={{width:'100%'}}>
                 <div className={styles['form-container']}>
@@ -275,7 +282,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
                   />
                   {renderErrors(errors.email)}
                   {/* #end-section */}
-
                   {/* #section Password Input */}
                   <input
                     type="password" 
@@ -286,7 +292,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
                   />
                   {renderErrors(errors.password)}
                   {/* #end-section */}
-
                   <input 
                     type="submit" 
                     className="btn-pri btn-md"                    
@@ -310,10 +315,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
                   </div>
                 )}
               </div>
-            </div>
-            {/* #end-section */}
-            {/* #section Footer */}
-            <div className='modal-footer'>
             </div>
             {/* #end-section */}
           </div>

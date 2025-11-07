@@ -12,6 +12,7 @@ import '/src/styles/modal.css'
 import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
 import { getServerErrorMessage, detectServerErrorType } from '../../utils/detectServerError/detectServerError'
+import { useNavigate } from 'react-router-dom'
 // #end-section
 // #interface RegisterFormData
 interface RegisterFormData{
@@ -158,6 +159,9 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     ));
   };
   // #end-function
+  // #hook navigate
+  const navigate = useNavigate();
+  // #end-hook
   // #event onSubmit - handles form submission
   const onSubmit = handleSubmit(async (data) => {
     // Limpiar errores previos
@@ -182,7 +186,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       
       console.log('✅ Store actualizado');
       
-      // Cerrar el modal
+      navigate('/dashboard');
       onCloseModal();
     } catch (error) {
       console.error('Registration with form failed:', error);
@@ -259,7 +263,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       
       console.log('✅ Store actualizado');
       
-      // Cerrar el modal
+      navigate('/dashboard');
       onCloseModal();
     } catch (error) {
       console.error('Registration with Google failed:', error);

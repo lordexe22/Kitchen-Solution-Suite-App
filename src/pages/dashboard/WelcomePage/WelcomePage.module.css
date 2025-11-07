@@ -1,0 +1,97 @@
+/* src/pages/dashboard/WelcomePage/WelcomePage.module.css */
+
+/* #style .container - Contenedor principal */
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* #end-style */
+
+/* #style .content - Contenedor de navbar + main */
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+/* #end-style */
+
+/* #style .main - Área principal de contenido */
+.main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #ffffff;
+}
+/* #end-style */
+
+/* #style .title - Título de bienvenida */
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2rem 0;
+}
+/* #end-style */
+
+/* #style .user-info-card - Tarjeta de información del usuario */
+.user-info-card {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  max-width: 600px;
+}
+
+.user-info-card h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1.5rem 0;
+}
+/* #end-style */
+
+/* #style .avatar - Avatar del usuario */
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1.5rem;
+  border: 3px solid #3b82f6;
+}
+/* #end-style */
+
+/* #style .info-grid - Grid de información */
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* #end-style */
+
+/* #style .info-item - Item de información */
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+/* #end-style */
+
+/* #style .label - Etiqueta del dato */
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+/* #end-style */
+
+/* #style .value - Valor del dato */
+.value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+/* #end-style */

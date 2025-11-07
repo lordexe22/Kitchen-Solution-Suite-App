@@ -3,7 +3,7 @@
 import styles from './MainPage.module.css';
 import '/src/styles/button.css';
 import '/src/styles/modal.css';
-import AppHeader from '../../components/AppHeader';
+import AppHeader from '../../../components/AppHeader';
 
 // #end-section
 

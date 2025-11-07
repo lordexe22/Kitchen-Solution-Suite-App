@@ -1,9 +1,15 @@
 /* src/App.tsx */
 // #section Imports
 import { Routes, Route, Navigate } from "react-router-dom";
-import MainPage from "./pages/MainPage/MainPage";
+import MainPage from "./pages/public/MainPage/MainPage";
+import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
+import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
+import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
+import ProductsPage from "./pages/dashboard/ProductsPage/ProductsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { useAutoLogin } from "./hooks/useAutoLogin";
 // #end-section
+
 // #component App
 function App() {
   const { isCheckingAuth } = useAutoLogin();
@@ -26,11 +32,49 @@ function App() {
 
   return (
     <Routes>
+      {/* Rutas públicas */}
       <Route path="/" element={<MainPage />} />
+      
+      {/* Rutas protegidas del Dashboard */}
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <WelcomePage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard/companies" 
+        element={
+          <ProtectedRoute>
+            <CompaniesPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard/employees" 
+        element={
+          <ProtectedRoute>
+            <EmployeesPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard/products" 
+        element={
+          <ProtectedRoute>
+            <ProductsPage />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Ruta por defecto */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
   // #end-section
 }
+
 export default App;
 // #end-component
