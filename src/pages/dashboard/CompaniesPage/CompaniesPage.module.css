@@ -1,6 +1,6 @@
 /* src/pages/dashboard/CompaniesPage/CompaniesPage.module.css */
 
-/* #style .container - Contenedor principal */
+/* #style .container */
 .container {
   width: 100vw;
   height: 100vh;
@@ -10,7 +10,7 @@
 }
 /* #end-style */
 
-/* #style .content - Contenedor de navbar + main */
+/* #style .content */
 .content {
   display: flex;
   flex: 1;
@@ -18,7 +18,7 @@
 }
 /* #end-style */
 
-/* #style .main - Área principal de contenido */
+/* #style .main */
 .main {
   flex: 1;
   padding: 2rem;
@@ -27,11 +27,62 @@
 }
 /* #end-style */
 
-/* #style .title - Título de la página */
+/* #style .header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+/* #end-style */
+
+/* #style .title */
 .title {
   font-size: 2rem;
   font-weight: 700;
   color: #111827;
   margin: 0;
+}
+/* #end-style */
+
+/* #style .error */
+.error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error p {
+  margin: 0;
+  color: #dc2626;
+  font-weight: 500;
+}
+/* #end-style */
+
+/* #style .loading */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.125rem;
+  color: #6b7280;
+}
+/* #end-style */
+
+/* #style .grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 /* #end-style */

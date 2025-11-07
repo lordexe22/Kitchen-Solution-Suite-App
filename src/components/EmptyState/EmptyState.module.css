@@ -1,0 +1,45 @@
+/* src/components/EmptyState/EmptyState.module.css */
+
+/* #style .container */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  min-height: 300px;
+}
+/* #end-style */
+
+/* #style .icon */
+.icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+}
+/* #end-style */
+
+/* #style .title */
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.75rem 0;
+}
+/* #end-style */
+
+/* #style .description */
+.description {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 2rem 0;
+  max-width: 400px;
+}
+/* #end-style */
+
+/* #style .actionButton */
+.actionButton {
+  margin-top: 0.5rem;
+}
+/* #end-style */
