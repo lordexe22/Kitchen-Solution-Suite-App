@@ -1,0 +1,9 @@
+/* src/components/BranchList/BranchList.module.css */
+
+/* #style .list */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* #end-style */

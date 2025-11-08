@@ -23,7 +23,7 @@
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
-  background-color: #ffffff;
+  background-color: #f9fafb;
 }
 /* #end-style */
 
@@ -51,10 +51,10 @@
   border: 1px solid #fecaca;
   border-radius: 0.5rem;
   padding: 1rem;
-  margin-bottom: 1.5rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .error p {
@@ -68,21 +68,15 @@
 .loading {
   text-align: center;
   padding: 3rem;
-  font-size: 1.125rem;
   color: #6b7280;
+  font-size: 1.1rem;
 }
 /* #end-style */
 
-/* #style .grid */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+/* #style .accordionList */
+.accordionList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 /* #end-style */

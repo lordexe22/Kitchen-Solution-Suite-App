@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
-import CompanyCard from '../../../components/CompanyCard/CompanyCard';
+import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
 import CompanyFormModal from '../../../components/CompanyFormModal/CompanyFormModal';
 import { useCompanies } from '../../../hooks/useCompanies';
 import type { Company } from '../../../store/Companies.types';
@@ -29,6 +29,7 @@ const CompaniesPage = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined);
+  const [expandedCompanyId, setExpandedCompanyId] = useState<number | null>(null);
 
   // Cargar compañías al montar el componente
   useEffect(() => {
@@ -56,12 +57,21 @@ const CompaniesPage = () => {
     } else {
       await createCompany(data);
     }
+    handleCloseModal();
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de eliminar esta compañía?')) {
+    if (confirm('¿Estás seguro de eliminar esta compañía y todas sus sucursales?')) {
       await deleteCompany(id);
+      // Si la compañía eliminada estaba expandida, colapsar
+      if (expandedCompanyId === id) {
+        setExpandedCompanyId(null);
+      }
     }
+  };
+
+  const handleToggleCompany = (companyId: number) => {
+    setExpandedCompanyId(expandedCompanyId === companyId ? null : companyId);
   };
 
   return (
@@ -113,15 +123,17 @@ const CompaniesPage = () => {
             />
           )}
 
-          {/* Grid de compañías */}
+          {/* Lista de compañías (acordeones) */}
           {companies.length > 0 && (
-            <div className={styles.grid}>
+            <div className={styles.accordionList}>
               {companies.map((company) => (
-                <CompanyCard
+                <CompanyAccordion
                   key={company.id}
                   company={company}
-                  onEdit={handleOpenEditModal}
-                  onDelete={handleDelete}
+                  isExpanded={expandedCompanyId === company.id}
+                  onToggle={() => handleToggleCompany(company.id)}
+                  onEdit={() => handleOpenEditModal(company)}
+                  onDelete={() => handleDelete(company.id)}
                 />
               ))}
             </div>
