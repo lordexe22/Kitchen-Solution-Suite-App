@@ -1,5 +1,4 @@
 /* src/components/BranchAccordion/BranchAccordion.module.css */
-
 /* #style .accordion */
 .accordion {
   background-color: #ffffff;
@@ -13,7 +12,6 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 /* #end-style */
-
 /* #style .header */
 .header {
   display: flex;
@@ -29,7 +27,6 @@
   background-color: #f9fafb;
 }
 /* #end-style */
-
 /* #style .headerLeft */
 .headerLeft {
   display: flex;
@@ -39,21 +36,17 @@
   min-width: 0;
 }
 /* #end-style */
-
-/* #style .icon */
+/* #style .expandIcon */
 .icon {
-  font-size: 1.5rem;
   flex-shrink: 0;
 }
 /* #end-style */
-
 /* #style .info */
 .info {
   flex: 1;
   min-width: 0;
 }
 /* #end-style */
-
 /* #style .name */
 .name {
   font-size: 1rem;
@@ -65,7 +58,6 @@
   text-overflow: ellipsis;
 }
 /* #end-style */
-
 /* #style .details */
 .details {
   display: flex;
@@ -73,14 +65,12 @@
   flex-wrap: wrap;
 }
 /* #end-style */
-
 /* #style .address */
 .address {
   font-size: 0.875rem;
   color: #6b7280;
 }
 /* #end-style */
-
 /* #style .postalCode */
 .postalCode {
   font-size: 0.875rem;
@@ -88,7 +78,6 @@
   font-weight: 500;
 }
 /* #end-style */
-
 /* #style .headerRight */
 .headerRight {
   display: flex;
@@ -97,7 +86,6 @@
   flex-shrink: 0;
 }
 /* #end-style */
-
 /* #style .arrow */
 .arrow {
   font-size: 1rem;
@@ -106,7 +94,6 @@
   transition: transform 0.2s ease;
 }
 /* #end-style */
-
 /* #style .content */
 .content {
   padding: 1rem;
@@ -126,7 +113,6 @@
   }
 }
 /* #end-style */
-
 /* #style .sectionTitle */
 .sectionTitle {
   font-size: 0.9rem;
@@ -135,7 +121,6 @@
   margin: 0 0 1rem 0;
 }
 /* #end-style */
-
 /* #style .configGrid */
 .configGrid {
   display: grid;
@@ -143,7 +128,6 @@
   gap: 0.75rem;
 }
 /* #end-style */
-
 /* #style .configButton */
 .configButton {
   display: flex;
@@ -173,20 +157,17 @@
   cursor: not-allowed;
 }
 /* #end-style */
-
 /* #style .configIcon */
 .configIcon {
   font-size: 1.25rem;
   flex-shrink: 0;
 }
 /* #end-style */
-
 /* #style .configLabel */
 .configLabel {
   flex: 1;
 }
 /* #end-style */
-
 /* #style .configArrow */
 .configArrow {
   font-size: 1rem;

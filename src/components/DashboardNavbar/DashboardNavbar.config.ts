@@ -29,4 +29,10 @@ export const NAV_ITEMS: NavItem[] = [
     icon: '📦',
     path: '/dashboard/products',
   },
+  {
+    id: 'schedules',
+    label: 'Horarios',
+    icon: '🕐',
+    path: '/dashboard/schedules',
+  },
 ];

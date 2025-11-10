@@ -1,0 +1,87 @@
+/* src/components/ScheduleRow/ScheduleRow.module.css */
+
+/* #style .row - Fila de horarios */
+.row {
+  display: grid;
+  grid-template-columns: 200px repeat(7, 1fr) 150px;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.row:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+/* #end-style */
+
+/* #style .branchInfo - Información de la sucursal */
+.branchInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.branchName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.branchLocation {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+/* #end-style */
+
+/* #style .dayCell - Celda de día */
+.dayCell {
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.dayCell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+/* #end-style */
+
+/* #style .dayOpen - Día abierto */
+.dayOpen {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.dayOpen:hover {
+  background-color: #bfdbfe;
+}
+/* #end-style */
+
+/* #style .dayClosed - Día cerrado */
+.dayClosed {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.dayClosed:hover {
+  background-color: #fecaca;
+}
+/* #end-style */
+
+/* #style .actions - Columna de acciones */
+.actions {
+  display: flex;
+  justify-content: center;
+}
+/* #end-style */

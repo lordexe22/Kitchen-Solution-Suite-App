@@ -69,37 +69,42 @@ const BranchAccordion = ({
 
   return (
     <div className={styles.accordion}>
-      {/* Header */}
+      {/* #section Header*/}
       <div 
         className={styles.header}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className={styles.branchName}>
-          {getDisplayName()}
-        </span>
-        <span className={styles.expandIcon}>
-          {isExpanded ? '▼' : '▶'}
-        </span>
-      </div>
+        <div className={styles.headerLeft}>
+          <span className={styles.expandIcon}>
+            {isExpanded ? '▼' : '▶'}
+          </span>
+          <span className={styles.branchName}>
+            {getDisplayName()}
+          </span>          
+        </div>
 
-      {/* Contenido expandido */}
+        <div className={styles.headerRight}>
+          <button 
+            className="btn-sec btn-sm" 
+            onClick={onEditName}
+          >
+            ✏️ Nombre
+          </button>
+          <button 
+            className="btn-sec btn-sm" 
+            onClick={onEditLocation}
+          >
+            📍 Ubicación
+          </button>
+        </div>
+      </div>
+      {/* #end-section */}
+      {/* #section Expanded content */}
       {isExpanded && (
         <div className={styles.content}>
           <div className={styles.configSection}>
             <h4 className={styles.configTitle}>⚙️ Configuración de la Sucursal</h4>
             <div className={styles.configGrid}>
-              <button 
-                className="btn-sec btn-sm" 
-                onClick={onEditLocation}
-              >
-                📍 Ubicación
-              </button>
-              <button 
-                className="btn-sec btn-sm" 
-                onClick={onEditName}
-              >
-                ✏️ Nombre
-              </button>
               <button 
                 className="btn-sec btn-sm" 
                 onClick={onEditSocials}
@@ -116,6 +121,7 @@ const BranchAccordion = ({
           </div>
         </div>
       )}
+      {/* #end-section */}
     </div>
   );
 };

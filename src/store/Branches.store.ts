@@ -1,7 +1,7 @@
 /* src/store/Branches.store.ts */
 // #section imports
 import { create } from 'zustand';
-import type { BranchWithLocation } from './Branches.types';
+import type { BranchWithSchedules } from './Branches.types';
 // #end-section
 
 // #interface BranchesStore
@@ -12,17 +12,17 @@ import type { BranchWithLocation } from './Branches.types';
  */
 interface BranchesStore {
   // Estado: { companyId: branches[] }
-  branchesByCompany: Record<number, BranchWithLocation[]>;
+  branchesByCompany: Record<number, BranchWithSchedules[]>;
   
   // Setters
-  setBranchesForCompany: (companyId: number, branches: BranchWithLocation[]) => void;
-  addBranch: (branch: BranchWithLocation) => void;
-  updateBranch: (branchId: number, updates: Partial<BranchWithLocation>) => void;
+  setBranchesForCompany: (companyId: number, branches: BranchWithSchedules[]) => void;
+  addBranch: (branch: BranchWithSchedules) => void;
+  updateBranch: (branchId: number, updates: Partial<BranchWithSchedules>) => void;
   removeBranch: (branchId: number, companyId: number) => void;
   clearAllBranches: () => void;
   
   // Helpers
-  getBranchesForCompany: (companyId: number) => BranchWithLocation[];
+  getBranchesForCompany: (companyId: number) => BranchWithSchedules[];
   hasBranchesForCompany: (companyId: number) => boolean;
 }
 // #end-interface

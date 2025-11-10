@@ -8,6 +8,7 @@ import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
 import ProductsPage from "./pages/dashboard/ProductsPage/ProductsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAutoLogin } from "./hooks/useAutoLogin";
+import SchedulesPage from "./pages/dashboard/SchedulePage/SchedulePage";
 // #end-section
 
 // #component App
@@ -68,6 +69,13 @@ function App() {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/dashboard/schedules" 
+        element={
+          <ProtectedRoute>
+            <SchedulesPage />
+          </ProtectedRoute>
+        } />
       
       {/* Ruta por defecto */}
       <Route path="*" element={<Navigate to="/" />} />

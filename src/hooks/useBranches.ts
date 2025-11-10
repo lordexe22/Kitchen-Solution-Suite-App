@@ -1,6 +1,5 @@
 /* src/hooks/useBranches.ts */
 // #section imports
-// #section imports
 import { useState, useCallback } from 'react';
 import { useBranchesStore } from '../store/Branches.store';
 import {
@@ -19,7 +18,13 @@ import {
   applyBranchSocialsToAll as applyBranchSocialsToAllService
 } from '../services/branches/branchSocials.service';
 import type { BranchFormData, BranchLocationFormData, BranchSocialFormData } from '../store/Branches.types';
-// #end-section
+import {
+  fetchBranchSchedules,
+  updateBranchScheduleBatch,
+  applySchedulesToAllBranches as applySchedulesToAllService
+} from '../services/branches/branchSchedules.service';
+import type { BranchScheduleFormData } from '../store/Branches.types';
+import type { BranchSchedule } from '../store/Branches.types';
 // #end-section
 
 // #hook useBranches
@@ -289,21 +294,96 @@ export const useBranches = (companyId: number) => {
   }, [companyId]);
   // #end-function
 
+  // #function loadBranchSchedules
+  /**
+   * Carga los horarios de una sucursal.
+   */
+  const loadBranchSchedules = useCallback(async (branchId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const schedules = await fetchBranchSchedules(branchId);
+      return schedules;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar horarios';
+      setError(errorMessage);
+      console.error('Error loading schedules:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+
+  // #function updateSchedules
+  /**
+   * Actualiza los horarios de una sucursal.
+   */
+  const updateSchedules = useCallback(async (branchId: number, schedules: BranchScheduleFormData[]) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updatedSchedules = await updateBranchScheduleBatch(branchId, { schedules });
+      return updatedSchedules;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar horarios';
+      setError(errorMessage);
+      console.error('Error updating schedules:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+
+  // #function applySchedulesToAll
+  /**
+   * Aplica los horarios de una sucursal a todas las sucursales de la compañía.
+   */
+  const applySchedulesToAll = useCallback(async (sourceBranchId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await applySchedulesToAllService(companyId, sourceBranchId);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al aplicar horarios';
+      setError(errorMessage);
+      console.error('Error applying schedules to all:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [companyId]);
+  // #end-function
+
+  // #function updateBranchSchedules
+  /**
+   * Actualiza los horarios de una sucursal en el store.
+   */
+  const updateBranchSchedules = useCallback((branchId: number, schedules: BranchSchedule[]) => {
+    updateBranchInStore(branchId, { schedules });
+  }, [updateBranchInStore]);
+  // #end-function
+
   return {
-    branches: getBranchesForCompany(companyId),
-    isLoading,
-    error,
-    loadBranches,
-    createBranch,
-    updateBranchName,
-    deleteBranch,
-    saveLocation,
-    deleteLocation,
-    loadBranchSocials,
-    createSocial,
-    updateSocial,
-    deleteSocial,
-    applySocialsToAllBranches
-  };
+      branches: getBranchesForCompany(companyId),
+      isLoading,
+      error,
+      loadBranches,
+      createBranch,
+      updateBranchName,
+      deleteBranch,
+      saveLocation,
+      deleteLocation,
+      loadBranchSocials,
+      createSocial,
+      updateSocial,
+      deleteSocial,
+      applySocialsToAllBranches,
+      loadBranchSchedules,
+      updateSchedules,
+      applySchedulesToAll,
+      updateBranchSchedules
+    };
 };
 // #end-hook
