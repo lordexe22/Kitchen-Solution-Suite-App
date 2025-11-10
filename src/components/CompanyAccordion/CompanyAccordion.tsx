@@ -6,8 +6,10 @@ import { useBranches } from '../../hooks/useBranches';
 import BranchList from '../BranchList/BranchList';
 import BranchLocationModal from '../BranchLocationModal/BranchLocationModal';
 import BranchNameModal from '../BranchNameModal/BranchNameModal';
+import BranchSocialsModal from '../BranchSocialsModal/BranchSocialsModal';
 import type { BranchWithLocation } from '../../store/Branches.types';
 import styles from './CompanyAccordion.module.css';
+import type { BranchLocationFormData } from '../../store/Branches.types';
 // #end-section
 
 // #interface CompanyAccordionProps
@@ -30,10 +32,16 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
     updateBranchName,
     deleteBranch,
     saveLocation,
+    loadBranchSocials,
+    createSocial,
+    updateSocial,
+    deleteSocial,
+    applySocialsToAllBranches
   } = useBranches(company.id);
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showSocialsModal, setShowSocialsModal] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchWithLocation | null>(null);
 
   // Cargar sucursales cuando se expande
@@ -63,6 +71,11 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
     setShowNameModal(true);
   };
 
+  const handleEditSocials = (branch: BranchWithLocation) => {
+    setSelectedBranch(branch);
+    setShowSocialsModal(true);
+  };
+
   const handleDeleteBranch = async (branchId: number) => {
     if (confirm('¿Estás seguro de eliminar esta sucursal?')) {
       try {
@@ -73,14 +86,16 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
     }
   };
 
-  const handleSaveLocation = async (data: Parameters<typeof saveLocation>[1]) => {
+  const handleSaveLocation = async (data: BranchLocationFormData) => {
     if (!selectedBranch) return;
     try {
       await saveLocation(selectedBranch.id, data);
+      await loadBranches(true); // Refrescar
       setShowLocationModal(false);
       setSelectedBranch(null);
     } catch (error) {
       console.error('Error guardando ubicación:', error);
+      throw error;
     }
   };
 
@@ -88,10 +103,12 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
     if (!selectedBranch) return;
     try {
       await updateBranchName(selectedBranch.id, name);
+      await loadBranches(true); // Refrescar
       setShowNameModal(false);
       setSelectedBranch(null);
     } catch (error) {
-      console.error('Error actualizando nombre:', error);
+      console.error('Error guardando nombre:', error);
+      throw error;
     }
   };
 
@@ -101,56 +118,43 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
         {/* Header del acordeón */}
         <div className={styles.header} onClick={handleToggle}>
           <div className={styles.headerLeft}>
-            {/* Logo o inicial */}
-            <div className={styles.logo}>
-              {company.logoUrl ? (
-                <img src={company.logoUrl} alt={company.name} />
-              ) : (
-                <span>{company.name.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-            
-            {/* Info de la compañía */}
-            <div className={styles.info}>
-              <h3 className={styles.name}>{company.name}</h3>
-              {company.description && (
-                <p className={styles.description}>{company.description}</p>
-              )}
-            </div>
+            <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
+            <h3 className={styles.companyName}>{company.name}</h3>
+            {company.description && (
+              <span className={styles.description}>{company.description}</span>
+            )}
           </div>
-
-          {/* Botón de expandir/colapsar */}
-          <div className={styles.headerRight}>
-            <span className={styles.arrow}>{isExpanded ? '▼' : '▶'}</span>
+          <div className={styles.headerRight} onClick={(e) => e.stopPropagation()}>
+            <button className="btn-sec btn-sm" onClick={onEdit}>
+              ✏️ Editar
+            </button>
+            <button className="btn-danger btn-sm" onClick={onDelete}>
+              🗑️ Eliminar
+            </button>
           </div>
         </div>
 
-        {/* Contenido expandible */}
+        {/* Contenido expandido */}
         {isExpanded && (
           <div className={styles.content}>
-            {/* Acciones de la compañía */}
-            <div className={styles.companyActions}>
-              <button className="btn-sec btn-sm" onClick={onEdit}>
-                ✏️ Editar Compañía
-              </button>
-              <button className="btn-sec btn-sm" onClick={onDelete}>
-                🗑️ Eliminar Compañía
-              </button>
-            </div>
-
-            {/* Sección de sucursales */}
             <div className={styles.branchesSection}>
               <div className={styles.branchesHeader}>
                 <h4 className={styles.sectionTitle}>Sucursales</h4>
-                <button className="btn-pri btn-sm" onClick={handleCreateBranch} disabled={isLoading}>
-                  + Agregar Sucursal
+                <button
+                  className="btn-pri btn-sm"
+                  onClick={handleCreateBranch}
+                  disabled={isLoading}
+                >
+                  + Nueva Sucursal
                 </button>
               </div>
 
-              {isLoading && <p className={styles.loading}>Cargando sucursales...</p>}
+              {isLoading && branches.length === 0 && (
+                <p className={styles.loading}>Cargando sucursales...</p>
+              )}
 
               {!isLoading && branches.length === 0 && (
-                <p className={styles.emptyMessage}>
+                <p className={styles.empty}>
                   No hay sucursales. Crea la primera para comenzar.
                 </p>
               )}
@@ -160,6 +164,7 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
                   branches={branches}
                   onEditLocation={handleEditLocation}
                   onEditName={handleEditName}
+                  onEditSocials={handleEditSocials}
                   onDelete={handleDeleteBranch}
                 />
               )}
@@ -188,6 +193,23 @@ const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: C
             setSelectedBranch(null);
           }}
           onSave={handleSaveName}
+        />
+      )}
+
+      {showSocialsModal && selectedBranch && (
+        <BranchSocialsModal
+          branch={selectedBranch}
+          companyId={company.id}
+          totalBranches={branches.length}
+          onClose={() => {
+            setShowSocialsModal(false);
+            setSelectedBranch(null);
+          }}
+          onLoadSocials={loadBranchSocials}
+          onCreateSocial={createSocial}
+          onUpdateSocial={updateSocial}
+          onDeleteSocial={deleteSocial}
+          onApplyToAll={applySocialsToAllBranches}
         />
       )}
     </>

@@ -1,5 +1,6 @@
 /* src/hooks/useBranches.ts */
 // #section imports
+// #section imports
 import { useState, useCallback } from 'react';
 import { useBranchesStore } from '../store/Branches.store';
 import {
@@ -10,7 +11,15 @@ import {
   createOrUpdateBranchLocation,
   deleteBranchLocation as deleteBranchLocationService
 } from '../services/branches/branches.service';
-import type { BranchFormData, BranchLocationFormData } from '../store/Branches.types';
+import {
+  fetchBranchSocials,
+  createBranchSocial as createBranchSocialService,
+  updateBranchSocial as updateBranchSocialService,
+  deleteBranchSocial as deleteBranchSocialService,
+  applyBranchSocialsToAll as applyBranchSocialsToAllService
+} from '../services/branches/branchSocials.service';
+import type { BranchFormData, BranchLocationFormData, BranchSocialFormData } from '../store/Branches.types';
+// #end-section
 // #end-section
 
 // #hook useBranches
@@ -174,6 +183,112 @@ export const useBranches = (companyId: number) => {
   }, [updateBranchInStore]);
   // #end-function
 
+  // #function loadBranchSocials
+  /**
+   * Carga las redes sociales de una sucursal.
+   */
+  const loadBranchSocials = useCallback(async (branchId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const socials = await fetchBranchSocials(branchId);
+      return socials;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar redes sociales';
+      setError(errorMessage);
+      console.error('Error loading socials:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+
+  // #function createSocial
+  /**
+   * Crea una nueva red social para una sucursal.
+   */
+  const createSocial = useCallback(async (branchId: number, data: BranchSocialFormData) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const newSocial = await createBranchSocialService(branchId, data);
+      return newSocial;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear red social';
+      setError(errorMessage);
+      console.error('Error creating social:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+
+  // #function updateSocial
+  /**
+   * Actualiza una red social existente.
+   */
+  const updateSocial = useCallback(async (
+    branchId: number,
+    socialId: number,
+    data: BranchSocialFormData
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updatedSocial = await updateBranchSocialService(branchId, socialId, data);
+      return updatedSocial;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar red social';
+      setError(errorMessage);
+      console.error('Error updating social:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+
+  // #function deleteSocial
+  /**
+   * Elimina una red social.
+   */
+  const deleteSocial = useCallback(async (branchId: number, socialId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await deleteBranchSocialService(branchId, socialId);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar red social';
+      setError(errorMessage);
+      console.error('Error deleting social:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+  // #function applySocialsToAllBranches
+  /**
+   * Aplica las redes sociales de una sucursal a todas las sucursales de la compañía.
+   */
+  const applySocialsToAllBranches = useCallback(async (sourceBranchId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await applyBranchSocialsToAllService(companyId, sourceBranchId);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al aplicar redes sociales';
+      setError(errorMessage);
+      console.error('Error applying socials to all:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [companyId]);
+  // #end-function
+
   return {
     branches: getBranchesForCompany(companyId),
     isLoading,
@@ -183,7 +298,12 @@ export const useBranches = (companyId: number) => {
     updateBranchName,
     deleteBranch,
     saveLocation,
-    deleteLocation
+    deleteLocation,
+    loadBranchSocials,
+    createSocial,
+    updateSocial,
+    deleteSocial,
+    applySocialsToAllBranches
   };
 };
 // #end-hook

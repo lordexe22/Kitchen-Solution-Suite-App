@@ -11,6 +11,7 @@ interface BranchAccordionProps {
   displayIndex: number;
   onEditLocation: () => void;
   onEditName: () => void;
+  onEditSocials: () => void;
   onDelete: () => void;
 }
 // #end-interface
@@ -26,6 +27,7 @@ const BranchAccordion = ({
   displayIndex,
   onEditLocation,
   onEditName,
+  onEditSocials,
   onDelete
 }: BranchAccordionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -54,112 +56,63 @@ const BranchAccordion = ({
       return branch.name!;
     }
 
-    // Caso 4: Con name, con location → "Nombre - Dirección"
+    // Caso 4: Con name, con location → "Nombre - Dirección corta"
     if (hasName && hasLocation && branch.location) {
-      const { address, city, state } = branch.location;
-      return `${branch.name} - ${address}, ${city}, ${state}`;
+      const { address, postalCode } = branch.location;
+      const shortAddress = postalCode ? `${address}, ${postalCode}` : address;
+      return `${branch.name} - ${shortAddress}`;
     }
 
     return `Sucursal ${displayIndex}`;
   };
   // #end-function
 
-  const displayName = getDisplayName();
-  const hasLocation = branch.location !== null;
-
   return (
     <div className={styles.accordion}>
-      {/* Header del acordeón */}
-      <div className={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
-        <div className={styles.headerLeft}>
-          <div className={styles.icon}>📍</div>
-          
-          <div className={styles.info}>
-            <h5 className={styles.name}>{displayName}</h5>
-            
-            {hasLocation && branch.location && (
-              <div className={styles.details}>
-                <span className={styles.address}>
-                  {branch.location.address}, {branch.location.city}
-                </span>
-                {branch.location.postalCode && (
-                  <span className={styles.postalCode}>
-                    CP: {branch.location.postalCode}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.headerRight}>
-          <button
-            className="btn-sec btn-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditName();
-            }}
-            title="Editar nombre"
-          >
-            ✏️ Editar
-          </button>
-          
-          <button
-            className="btn-sec btn-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            title="Eliminar sucursal"
-            style={{ color: '#dc2626' }}
-          >
-            🗑️ Eliminar
-          </button>
-
-          <span className={styles.arrow}>{isExpanded ? '▼' : '▶'}</span>
-        </div>
+      {/* Header */}
+      <div 
+        className={styles.header}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <span className={styles.branchName}>
+          {getDisplayName()}
+        </span>
+        <span className={styles.expandIcon}>
+          {isExpanded ? '▼' : '▶'}
+        </span>
       </div>
 
-      {/* Contenido expandible */}
+      {/* Contenido expandido */}
       {isExpanded && (
         <div className={styles.content}>
-          <h6 className={styles.sectionTitle}>Configuración de Sucursal</h6>
-          
-          <div className={styles.configGrid}>
-            {/* Ubicación */}
-            <button className={styles.configButton} onClick={onEditLocation}>
-              <span className={styles.configIcon}>📍</span>
-              <span className={styles.configLabel}>Ubicación</span>
-              <span className={styles.configArrow}>→</span>
-            </button>
-
-            {/* Empleados */}
-            <button className={styles.configButton} disabled title="Próximamente">
-              <span className={styles.configIcon}>👥</span>
-              <span className={styles.configLabel}>Empleados</span>
-              <span className={styles.configArrow}>→</span>
-            </button>
-
-            {/* Productos */}
-            <button className={styles.configButton} disabled title="Próximamente">
-              <span className={styles.configIcon}>📦</span>
-              <span className={styles.configLabel}>Productos</span>
-              <span className={styles.configArrow}>→</span>
-            </button>
-
-            {/* Redes Sociales */}
-            <button className={styles.configButton} disabled title="Próximamente">
-              <span className={styles.configIcon}>🌐</span>
-              <span className={styles.configLabel}>Redes Sociales</span>
-              <span className={styles.configArrow}>→</span>
-            </button>
-
-            {/* Horarios */}
-            <button className={styles.configButton} disabled title="Próximamente">
-              <span className={styles.configIcon}>🕐</span>
-              <span className={styles.configLabel}>Horarios</span>
-              <span className={styles.configArrow}>→</span>
-            </button>
+          <div className={styles.configSection}>
+            <h4 className={styles.configTitle}>⚙️ Configuración de la Sucursal</h4>
+            <div className={styles.configGrid}>
+              <button 
+                className="btn-sec btn-sm" 
+                onClick={onEditLocation}
+              >
+                📍 Ubicación
+              </button>
+              <button 
+                className="btn-sec btn-sm" 
+                onClick={onEditName}
+              >
+                ✏️ Nombre
+              </button>
+              <button 
+                className="btn-sec btn-sm" 
+                onClick={onEditSocials}
+              >
+                🌐 Redes Sociales
+              </button>
+              <button 
+                className="btn-danger btn-sm" 
+                onClick={onDelete}
+              >
+                🗑️ Eliminar
+              </button>
+            </div>
           </div>
         </div>
       )}
