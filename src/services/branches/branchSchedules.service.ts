@@ -1,11 +1,8 @@
 /* src/services/branches/branchSchedules.service.ts */
 // #section imports
-import { fetchWithTimeout } from '../../utils/fetchWithTimeout/fetchWithTimeout';
+import { httpClient } from '../../api/httpClient.instance';
 import type { BranchSchedule, BranchScheduleFormData, BranchScheduleBatchData } from '../../store/Branches.types';
 // #end-section
-// #variable BASE_URL
-const BASE_URL = 'http://localhost:4000/api/branches';
-// #end-variable
 // #function fetchBranchSchedules
 /**
  * Obtiene todos los horarios de una sucursal.
@@ -19,22 +16,8 @@ const BASE_URL = 'http://localhost:4000/api/branches';
  * const schedules = await fetchBranchSchedules(1);
  */
 export const fetchBranchSchedules = async (branchId: number): Promise<BranchSchedule[]> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${branchId}/schedules`,
-    {
-      method: 'GET',
-      credentials: 'include',
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al obtener horarios');
-  }
-
-  return responseData.data.schedules;
+  const response = await httpClient.get<{ schedules: BranchSchedule[] }>(`/branches/${branchId}/schedules`);
+  return response.schedules;
 };
 // #end-function
 // #function createBranchSchedule
@@ -59,26 +42,8 @@ export const createBranchSchedule = async (
   branchId: number,
   data: BranchScheduleFormData
 ): Promise<BranchSchedule> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${branchId}/schedules`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al crear horario');
-  }
-
-  return responseData.data.schedule;
+  const response = await httpClient.post<{ schedule: BranchSchedule }>(`/branches/${branchId}/schedules`, data);
+  return response.schedule;
 };
 // #end-function
 // #function updateBranchScheduleBatch
@@ -88,7 +53,7 @@ export const createBranchSchedule = async (
  * 
  * @async
  * @param {number} branchId - ID de la sucursal
- * @param {BranchScheduleBatchData} data - Array de horarios
+ * @param {BranchScheduleBatchData} data - Datos de los horarios a actualizar
  * @returns {Promise<BranchSchedule[]>} Horarios actualizados
  * @throws {Error} Si la solicitud falla
  * 
@@ -96,7 +61,7 @@ export const createBranchSchedule = async (
  * const schedules = await updateBranchScheduleBatch(1, {
  *   schedules: [
  *     { dayOfWeek: 'monday', openTime: '09:00', closeTime: '18:00', isClosed: false },
- *     { dayOfWeek: 'sunday', isClosed: true }
+ *     { dayOfWeek: 'tuesday', openTime: '09:00', closeTime: '18:00', isClosed: false }
  *   ]
  * });
  */
@@ -104,124 +69,67 @@ export const updateBranchScheduleBatch = async (
   branchId: number,
   data: BranchScheduleBatchData
 ): Promise<BranchSchedule[]> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${branchId}/schedules/batch`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al actualizar horarios');
-  }
-
-  return responseData.data.schedules;
+  const response = await httpClient.put<{ schedules: BranchSchedule[] }>(`/branches/${branchId}/schedules/batch`, data);
+  return response.schedules;
 };
 // #end-function
 // #function updateBranchSchedule
 /**
- * Actualiza un horario específico.
+ * Actualiza un horario específico de una sucursal.
  * 
  * @async
  * @param {number} branchId - ID de la sucursal
  * @param {number} scheduleId - ID del horario
- * @param {BranchScheduleFormData} data - Datos actualizados
+ * @param {Partial<BranchScheduleFormData>} updates - Datos a actualizar
  * @returns {Promise<BranchSchedule>} Horario actualizado
  * @throws {Error} Si la solicitud falla
+ * 
+ * @example
+ * const updated = await updateBranchSchedule(1, 5, { openTime: '10:00' });
  */
 export const updateBranchSchedule = async (
   branchId: number,
   scheduleId: number,
-  data: BranchScheduleFormData
+  updates: Partial<BranchScheduleFormData>
 ): Promise<BranchSchedule> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${branchId}/schedules/${scheduleId}`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al actualizar horario');
-  }
-
-  return responseData.data.schedule;
+  const response = await httpClient.put<{ schedule: BranchSchedule }>(`/branches/${branchId}/schedules/${scheduleId}`, updates);
+  return response.schedule;
 };
 // #end-function
 // #function deleteBranchSchedule
 /**
- * Elimina un horario específico.
+ * Elimina un horario de una sucursal.
  * 
  * @async
  * @param {number} branchId - ID de la sucursal
  * @param {number} scheduleId - ID del horario
+ * @returns {Promise<void>}
  * @throws {Error} Si la solicitud falla
+ * 
+ * @example
+ * await deleteBranchSchedule(1, 5);
  */
-export const deleteBranchSchedule = async (
-  branchId: number,
-  scheduleId: number
-): Promise<void> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${branchId}/schedules/${scheduleId}`,
-    {
-      method: 'DELETE',
-      credentials: 'include',
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al eliminar horario');
-  }
+export const deleteBranchSchedule = async (branchId: number, scheduleId: number): Promise<void> => {
+  await httpClient.delete(`/branches/${branchId}/schedules/${scheduleId}`);
 };
 // #end-function
 // #function applySchedulesToAllBranches
 /**
- * Aplica los horarios de una sucursal a todas las sucursales de la misma compañía.
+ * Aplica los horarios de una sucursal a todas las sucursales de la compañía.
  * 
  * @async
- * @param {number} companyId - ID de la compañía
  * @param {number} sourceBranchId - ID de la sucursal origen
+ * @param {number} companyId - ID de la compañía
+ * @returns {Promise<void>}
  * @throws {Error} Si la solicitud falla
  * 
  * @example
  * await applySchedulesToAllBranches(1, 5);
  */
 export const applySchedulesToAllBranches = async (
-  companyId: number,
-  sourceBranchId: number
+  sourceBranchId: number,
+  companyId: number
 ): Promise<void> => {
-  const response = await fetchWithTimeout(
-    `http://localhost:4000/api/companies/${companyId}/apply-schedules/${sourceBranchId}`,
-    {
-      method: 'POST',
-      credentials: 'include',
-    },
-    30000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al aplicar horarios a todas las sucursales');
-  }
+  await httpClient.post(`/branches/${sourceBranchId}/schedules/apply-to-all`, { companyId });
 };
 // #end-function

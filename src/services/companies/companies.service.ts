@@ -1,13 +1,8 @@
 /* src/services/companies/companies.service.ts */
 // #section imports
-import { fetchWithTimeout } from '../../utils/fetchWithTimeout/fetchWithTimeout';
+import { httpClient } from '../../api/httpClient.instance';
 import type { Company, CompanyFormData } from '../../store/Companies.types';
 // #end-section
-
-// #variable BASE_URL
-const BASE_URL = 'http://localhost:4000/api/companies';
-// #end-variable
-
 // #function fetchUserCompanies
 /**
  * Obtiene todas las compañías del usuario autenticado.
@@ -20,25 +15,10 @@ const BASE_URL = 'http://localhost:4000/api/companies';
  * const companies = await fetchUserCompanies();
  */
 export const fetchUserCompanies = async (): Promise<Company[]> => {
-  const response = await fetchWithTimeout(
-    BASE_URL,
-    {
-      method: 'GET',
-      credentials: 'include',
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al obtener compañías');
-  }
-
-  return responseData.data.companies;
+  const response = await httpClient.get<{ companies: Company[] }>('/companies');
+  return response.companies;
 };
 // #end-function
-
 // #function createCompany
 /**
  * Crea una nueva compañía.
@@ -52,29 +32,10 @@ export const fetchUserCompanies = async (): Promise<Company[]> => {
  * const newCompany = await createCompany({ name: 'Mi Empresa' });
  */
 export const createCompany = async (data: CompanyFormData): Promise<Company> => {
-  const response = await fetchWithTimeout(
-    BASE_URL,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al crear compañía');
-  }
-
-  return responseData.data.company;
+  const response = await httpClient.post<{ company: Company }>('/companies', data);
+  return response.company;
 };
 // #end-function
-
 // #function updateCompany
 /**
  * Actualiza una compañía existente.
@@ -92,29 +53,10 @@ export const updateCompany = async (
   id: number,
   updates: Partial<CompanyFormData>
 ): Promise<Company> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${id}`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(updates),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al actualizar compañía');
-  }
-
-  return responseData.data.company;
+  const response = await httpClient.put<{ company: Company }>(`/companies/${id}`, updates);
+  return response.company;
 };
 // #end-function
-
 // #function deleteCompany
 /**
  * Elimina (soft delete) una compañía.
@@ -128,23 +70,9 @@ export const updateCompany = async (
  * await deleteCompany(1);
  */
 export const deleteCompany = async (id: number): Promise<void> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/${id}`,
-    {
-      method: 'DELETE',
-      credentials: 'include',
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al eliminar compañía');
-  }
+  await httpClient.delete(`/companies/${id}`);
 };
 // #end-function
-
 // #function checkCompanyNameAvailability
 /**
  * Verifica si un nombre de compañía está disponible.
@@ -158,25 +86,7 @@ export const deleteCompany = async (id: number): Promise<void> => {
  * const isAvailable = await checkCompanyNameAvailability('Mi Empresa');
  */
 export const checkCompanyNameAvailability = async (name: string): Promise<boolean> => {
-  const response = await fetchWithTimeout(
-    `${BASE_URL}/check-name`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ name }),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Error al verificar disponibilidad');
-  }
-
-  return responseData.data.available;
+  const response = await httpClient.post<{ available: boolean }>('/companies/check-name', { name });
+  return response.available;
 };
 // #end-function

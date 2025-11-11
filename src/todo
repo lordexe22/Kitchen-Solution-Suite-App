@@ -1,1 +1,3 @@
-1 - Separar el dropdown del header y plantearlo como componente independiente
+1 - Cambiar el mensaje de error cuando se intenta hacer login a una cuenta que no fue previamente registrada.
+2 - En la pagina de redes sociales falta poner un boton de redireccionamiento cuando no existen sucursales creadas
+3 - Seria buena idea crear una sucursal por defecto al crear una marca

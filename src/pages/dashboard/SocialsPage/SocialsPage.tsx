@@ -10,9 +10,7 @@ import { useBranches } from '../../../hooks/useBranches';
 import type { BranchSocial } from '../../../store/Branches.types';
 import type { Company } from '../../../store/Companies.types';
 import styles from './SocialsPage.module.css';
-import type { BranchWithSocials } from '../../../store/Branches.types';
 // #end-section
-
 // #component SocialsPage
 const SocialsPage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
@@ -58,15 +56,18 @@ const SocialsPage = () => {
             </div>
           )}
 
-          {/* Lista de empresas */}
+          {/* Empty State */}
           {!isLoadingCompanies && companies.length === 0 && (
             <EmptyState
-              icon="🏢"
               title="No hay empresas"
-              description="Crea una empresa para empezar a gestionar redes sociales."
+              description="Crea tu primera empresa para comenzar a configurar horarios"
+              actionButtonText="Ir a Compañías"
+              onActionClick={() => window.location.href = '/dashboard/companies'}
+              icon="🏢"
             />
           )}
 
+          {/* Lista de empresas */}
           {!isLoadingCompanies && companies.length > 0 && (
             <div className={styles.companiesList}>
               {companies.map((company) => (
@@ -86,11 +87,10 @@ const SocialsPage = () => {
 
 export default SocialsPage;
 // #end-component
-
 // #component CompanySocialsSection
 /**
  * Sección de redes sociales para una compañía.
- * Muestra un acordeón con todas las sucursales y sus redes sociales.
+ * Carga sucursales y redes sociales automáticamente al montar.
  */
 interface CompanySocialsSectionProps {
   company: Company;
@@ -102,7 +102,7 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
     branches, 
     loadBranches, 
     isLoading: isLoadingBranches, 
-    loadBranchSocials, 
+    loadBranchSocials,
     createSocial,
     updateSocial,
     deleteSocial,
@@ -113,15 +113,18 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
   const [isExpanded, setIsExpanded] = useState(false);
   const [loadingBranchId, setLoadingBranchId] = useState<number | null>(null);
   const [isLoadingSocials, setIsLoadingSocials] = useState(false);
+  const [branchSocialsMap, setBranchSocialsMap] = useState<Map<number, BranchSocial[]>>(new Map());
 
-  // Cargar redes sociales cuando las sucursales cambian y el acordeón está expandido
+  // ✅ CARGAR SUCURSALES AL MONTAR (no al expandir)
   useEffect(() => {
-    if (isExpanded && branches.length > 0 && !isLoadingSocials) {
+    loadBranches();
+  }, [loadBranches]);
+
+  // ✅ CARGAR REDES SOCIALES CUANDO LAS SUCURSALES ESTÉN DISPONIBLES
+  useEffect(() => {
+    if (branches.length > 0 && !isLoadingSocials) {
       // Verificar si ya se cargaron las redes sociales
-      const needsSocials = branches.some(branch => {
-        const branchWithSocials = branch as BranchWithSocials;
-        return !branchWithSocials.socials;
-      });
+      const needsSocials = branches.some(branch => !branchSocialsMap.has(branch.id));
       
       if (needsSocials) {
         setIsLoadingSocials(true);
@@ -129,11 +132,11 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
         // Cargar redes sociales en paralelo
         Promise.all(
           branches.map(async (branch) => {
-            const branchWithSocials = branch as BranchWithSocials;
             // Solo cargar si no tiene redes sociales ya
-            if (!branchWithSocials.socials) {
+            if (!branchSocialsMap.has(branch.id)) {
               try {
                 const socials = await loadBranchSocials(branch.id);
+                setBranchSocialsMap(prev => new Map(prev).set(branch.id, socials));
                 updateBranchInStore(branch.id, { socials });
               } catch (err) {
                 console.error(`Error loading socials for branch ${branch.id}:`, err);
@@ -145,13 +148,9 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
         });
       }
     }
-  }, [isExpanded, branches, loadBranchSocials, updateBranchInStore, isLoadingSocials]);
+  }, [branches, loadBranchSocials, updateBranchInStore, isLoadingSocials, branchSocialsMap]);
 
-  // Cargar sucursales cuando se expande
-  const handleToggle = async () => {
-    if (!isExpanded) {
-      await loadBranches();
-    }
+  const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
 
@@ -160,100 +159,87 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
     onError('');
 
     try {
-      // Actualizar en el store
+      // Actualizar en el mapa local y en el store
+      setBranchSocialsMap(prev => new Map(prev).set(branchId, socials));
       updateBranchInStore(branchId, { socials });
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al actualizar redes sociales';
       onError(errorMessage);
-      throw err;
     } finally {
       setLoadingBranchId(null);
     }
   };
 
   const handleApplyToAll = async (sourceBranchId: number) => {
-    setLoadingBranchId(sourceBranchId);
     onError('');
+    setLoadingBranchId(sourceBranchId);
 
     try {
       await applySocialsToAllBranches(sourceBranchId);
       
-      // Recargar todas las redes sociales
-      const updatedSocials = await Promise.all(
-        branches.map(branch => loadBranchSocials(branch.id))
+      // Recargar redes sociales de todas las sucursales
+      setIsLoadingSocials(true);
+      await Promise.all(
+        branches.map(async (branch) => {
+          const socials = await loadBranchSocials(branch.id);
+          setBranchSocialsMap(prev => new Map(prev).set(branch.id, socials));
+          updateBranchInStore(branch.id, { socials });
+        })
       );
-
-      // Actualizar en el store
-      branches.forEach((branch, index) => {
-        updateBranchInStore(branch.id, { socials: updatedSocials[index] });
-      });
-
-      alert('✅ Redes sociales aplicadas a todas las sucursales exitosamente');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al aplicar redes sociales';
       onError(errorMessage);
     } finally {
+      setIsLoadingSocials(false);
       setLoadingBranchId(null);
     }
   };
-
-  const branchesWithSocials = branches as BranchWithSocials[];
 
   return (
     <div className={styles.companySection}>
       {/* Header del acordeón */}
       <button
-        className={styles.companyHeader}
+        className={`${styles.companyHeader} ${isExpanded ? styles.expanded : ''}`}
         onClick={handleToggle}
-        disabled={isLoadingBranches}
       >
         <div className={styles.companyInfo}>
-          <span className={styles.companyIcon}>
-            {isExpanded ? '📂' : '📁'}
-          </span>
-          <span className={styles.companyName}>{company.name}</span>
-          <span className={styles.branchCount}>
-            {branches.length} {branches.length === 1 ? 'sucursal' : 'sucursales'}
-          </span>
+          <h3 className={styles.companyName}>
+            {company.logoUrl && (
+              <img src={company.logoUrl} alt={company.name} className={styles.companyLogo} />
+            )}
+            {company.name}
+          </h3>
+          {company.description && (
+            <p className={styles.companyDescription}>{company.description}</p>
+          )}
         </div>
-        <span className={styles.expandIcon}>
-          {isExpanded ? '▼' : '▶'}
-        </span>
+        <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
       </button>
 
-      {/* Contenido del acordeón */}
+      {/* Contenido expandible */}
       {isExpanded && (
         <div className={styles.companyContent}>
-          {isLoadingBranches || isLoadingSocials ? (
-            <div className={styles.loadingSection}>
+          {(isLoadingBranches || isLoadingSocials) && (
+            <div className={styles.loading}>
               <div className={styles.spinner}></div>
-              <p>Cargando {isLoadingSocials ? 'redes sociales' : 'sucursales'}...</p>
+              <p>Cargando redes sociales...</p>
             </div>
-          ) : branches.length === 0 ? (
-            <div className={styles.emptySection}>
-              <p>Esta empresa no tiene sucursales.</p>
-            </div>
-          ) : (
-            <>
-              {/* Header de tabla */}
-              <div className={styles.tableHeader}>
-                <div className={styles.headerCell}>Sucursal</div>
-                <div className={styles.headerCell}>Facebook</div>
-                <div className={styles.headerCell}>Instagram</div>
-                <div className={styles.headerCell}>Twitter</div>
-                <div className={styles.headerCell}>LinkedIn</div>
-                <div className={styles.headerCell}>TikTok</div>
-                <div className={styles.headerCell}>WhatsApp</div>
-                <div className={styles.headerCell}>Acciones</div>
-              </div>
+          )}
 
-              {/* Filas de sucursales */}
-              {branchesWithSocials.map((branch) => (
+          {!isLoadingBranches && !isLoadingSocials && branches.length === 0 && (
+            <div className={styles.emptyState}>
+              <p>No hay sucursales en esta compañía</p>
+            </div>
+          )}
+
+          {!isLoadingBranches && !isLoadingSocials && branches.length > 0 && (
+            <div className={styles.branchesGrid}>
+              {branches.map((branch) => (
                 <SocialRow
                   key={branch.id}
                   branch={branch}
-                  socials={branch.socials || []}
+                  socials={branchSocialsMap.get(branch.id) || []}
                   onUpdateSocials={handleUpdateSocials}
                   onCreateSocial={createSocial}
                   onUpdateSocial={updateSocial}
@@ -262,7 +248,7 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
                   isLoading={loadingBranchId === branch.id}
                 />
               ))}
-            </>
+            </div>
           )}
         </div>
       )}

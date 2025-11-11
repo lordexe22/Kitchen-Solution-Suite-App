@@ -1,8 +1,7 @@
 // src/services/authentication/authentication.ts
 // #section Imports
-import { API_CONFIG } from "../../config/config";
 import type { RegisterUserData, UserLoginData } from "./authentication.types";
-import { fetchWithTimeout } from "../../utils/fetchWithTimeout/fetchWithTimeout";
+import { httpClient } from '../../api/httpClient.instance';
 // #end-section
 // #function registerUser
 /**
@@ -15,26 +14,7 @@ import { fetchWithTimeout } from "../../utils/fetchWithTimeout/fetchWithTimeout"
  * @throws {Error} Si la solicitud al backend falla.
  */
 export const registerUser = async (registerUserData: RegisterUserData) => {
-  const response = await fetchWithTimeout(
-    `${API_CONFIG.BASE_URL}${API_CONFIG.REGISTER_URL}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(registerUserData),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Registration failed');
-  }
-
-  return responseData.data;
+  return httpClient.post('/auth/register', registerUserData);
 };
 // #end-function
 // #function loginUser
@@ -48,26 +28,7 @@ export const registerUser = async (registerUserData: RegisterUserData) => {
  * @throws {Error} Si las credenciales son inválidas o la solicitud falla.
  */
 export const loginUser = async (loginUserData: UserLoginData) => {
-  const response = await fetchWithTimeout(
-    `${API_CONFIG.BASE_URL}${API_CONFIG.LOGIN_URL}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(loginUserData),
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Login failed');
-  }
-
-  return responseData.data;
+  return httpClient.post('/auth/login', loginUserData);
 };
 // #end-function
 // #function logoutUser
@@ -80,20 +41,7 @@ export const loginUser = async (loginUserData: UserLoginData) => {
  * @throws {Error} Si la solicitud al backend falla.
  */
 export const logoutUser = async (): Promise<void> => {
-  const response = await fetchWithTimeout(
-    `${API_CONFIG.BASE_URL}${API_CONFIG.LOGOUT_URL}`,
-    {
-      method: 'POST',
-      credentials: 'include',
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Logout failed');
-  }
+  await httpClient.post('/auth/jwt/logout');
 };
 // #end-function
 // #function autoLoginByToken
@@ -106,21 +54,6 @@ export const logoutUser = async (): Promise<void> => {
  * @throws {Error} Si el token es inválido o expiró.
  */
 export const autoLoginByToken = async () => {
-  const response = await fetchWithTimeout(
-    `${API_CONFIG.BASE_URL}${API_CONFIG.AUTO_LOGIN_BY_TOKEN_URL}`,
-    {
-      method: 'POST',
-      credentials: 'include',
-    },
-    10000
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok || !responseData.success) {
-    throw new Error(responseData.error || 'Auto-login failed');
-  }
-
-  return responseData.data;
+  return httpClient.post('/auth/auto-login-by-token');
 };
 // #end-function

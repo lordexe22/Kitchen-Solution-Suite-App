@@ -7,13 +7,10 @@ import EmptyState from '../../../components/EmptyState/EmptyState';
 import ScheduleRow from '../../../components/ScheduleRow/ScheduleRow';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
-import type { BranchSchedule, BranchScheduleFormData } from '../../../store/Branches.types';
+import type { BranchSchedule } from '../../../store/Branches.types';
 import type { Company } from '../../../store/Companies.types';
 import styles from './SchedulePage.module.css';
-import { DAYS_OF_WEEK } from '../../../store/Branches.types';
-import type { BranchWithSchedules } from '../../../store/Branches.types';
 // #end-section
-
 // #component SchedulesPage
 const SchedulesPage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
@@ -88,10 +85,10 @@ const SchedulesPage = () => {
 
 export default SchedulesPage;
 // #end-component
-
 // #component CompanySchedulesSection
 /**
- * Componente que muestra una empresa con sus sucursales y horarios.
+ * Sección de horarios para una compañía.
+ * Carga sucursales y horarios automáticamente al montar.
  */
 interface CompanySchedulesSectionProps {
   company: Company;
@@ -112,12 +109,18 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
   const [isExpanded, setIsExpanded] = useState(false);
   const [loadingBranchId, setLoadingBranchId] = useState<number | null>(null);
   const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
+  const [branchSchedulesMap, setBranchSchedulesMap] = useState<Map<number, BranchSchedule[]>>(new Map());
 
-  // Cargar horarios cuando las sucursales cambian y el acordeón está expandido
+  // ✅ CARGAR SUCURSALES AL MONTAR (no al expandir)
   useEffect(() => {
-    if (isExpanded && branches.length > 0 && !isLoadingSchedules) {
+    loadBranches();
+  }, [loadBranches]);
+
+  // ✅ CARGAR HORARIOS CUANDO LAS SUCURSALES ESTÉN DISPONIBLES
+  useEffect(() => {
+    if (branches.length > 0 && !isLoadingSchedules) {
       // Verificar si ya se cargaron los horarios
-      const needsSchedules = branches.some(branch => !branch.schedules || branch.schedules.length === 0);
+      const needsSchedules = branches.some(branch => !branchSchedulesMap.has(branch.id));
       
       if (needsSchedules) {
         setIsLoadingSchedules(true);
@@ -126,9 +129,10 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
         Promise.all(
           branches.map(async (branch) => {
             // Solo cargar si no tiene horarios ya
-            if (!branch.schedules || branch.schedules.length === 0) {
+            if (!branchSchedulesMap.has(branch.id)) {
               try {
                 const schedules = await loadBranchSchedules(branch.id);
+                setBranchSchedulesMap(prev => new Map(prev).set(branch.id, schedules));
                 updateBranchSchedules(branch.id, schedules);
               } catch (err) {
                 console.error(`Error loading schedules for branch ${branch.id}:`, err);
@@ -140,13 +144,9 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
         });
       }
     }
-  }, [isExpanded, branches, loadBranchSchedules, updateBranchSchedules, isLoadingSchedules]);
+  }, [branches, loadBranchSchedules, updateBranchSchedules, isLoadingSchedules, branchSchedulesMap]);
 
-  // Cargar sucursales cuando se expande
-  const handleToggle = async () => {
-    if (!isExpanded) {
-      await loadBranches();
-    }
+  const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
 
@@ -155,8 +155,7 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
     onError('');
 
     try {
-      // Convertir a formato que espera el backend
-      const schedulesData: BranchScheduleFormData[] = schedules.map(s => ({
+      const schedulesData = schedules.map(s => ({
         dayOfWeek: s.dayOfWeek,
         openTime: s.openTime,
         closeTime: s.closeTime,
@@ -165,113 +164,93 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
 
       const updatedSchedules = await updateSchedules(branchId, schedulesData);
       
-      // Actualizar en el store
+      // Actualizar en el mapa local
+      setBranchSchedulesMap(prev => new Map(prev).set(branchId, updatedSchedules));
       updateBranchSchedules(branchId, updatedSchedules);
       
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar horarios';
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar horarios';
       onError(errorMessage);
-      throw err;
     } finally {
       setLoadingBranchId(null);
     }
   };
 
   const handleApplyToAll = async (sourceBranchId: number) => {
-    setLoadingBranchId(sourceBranchId);
     onError('');
+    setLoadingBranchId(sourceBranchId);
 
     try {
       await applySchedulesToAll(sourceBranchId);
       
       // Recargar horarios de todas las sucursales
-      await loadBranches(true); // Force refresh
-      
-      // Esperar un tick
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Cargar horarios de cada sucursal
+      setIsLoadingSchedules(true);
       await Promise.all(
         branches.map(async (branch) => {
-          try {
-            const schedules = await loadBranchSchedules(branch.id);
-            updateBranchSchedules(branch.id, schedules);
-          } catch (err) {
-            console.error(`Error loading schedules for branch ${branch.id}:`, err);
-          }
+          const schedules = await loadBranchSchedules(branch.id);
+          setBranchSchedulesMap(prev => new Map(prev).set(branch.id, schedules));
+          updateBranchSchedules(branch.id, schedules);
         })
       );
-      
-      alert('✅ Horarios aplicados exitosamente a todas las sucursales');
-      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al aplicar horarios';
       onError(errorMessage);
-      alert(`❌ ${errorMessage}`);
     } finally {
+      setIsLoadingSchedules(false);
       setLoadingBranchId(null);
     }
   };
 
   return (
     <div className={styles.companySection}>
-      {/* Header de empresa */}
-      <div className={styles.companyHeader} onClick={handleToggle}>
+      {/* Header del acordeón */}
+      <button
+        className={`${styles.companyHeader} ${isExpanded ? styles.expanded : ''}`}
+        onClick={handleToggle}
+      >
         <div className={styles.companyInfo}>
-          <h2 className={styles.companyName}>
-            {isExpanded ? '▼' : '▶'} 🏢 {company.name}
-          </h2>
+          <h3 className={styles.companyName}>
+            {company.logoUrl && (
+              <img src={company.logoUrl} alt={company.name} className={styles.companyLogo} />
+            )}
+            {company.name}
+          </h3>
           {company.description && (
             <p className={styles.companyDescription}>{company.description}</p>
           )}
         </div>
-        <div className={styles.companyBadge}>
-          {branches.length} {branches.length === 1 ? 'sucursal' : 'sucursales'}
-        </div>
-      </div>
+        <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
+      </button>
 
       {/* Contenido expandible */}
       {isExpanded && (
         <div className={styles.companyContent}>
           {(isLoadingBranches || isLoadingSchedules) && (
             <div className={styles.loading}>
-              {isLoadingBranches ? 'Cargando sucursales...' : 'Cargando horarios...'}
+              <div className={styles.spinner}></div>
+              <p>Cargando horarios...</p>
             </div>
           )}
 
-          {!isLoadingBranches && branches.length === 0 && (
-            <p className={styles.emptyMessage}>
-              No hay sucursales en esta empresa.
-            </p>
+          {!isLoadingBranches && !isLoadingSchedules && branches.length === 0 && (
+            <div className={styles.emptyState}>
+              <p>No hay sucursales en esta compañía</p>
+            </div>
           )}
 
-          {!isLoadingBranches && branches.length > 0 && (
-            <>
-              {/* Encabezados de tabla */}
-              <div className={styles.tableHeader}>
-                <div className={styles.columnBranch}>Sucursal</div>
-                {DAYS_OF_WEEK.map(day => (
-                  <div key={day.value} className={styles.columnDay}>
-                    {day.shortLabel}
-                  </div>
-                ))}
-                <div className={styles.columnActions}>Acciones</div>
-              </div>
-
-              {/* Filas de sucursales */}
-              {branches.map(branch => (
+          {!isLoadingBranches && !isLoadingSchedules && branches.length > 0 && (
+            <div className={styles.branchesGrid}>
+              {branches.map((branch) => (
                 <ScheduleRow
                   key={branch.id}
                   branch={branch}
-                  schedules={(branch as BranchWithSchedules).schedules || []}
-                  onUpdateSchedules={(branchId, schedules) => 
-                    handleUpdateSchedules(branchId, schedules)
-                  }
-                  onApplyToAll={(branchId) => handleApplyToAll(branchId)}
+                  schedules={branchSchedulesMap.get(branch.id) || []}
+                  onUpdateSchedules={handleUpdateSchedules}
+                  onApplyToAll={handleApplyToAll}
                   isLoading={loadingBranchId === branch.id}
                 />
               ))}
-            </>
+            </div>
           )}
         </div>
       )}
