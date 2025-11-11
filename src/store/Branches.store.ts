@@ -1,7 +1,7 @@
 /* src/store/Branches.store.ts */
 // #section imports
 import { create } from 'zustand';
-import type { BranchWithSchedules } from './Branches.types';
+import type { BranchWithSocials } from './Branches.types';  // 👈 CAMBIAR ESTA LÍNEA
 // #end-section
 
 // #interface BranchesStore
@@ -12,17 +12,17 @@ import type { BranchWithSchedules } from './Branches.types';
  */
 interface BranchesStore {
   // Estado: { companyId: branches[] }
-  branchesByCompany: Record<number, BranchWithSchedules[]>;
+  branchesByCompany: Record<number, BranchWithSocials[]>;  // 👈 CAMBIAR ESTA LÍNEA
   
   // Setters
-  setBranchesForCompany: (companyId: number, branches: BranchWithSchedules[]) => void;
-  addBranch: (branch: BranchWithSchedules) => void;
-  updateBranch: (branchId: number, updates: Partial<BranchWithSchedules>) => void;
+  setBranchesForCompany: (companyId: number, branches: BranchWithSocials[]) => void;  // 👈 CAMBIAR ESTA LÍNEA
+  addBranch: (branch: BranchWithSocials) => void;  // 👈 CAMBIAR ESTA LÍNEA
+  updateBranch: (branchId: number, updates: Partial<BranchWithSocials>) => void;  // 👈 CAMBIAR ESTA LÍNEA
   removeBranch: (branchId: number, companyId: number) => void;
   clearAllBranches: () => void;
   
   // Helpers
-  getBranchesForCompany: (companyId: number) => BranchWithSchedules[];
+  getBranchesForCompany: (companyId: number) => BranchWithSocials[];  // 👈 CAMBIAR ESTA LÍNEA
   hasBranchesForCompany: (companyId: number) => boolean;
 }
 // #end-interface

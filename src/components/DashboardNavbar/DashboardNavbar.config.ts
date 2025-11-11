@@ -35,4 +35,10 @@ export const NAV_ITEMS: NavItem[] = [
     icon: '🕐',
     path: '/dashboard/schedules',
   },
+  {
+    id: 'socials',
+    label: 'Redes Sociales',
+    icon: '🌐',
+    path: '/dashboard/socials',
+  },
 ];

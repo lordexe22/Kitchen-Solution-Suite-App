@@ -25,6 +25,7 @@ import {
 } from '../services/branches/branchSchedules.service';
 import type { BranchScheduleFormData } from '../store/Branches.types';
 import type { BranchSchedule } from '../store/Branches.types';
+import type { BranchSocial } from '../store/Branches.types';
 // #end-section
 
 // #hook useBranches
@@ -365,6 +366,15 @@ export const useBranches = (companyId: number) => {
   }, [updateBranchInStore]);
   // #end-function
 
+  // #function updateBranchSocials
+  /**
+   * Actualiza las redes sociales de una sucursal en el store.
+   */
+  const updateBranchSocials = useCallback((branchId: number, socials: BranchSocial[]) => {
+    updateBranchInStore(branchId, { socials });
+  }, [updateBranchInStore]);
+  // #end-function
+
   return {
       branches: getBranchesForCompany(companyId),
       isLoading,
@@ -383,7 +393,9 @@ export const useBranches = (companyId: number) => {
       loadBranchSchedules,
       updateSchedules,
       applySchedulesToAll,
-      updateBranchSchedules
+      updateBranchSchedules,
+      updateBranchSocials,
+      updateBranchInStore
     };
 };
 // #end-hook

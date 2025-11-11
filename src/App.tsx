@@ -9,6 +9,7 @@ import ProductsPage from "./pages/dashboard/ProductsPage/ProductsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAutoLogin } from "./hooks/useAutoLogin";
 import SchedulesPage from "./pages/dashboard/SchedulePage/SchedulePage";
+import SocialsPage from "./pages/dashboard/SocialsPage/SocialsPage";
 // #end-section
 
 // #component App
@@ -75,7 +76,17 @@ function App() {
           <ProtectedRoute>
             <SchedulesPage />
           </ProtectedRoute>
-        } />
+        } 
+      />
+      
+        <Route 
+          path="/dashboard/socials" 
+          element={
+            <ProtectedRoute>
+              <SocialsPage />
+            </ProtectedRoute>
+          } 
+        />
       
       {/* Ruta por defecto */}
       <Route path="*" element={<Navigate to="/" />} />

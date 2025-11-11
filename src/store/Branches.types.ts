@@ -48,6 +48,14 @@ export interface BranchWithSchedules extends BranchWithLocation {
   schedules?: BranchSchedule[];
 }
 // #end-interface
+// #interface BranchWithSocials
+/**
+ * Sucursal con ubicación, horarios y redes sociales incluidas.
+ */
+export interface BranchWithSocials extends BranchWithSchedules {
+  socials?: BranchSocial[];
+}
+// #end-interface
 // #type BranchFormData
 /**
  * Datos del formulario para crear/actualizar una sucursal.
