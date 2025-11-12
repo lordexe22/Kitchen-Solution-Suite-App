@@ -27,7 +27,6 @@ import type { BranchScheduleFormData } from '../store/Branches.types';
 import type { BranchSchedule } from '../store/Branches.types';
 import type { BranchSocial } from '../store/Branches.types';
 // #end-section
-
 // #hook useBranches
 /**
  * Hook personalizado para gestionar sucursales.
@@ -80,7 +79,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [companyId, hasBranchesForCompany, setBranchesForCompany]);
   // #end-function
-
   // #function createBranch
   /**
    * Crea una nueva sucursal.
@@ -102,7 +100,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [addBranch]);
   // #end-function
-
   // #function updateBranchName
   /**
    * Actualiza el nombre de una sucursal.
@@ -124,7 +121,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [updateBranchInStore]);
   // #end-function
-
   // #function deleteBranch
   /**
    * Elimina (soft delete) una sucursal.
@@ -145,7 +141,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [removeBranch, companyId]);
   // #end-function
-
   // #function saveLocation
   /**
    * Guarda o actualiza la ubicación de una sucursal.
@@ -167,7 +162,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [updateBranchInStore]);
   // #end-function
-
   // #function deleteLocation
   /**
    * Elimina la ubicación de una sucursal.
@@ -188,7 +182,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [updateBranchInStore]);
   // #end-function
-
   // #function loadBranchSocials
   /**
    * Carga las redes sociales de una sucursal.
@@ -209,7 +202,6 @@ export const useBranches = (companyId: number) => {
     }
   }, []);
   // #end-function
-
   // #function createSocial
   /**
    * Crea una nueva red social para una sucursal.
@@ -230,7 +222,6 @@ export const useBranches = (companyId: number) => {
     }
   }, []);
   // #end-function
-
   // #function updateSocial
   /**
    * Actualiza una red social existente.
@@ -255,7 +246,6 @@ export const useBranches = (companyId: number) => {
     }
   }, []);
   // #end-function
-
   // #function deleteSocial
   /**
    * Elimina una red social.
@@ -294,7 +284,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [companyId]);
   // #end-function
-
   // #function loadBranchSchedules
   /**
    * Carga los horarios de una sucursal.
@@ -315,7 +304,6 @@ export const useBranches = (companyId: number) => {
     }
   }, []);
   // #end-function
-
   // #function updateSchedules
   /**
    * Actualiza los horarios de una sucursal.
@@ -336,7 +324,6 @@ export const useBranches = (companyId: number) => {
     }
   }, []);
   // #end-function
-
   // #function applySchedulesToAll
   /**
    * Aplica los horarios de una sucursal a todas las sucursales de la compañía.
@@ -356,7 +343,6 @@ export const useBranches = (companyId: number) => {
     }
   }, [companyId]);
   // #end-function
-
   // #function updateBranchSchedules
   /**
    * Actualiza los horarios de una sucursal en el store.
@@ -365,7 +351,6 @@ export const useBranches = (companyId: number) => {
     updateBranchInStore(branchId, { schedules });
   }, [updateBranchInStore]);
   // #end-function
-
   // #function updateBranchSocials
   /**
    * Actualiza las redes sociales de una sucursal en el store.
@@ -374,7 +359,7 @@ export const useBranches = (companyId: number) => {
     updateBranchInStore(branchId, { socials });
   }, [updateBranchInStore]);
   // #end-function
-
+  // #section return
   return {
       branches: getBranchesForCompany(companyId),
       isLoading,
@@ -396,6 +381,7 @@ export const useBranches = (companyId: number) => {
       updateBranchSchedules,
       updateBranchSocials,
       updateBranchInStore
-    };
+  };
+  // #end-section
 };
 // #end-hook

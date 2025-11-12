@@ -14,8 +14,10 @@ import type { CompanyFormData } from '../../../store/Companies.types';
 
 // #component CompaniesPage
 const CompaniesPage = () => {
+  // #variable appLogoUrl
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
-  
+  // #end-variable
+  // #hook useCompanies()
   const {
     companies,
     isLoading,
@@ -26,31 +28,42 @@ const CompaniesPage = () => {
     deleteCompany,
     checkNameAvailability
   } = useCompanies();
-
+  // #end-hook
+  // #state [showModa, setShowModal]
   const [showModal, setShowModal] = useState(false);
+  // #end-state
+  // #state [editingCompany, setEditingCompany]
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined);
+  // #end-state
+  // #state [expandedCompanyId, setExpandedCompanyId] 
   const [expandedCompanyId, setExpandedCompanyId] = useState<number | null>(null);
+  // #end-state
 
-  // Cargar compañías al montar el componente
+  // #event -> loadCompanies
   useEffect(() => {
     loadCompanies();
   }, [loadCompanies]);
+  // #end-event
 
+  // #function handleOpenCreateModal - open the modal with the form for create a new company
   const handleOpenCreateModal = () => {
     setEditingCompany(undefined);
     setShowModal(true);
   };
-
+  // #end-function
+  // #function handleOpenEditModal - handle when open modal for edit the company's name
   const handleOpenEditModal = (company: Company) => {
     setEditingCompany(company);
     setShowModal(true);
   };
-
+  // #end-function
+  // #function handleCloseModal - close modal window
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingCompany(undefined);
   };
-
+  // #end-function
+  // #function handleSubmit - create or update company and then close de modal window
   const handleSubmit = async (data: CompanyFormData) => {
     if (editingCompany) {
       await updateCompany(editingCompany.id, data);
@@ -59,7 +72,8 @@ const CompaniesPage = () => {
     }
     handleCloseModal();
   };
-
+  // #end-function
+  // #function handleDelete - delete company and its branches
   const handleDelete = async (id: number) => {
     if (confirm('¿Estás seguro de eliminar esta compañía y todas sus sucursales?')) {
       await deleteCompany(id);
@@ -69,35 +83,33 @@ const CompaniesPage = () => {
       }
     }
   };
-
+  // #end-function
+  // #function handleToggleCompany - logic when expand an specific company
   const handleToggleCompany = (companyId: number) => {
     setExpandedCompanyId(expandedCompanyId === companyId ? null : companyId);
   };
-
+  // #end-function
+  // #section return
   return (
     <div className={styles.container}>
+      {/* #section AppHeader - header for the page */}
       <AppHeader
         appLogoUrl={appLogoUrl}
         appName="Kitchen Solutions"
         onLogin={() => {}}
         onLogout={() => {}}
       />
+      {/* #end-section */}
+      
       <div className={styles.content}>
         <DashboardNavbar />
         <main className={styles.main}>
-          {/* Header con título y botón */}
+          {/* #section - title */}
           <div className={styles.header}>
             <h1 className={styles.title}>Mis Compañías</h1>
-            <button
-              className="btn-pri btn-md"
-              onClick={handleOpenCreateModal}
-              disabled={isLoading}
-            >
-              + Crear Compañía
-            </button>
           </div>
-
-          {/* Error */}
+          {/* #end-section */}
+          {/* #section Error - show errors */}
           {error && (
             <div className={styles.error}>
               <p>❌ {error}</p>
@@ -106,13 +118,13 @@ const CompaniesPage = () => {
               </button>
             </div>
           )}
-
-          {/* Loading */}
+          {/* #end-section */}
+          {/* #section Loading - show loader while load companies list */}
           {isLoading && companies.length === 0 && (
             <div className={styles.loading}>Cargando compañías...</div>
           )}
-
-          {/* Empty State */}
+          {/* #end-section */}
+          {/* #section Empty State - show only if no companies created */}
           {!isLoading && companies.length === 0 && !error && (
             <EmptyState
               title="No hay compañías"
@@ -122,8 +134,8 @@ const CompaniesPage = () => {
               icon="🏢"
             />
           )}
-
-          {/* Lista de compañías (acordeones) */}
+          {/* #end-section */}
+          {/* #section Show Companies list - show only if no companies created */}
           {companies.length > 0 && (
             <div className={styles.accordionList}>
               {companies.map((company) => (
@@ -138,10 +150,11 @@ const CompaniesPage = () => {
               ))}
             </div>
           )}
+          {/* #end-section */}
         </main>
       </div>
 
-      {/* Modal */}
+      {/* #section CompanyFormModal - Modal window for create a new company */}
       {showModal && (
         <CompanyFormModal
           company={editingCompany}
@@ -150,8 +163,10 @@ const CompaniesPage = () => {
           onCheckNameAvailability={checkNameAvailability}
         />
       )}
+      {/* #end-section */}
     </div>
   );
+  // #end-section
 };
 
 export default CompaniesPage;

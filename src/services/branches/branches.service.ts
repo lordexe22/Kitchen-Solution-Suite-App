@@ -50,7 +50,7 @@ export const createBranch = async (data: BranchFormData): Promise<BranchWithLoca
  * @example
  * const updated = await updateBranch(1, "Local Sur");
  */
-export const updateBranch = async (id: number, name: string): Promise<BranchWithLocation> => {
+export const updateBranch = async (id: number, name: string | null): Promise<BranchWithLocation> => {
   const response = await httpClient.put<{ branch: BranchWithLocation }>(`/branches/${id}`, { name });
   return response.branch;
 };
