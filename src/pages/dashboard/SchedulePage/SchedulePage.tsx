@@ -13,6 +13,16 @@ import type { BranchSchedule } from '../../../store/Branches.types';
 import styles from './SchedulePage.module.css';
 // #end-section
 
+// #interface CopiedSchedulesConfig
+/**
+ * Configuración copiada con el ID de la compañía para validar
+ */
+interface CopiedSchedulesConfig {
+  companyId: number;
+  schedules: BranchSchedule[];
+}
+// #end-interface
+
 // #component SchedulesPage
 const SchedulesPage = () => {
   // #variable appLogoUrl
@@ -29,6 +39,10 @@ const SchedulesPage = () => {
 
   // #state [error, setError]
   const [error, setError] = useState<string | null>(null);
+  // #end-state
+
+  // #state [copiedConfig, setCopiedConfig] - Estado global con companyId
+  const [copiedConfig, setCopiedConfig] = useState<CopiedSchedulesConfig | null>(null);
   // #end-state
 
   // #effect - Load companies on mount
@@ -99,6 +113,8 @@ const SchedulesPage = () => {
                   <BranchSchedulesSection 
                     companyId={company.id} 
                     onError={setError}
+                    copiedConfig={copiedConfig}
+                    onCopyConfig={setCopiedConfig}
                   />
                 </CompanyAccordion>
               ))}
@@ -122,10 +138,14 @@ export default SchedulesPage;
  */
 function BranchSchedulesSection({ 
   companyId, 
-  onError 
+  onError,
+  copiedConfig,
+  onCopyConfig
 }: { 
   companyId: number; 
   onError: (error: string) => void;
+  copiedConfig: CopiedSchedulesConfig | null;
+  onCopyConfig: (config: CopiedSchedulesConfig | null) => void;
 }) {
   // #hook useBranches
   const { 
@@ -133,8 +153,7 @@ function BranchSchedulesSection({
     isLoading,
     loadBranches, 
     loadBranchSchedules, 
-    updateSchedules, 
-    applySchedulesToAll,
+    updateSchedules,
     updateBranchSchedules 
   } = useBranches(companyId);
   // #end-hook
@@ -199,6 +218,8 @@ function BranchSchedulesSection({
       }));
 
       const updatedSchedules = await updateSchedules(branchId, schedulesData);
+      
+      // Actualizar en el mapa local
       setBranchSchedulesMap(prev => new Map(prev).set(branchId, updatedSchedules));
       updateBranchSchedules(branchId, updatedSchedules);
       
@@ -206,33 +227,6 @@ function BranchSchedulesSection({
       const errorMessage = err instanceof Error ? err.message : 'Error al guardar horarios';
       onError(errorMessage);
     } finally {
-      setLoadingBranchId(null);
-    }
-  };
-  // #end-event
-
-  // #event handleApplyToAll
-  const handleApplyToAll = async (sourceBranchId: number) => {
-    onError('');
-    setLoadingBranchId(sourceBranchId);
-
-    try {
-      await applySchedulesToAll(sourceBranchId);
-      
-      // Recargar horarios de todas las sucursales
-      setIsLoadingSchedules(true);
-      await Promise.all(
-        branches.map(async (branch) => {
-          const schedules = await loadBranchSchedules(branch.id);
-          setBranchSchedulesMap(prev => new Map(prev).set(branch.id, schedules));
-          updateBranchSchedules(branch.id, schedules);
-        })
-      );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al aplicar horarios';
-      onError(errorMessage);
-    } finally {
-      setIsLoadingSchedules(false);
       setLoadingBranchId(null);
     }
   };
@@ -274,9 +268,11 @@ function BranchSchedulesSection({
               >
                 <ScheduleRow
                   branch={branch}
+                  companyId={companyId}
                   schedules={branchSchedulesMap.get(branch.id) || []}
                   onUpdateSchedules={handleUpdateSchedules}
-                  onApplyToAll={handleApplyToAll}
+                  copiedConfig={copiedConfig}
+                  onCopyConfig={onCopyConfig}
                   isLoading={loadingBranchId === branch.id}
                 />
               </BranchAccordion>

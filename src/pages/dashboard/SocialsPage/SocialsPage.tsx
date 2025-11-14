@@ -4,140 +4,195 @@ import { useEffect, useState } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
+import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
+import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
 import SocialRow from '../../../components/SocialRow/SocialRow';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
 import type { BranchSocial } from '../../../store/Branches.types';
-import type { Company } from '../../../store/Companies.types';
 import styles from './SocialsPage.module.css';
 // #end-section
+
+// #interface CopiedSocialsConfig
+/**
+ * Configuración copiada con el ID de la compañía para validar
+ */
+interface CopiedSocialsConfig {
+  companyId: number;
+  socials: BranchSocial[];
+}
+// #end-interface
+
 // #component SocialsPage
 const SocialsPage = () => {
+  // #variable appLogoUrl
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
-  const { companies, loadCompanies, isLoading: isLoadingCompanies } = useCompanies();
-  const [error, setError] = useState<string | null>(null);
+  // #end-variable
 
-  // Cargar empresas al montar
+  // #hook useCompanies
+  const { 
+    companies, 
+    loadCompanies, 
+    isLoading: isLoadingCompanies 
+  } = useCompanies();
+  // #end-hook
+
+  // #state [error, setError]
+  const [error, setError] = useState<string | null>(null);
+  // #end-state
+
+  // #state [copiedConfig, setCopiedConfig] - Estado global con companyId
+  const [copiedConfig, setCopiedConfig] = useState<CopiedSocialsConfig | null>(null);
+  // #end-state
+
+  // #effect - Load companies on mount
   useEffect(() => {
     loadCompanies();
   }, [loadCompanies]);
+  // #end-effect
 
+  // #section return
   return (
     <div className={styles.container}>
+      {/* #section AppHeader */}
       <AppHeader
         appLogoUrl={appLogoUrl}
         appName="Kitchen Solutions"
         onLogin={() => {}}
         onLogout={() => {}}
       />
+      {/* #end-section */}
+
       <div className={styles.content}>
         <DashboardNavbar />
         <main className={styles.main}>
-          {/* Header */}
+          {/* #section Header */}
           <div className={styles.header}>
             <h1 className={styles.title}>🌐 Redes Sociales</h1>
             <p className={styles.subtitle}>
-              Configura las redes sociales de todas tus sucursales. Click en cada celda para editar.
+              Configura las redes sociales de todas tus sucursales. Click en cada plataforma para editar.
             </p>
           </div>
+          {/* #end-section */}
 
-          {/* Error global */}
+          {/* #section Error */}
           {error && (
-            <div className={styles.errorBanner}>
-              ⚠️ {error}
+            <div className={styles.error}>
+              <p>❌ {error}</p>
+              <button onClick={() => setError(null)}>✕</button>
             </div>
           )}
+          {/* #end-section */}
 
-          {/* Loading */}
+          {/* #section Loading */}
           {isLoadingCompanies && (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Cargando empresas...</p>
-            </div>
+            <div className={styles.loading}>Cargando compañías...</div>
           )}
+          {/* #end-section */}
 
-          {/* Empty State */}
+          {/* #section Empty State */}
           {!isLoadingCompanies && companies.length === 0 && (
             <EmptyState
-              title="No hay empresas"
-              description="Crea tu primera empresa para comenzar a configurar horarios"
+              title="No hay compañías"
+              description="Crea tu primera compañía para comenzar a configurar redes sociales"
               actionButtonText="Ir a Compañías"
               onActionClick={() => window.location.href = '/dashboard/companies'}
               icon="🏢"
             />
           )}
+          {/* #end-section */}
 
-          {/* Lista de empresas */}
-          {!isLoadingCompanies && companies.length > 0 && (
-            <div className={styles.companiesList}>
+          {/* #section Companies List */}
+          {companies.length > 0 && (
+            <div className={styles.accordionList}>
               {companies.map((company) => (
-                <CompanySocialsSection
+                <CompanyAccordion
                   key={company.id}
                   company={company}
-                  onError={setError}
-                />
+                >
+                  <BranchSocialsSection 
+                    companyId={company.id} 
+                    onError={setError}
+                    copiedConfig={copiedConfig}
+                    onCopyConfig={setCopiedConfig}
+                  />
+                </CompanyAccordion>
               ))}
             </div>
           )}
+          {/* #end-section */}
         </main>
       </div>
     </div>
   );
+  // #end-section
 };
 
 export default SocialsPage;
 // #end-component
-// #component CompanySocialsSection
-/**
- * Sección de redes sociales para una compañía.
- * Carga sucursales y redes sociales automáticamente al montar.
- */
-interface CompanySocialsSectionProps {
-  company: Company;
-  onError: (error: string) => void;
-}
 
-const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps) => {
+// #component BranchSocialsSection
+/**
+ * Componente interno que maneja la sección de redes sociales de sucursales.
+ * Carga branches, socials y renderiza BranchAccordion expandibles.
+ */
+function BranchSocialsSection({ 
+  companyId, 
+  onError,
+  copiedConfig,
+  onCopyConfig
+}: { 
+  companyId: number; 
+  onError: (error: string) => void;
+  copiedConfig: CopiedSocialsConfig | null;
+  onCopyConfig: (config: CopiedSocialsConfig | null) => void;
+}) {
+  // #hook useBranches
   const { 
     branches, 
+    isLoading,
     loadBranches, 
-    isLoading: isLoadingBranches, 
-    loadBranchSocials,
+    loadBranchSocials, 
     createSocial,
     updateSocial,
     deleteSocial,
-    applySocialsToAllBranches,
-    updateBranchInStore
-  } = useBranches(company.id);
-  
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [loadingBranchId, setLoadingBranchId] = useState<number | null>(null);
-  const [isLoadingSocials, setIsLoadingSocials] = useState(false);
-  const [branchSocialsMap, setBranchSocialsMap] = useState<Map<number, BranchSocial[]>>(new Map());
+    updateBranchSocials 
+  } = useBranches(companyId);
+  // #end-hook
 
-  // ✅ CARGAR SUCURSALES AL MONTAR (no al expandir)
+  // #state [branchSocialsMap, setBranchSocialsMap]
+  const [branchSocialsMap, setBranchSocialsMap] = useState<Map<number, BranchSocial[]>>(new Map());
+  // #end-state
+
+  // #state [isLoadingSocials, setIsLoadingSocials]
+  const [isLoadingSocials, setIsLoadingSocials] = useState(false);
+  // #end-state
+
+  // #state [loadingBranchId, setLoadingBranchId]
+  const [loadingBranchId, setLoadingBranchId] = useState<number | null>(null);
+  // #end-state
+
+  // #effect - Load branches on mount
   useEffect(() => {
     loadBranches();
   }, [loadBranches]);
+  // #end-effect
 
-  // ✅ CARGAR REDES SOCIALES CUANDO LAS SUCURSALES ESTÉN DISPONIBLES
+  // #effect - Load socials when branches are available
   useEffect(() => {
     if (branches.length > 0 && !isLoadingSocials) {
-      // Verificar si ya se cargaron las redes sociales
       const needsSocials = branches.some(branch => !branchSocialsMap.has(branch.id));
       
       if (needsSocials) {
         setIsLoadingSocials(true);
         
-        // Cargar redes sociales en paralelo
         Promise.all(
           branches.map(async (branch) => {
-            // Solo cargar si no tiene redes sociales ya
             if (!branchSocialsMap.has(branch.id)) {
               try {
                 const socials = await loadBranchSocials(branch.id);
                 setBranchSocialsMap(prev => new Map(prev).set(branch.id, socials));
-                updateBranchInStore(branch.id, { socials });
+                updateBranchSocials(branch.id, socials);
               } catch (err) {
                 console.error(`Error loading socials for branch ${branch.id}:`, err);
               }
@@ -148,111 +203,81 @@ const CompanySocialsSection = ({ company, onError }: CompanySocialsSectionProps)
         });
       }
     }
-  }, [branches, loadBranchSocials, updateBranchInStore, isLoadingSocials, branchSocialsMap]);
+  }, [branches, loadBranchSocials, updateBranchSocials, isLoadingSocials, branchSocialsMap]);
+  // #end-effect
 
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  };
-
+  // #event handleUpdateSocials
   const handleUpdateSocials = async (branchId: number, socials: BranchSocial[]) => {
     setLoadingBranchId(branchId);
     onError('');
 
     try {
-      // Actualizar en el mapa local y en el store
+      // Actualizar en el mapa local
       setBranchSocialsMap(prev => new Map(prev).set(branchId, socials));
-      updateBranchInStore(branchId, { socials });
-      
+      updateBranchSocials(branchId, socials);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar redes sociales';
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar redes sociales';
       onError(errorMessage);
     } finally {
       setLoadingBranchId(null);
     }
   };
+  // #end-event
 
-  const handleApplyToAll = async (sourceBranchId: number) => {
-    onError('');
-    setLoadingBranchId(sourceBranchId);
-
-    try {
-      await applySocialsToAllBranches(sourceBranchId);
-      
-      // Recargar redes sociales de todas las sucursales
-      setIsLoadingSocials(true);
-      await Promise.all(
-        branches.map(async (branch) => {
-          const socials = await loadBranchSocials(branch.id);
-          setBranchSocialsMap(prev => new Map(prev).set(branch.id, socials));
-          updateBranchInStore(branch.id, { socials });
-        })
-      );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al aplicar redes sociales';
-      onError(errorMessage);
-    } finally {
-      setIsLoadingSocials(false);
-      setLoadingBranchId(null);
-    }
-  };
-
+  // #section return
   return (
-    <div className={styles.companySection}>
-      {/* Header del acordeón */}
-      <button
-        className={`${styles.companyHeader} ${isExpanded ? styles.expanded : ''}`}
-        onClick={handleToggle}
-      >
-        <div className={styles.companyInfo}>
-          <h3 className={styles.companyName}>
-            {company.logoUrl && (
-              <img src={company.logoUrl} alt={company.name} className={styles.companyLogo} />
-            )}
-            {company.name}
-          </h3>
-          {company.description && (
-            <p className={styles.companyDescription}>{company.description}</p>
-          )}
+    <>
+      <div className={styles.branchesSection}>
+        {/* #section Header */}
+        <div className={styles.branchesHeader}>
+          <h4 className={styles.sectionTitle}>Sucursales</h4>
         </div>
-        <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
-      </button>
+        {/* #end-section */}
 
-      {/* Contenido expandible */}
-      {isExpanded && (
-        <div className={styles.companyContent}>
-          {(isLoadingBranches || isLoadingSocials) && (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Cargando redes sociales...</p>
-            </div>
-          )}
+        {/* #section Loading state */}
+        {(isLoading || isLoadingSocials) && branches.length === 0 && (
+          <p className={styles.loading}>Cargando redes sociales...</p>
+        )}
+        {/* #end-section */}
 
-          {!isLoadingBranches && !isLoadingSocials && branches.length === 0 && (
-            <div className={styles.emptyState}>
-              <p>No hay sucursales en esta compañía</p>
-            </div>
-          )}
+        {/* #section Empty state */}
+        {!isLoading && !isLoadingSocials && branches.length === 0 && (
+          <p className={styles.emptyMessage}>
+            No hay sucursales en esta compañía.
+          </p>
+        )}
+        {/* #end-section */}
 
-          {!isLoadingBranches && !isLoadingSocials && branches.length > 0 && (
-            <div className={styles.branchesGrid}>
-              {branches.map((branch) => (
+        {/* #section Branch list */}
+        {branches.length > 0 && (
+          <div className={styles.branchList}>
+            {branches.map((branch, index) => (
+              <BranchAccordion
+                key={branch.id}
+                branch={branch}
+                displayIndex={index + 1}
+                expandable={true}
+              >
                 <SocialRow
-                  key={branch.id}
                   branch={branch}
+                  companyId={companyId}
                   socials={branchSocialsMap.get(branch.id) || []}
                   onUpdateSocials={handleUpdateSocials}
                   onCreateSocial={createSocial}
                   onUpdateSocial={updateSocial}
                   onDeleteSocial={deleteSocial}
-                  onApplyToAll={handleApplyToAll}
+                  copiedConfig={copiedConfig}
+                  onCopyConfig={onCopyConfig}
                   isLoading={loadingBranchId === branch.id}
                 />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+              </BranchAccordion>
+            ))}
+          </div>
+        )}
+        {/* #end-section */}
+      </div>
+    </>
   );
-};
+  // #end-section
+}
 // #end-component

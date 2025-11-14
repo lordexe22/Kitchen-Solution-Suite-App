@@ -108,8 +108,7 @@ export type BranchSocialFormData = {
 export type SocialPlatform = 
   | 'facebook'
   | 'instagram'
-  | 'twitter'
-  | 'linkedin'
+  | 'x'
   | 'tiktok'
   | 'youtube'
   | 'whatsapp'
@@ -127,8 +126,7 @@ export const SOCIAL_PLATFORMS: Array<{
 }> = [
   { value: 'facebook', label: 'Facebook', icon: '📘', placeholder: 'https://facebook.com/tu-negocio' },
   { value: 'instagram', label: 'Instagram', icon: '📷', placeholder: 'https://instagram.com/tu-negocio' },
-  { value: 'twitter', label: 'Twitter/X', icon: '🐦', placeholder: 'https://twitter.com/tu-negocio' },
-  { value: 'linkedin', label: 'LinkedIn', icon: '💼', placeholder: 'https://linkedin.com/company/tu-negocio' },
+  { value: 'x', label: 'Twitter/X', icon: '🐦', placeholder: 'https://twitter.com/tu-negocio' },
   { value: 'tiktok', label: 'TikTok', icon: '🎵', placeholder: 'https://tiktok.com/@tu-negocio' },
   { value: 'youtube', label: 'YouTube', icon: '📹', placeholder: 'https://youtube.com/@tu-negocio' },
   { value: 'whatsapp', label: 'WhatsApp', icon: '💬', placeholder: 'https://wa.me/1234567890' },

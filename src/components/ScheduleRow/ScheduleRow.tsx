@@ -7,29 +7,52 @@ import ScheduleDayEditor from '../ScheduleDayEditor/ScheduleDayEditor';
 import styles from './ScheduleRow.module.css';
 import '/src/styles/button.css';
 // #end-section
+
+// #interface CopiedSchedulesConfig
+/**
+ * Configuración copiada con el ID de la compañía para validar
+ */
+interface CopiedSchedulesConfig {
+  companyId: number;
+  schedules: BranchSchedule[];
+}
+// #end-interface
+
 // #interface ScheduleRowProps
 interface ScheduleRowProps {
   /** Sucursal */
   branch: BranchWithLocation;
+  /** ID de la compañía (para validar copiar/pegar) */
+  companyId: number;
   /** Horarios de la sucursal */
   schedules: BranchSchedule[];
   /** Callback al actualizar horarios */
   onUpdateSchedules: (branchId: number, schedules: BranchSchedule[]) => Promise<void>;
-  /** Callback al aplicar a todas */
-  onApplyToAll: (branchId: number) => Promise<void>;
+  /** Configuración copiada (estado global con companyId) */
+  copiedConfig: CopiedSchedulesConfig | null;
+  /** Callback para actualizar configuración copiada */
+  onCopyConfig: (config: CopiedSchedulesConfig | null) => void;
   /** Indica si está cargando */
   isLoading?: boolean;
 }
 // #end-interface
+
 // #component ScheduleRow
 /**
- * Componente que muestra una fila con los horarios de una sucursal.
+ * Componente que muestra una tabla con los horarios de una sucursal.
  * Permite editar cada día individualmente.
  */
-const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoading }: ScheduleRowProps) => {
-  // #state [editingDay, setEditingDay]
+const ScheduleRow = ({ 
+  branch, 
+  companyId,
+  schedules, 
+  onUpdateSchedules,
+  copiedConfig,
+  onCopyConfig,
+  isLoading 
+}: ScheduleRowProps) => {
   const [editingDay, setEditingDay] = useState<DayOfWeek | null>(null);
-  // #end-state
+
   // #function getScheduleForDay
   /**
    * Obtiene el horario de un día específico.
@@ -38,6 +61,7 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     return schedules.find(s => s.dayOfWeek === day);
   };
   // #end-function
+
   // #function formatSchedule
   /**
    * Formatea el horario para mostrar en la celda.
@@ -49,6 +73,7 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     return `${schedule.openTime}-${schedule.closeTime}`;
   };
   // #end-function
+
   // #function handleCellClick
   /**
    * Maneja el click en una celda de día.
@@ -57,27 +82,39 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     setEditingDay(day);
   };
   // #end-function
+
   // #function handleSaveSchedule
   /**
    * Guarda el horario editado.
    */
   const handleSaveSchedule = async (data: { openTime: string | null; closeTime: string | null; isClosed: boolean }) => {
-    const updatedSchedules = schedules.map(s => 
-      s.dayOfWeek === editingDay
-        ? { ...s, ...data }
-        : s
-    );
+    if (!editingDay) return;
 
-    // Si no existe un schedule para este día, crearlo
-    if (!schedules.find(s => s.dayOfWeek === editingDay)) {
-      const now = new Date().toISOString();
+    // Crear una copia de los horarios actuales
+    const updatedSchedules = [...schedules];
+    
+    // Buscar si ya existe un horario para este día
+    const existingIndex = updatedSchedules.findIndex(s => s.dayOfWeek === editingDay);
+    
+    if (existingIndex >= 0) {
+      // Actualizar existente
+      updatedSchedules[existingIndex] = {
+        ...updatedSchedules[existingIndex],
+        openTime: data.openTime,
+        closeTime: data.closeTime,
+        isClosed: data.isClosed
+      };
+    } else {
+      // Crear nuevo
       updatedSchedules.push({
-        id: 0, // Temporal, el backend asignará el ID
+        id: 0, // Temporal, el backend asignará el ID real
         branchId: branch.id,
-        dayOfWeek: editingDay!,
-        createdAt: now,
-        updatedAt: now,
-        ...data
+        dayOfWeek: editingDay,
+        openTime: data.openTime,
+        closeTime: data.closeTime,
+        isClosed: data.isClosed,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
     }
 
@@ -85,55 +122,123 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     setEditingDay(null);
   };
   // #end-function
-  // #function handleApplyToAll
+
+  // #function handleCopyConfig
   /**
-   * Aplica los horarios de esta sucursal a todas.
+   * Copia la configuración de horarios (actualiza estado global con companyId).
    */
-  const handleApplyToAll = async () => {
-    if (confirm('¿Aplicar estos horarios a todas las sucursales de la compañía?')) {
-      await onApplyToAll(branch.id);
+  const handleCopyConfig = () => {
+    if (schedules.length === 0) {
+      alert('No hay horarios configurados para copiar');
+      return;
+    }
+
+    onCopyConfig({ companyId, schedules: [...schedules] });
+    alert(`✓ Configuración copiada (${schedules.length} horarios)\n\nAhora puedes pegarla en cualquier otra sucursal de esta compañía.`);
+  };
+  // #end-function
+
+  // #function handlePasteConfig
+  /**
+   * Pega la configuración copiada en esta sucursal.
+   * Solo funciona si la config es de la misma compañía.
+   */
+  const handlePasteConfig = async () => {
+    if (!copiedConfig || copiedConfig.schedules.length === 0) {
+      alert('No hay configuración copiada');
+      return;
+    }
+
+    // Validar que sea de la misma compañía
+    if (copiedConfig.companyId !== companyId) {
+      alert('No puedes pegar configuración de otra compañía');
+      return;
+    }
+
+    if (!confirm(`¿Aplicar ${copiedConfig.schedules.length} horarios a esta sucursal?\n\nEsto reemplazará la configuración actual.`)) {
+      return;
+    }
+
+    try {
+      // Crear los nuevos horarios basados en la configuración copiada
+      const newSchedules: BranchSchedule[] = copiedConfig.schedules.map(schedule => ({
+        ...schedule,
+        id: 0, // Temporal, el backend asignará IDs reales
+        branchId: branch.id, // Cambiar al ID de la sucursal actual
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+
+      await onUpdateSchedules(branch.id, newSchedules);
+      alert('✓ Configuración aplicada exitosamente');
+    } catch (error) {
+      console.error('Error pasting schedules:', error);
+      alert(error instanceof Error ? error.message : 'Error al aplicar horarios');
     }
   };
   // #end-function
-  // #section return
+
   return (
-    <>
-      <div className={styles.scheduleRow}>
-        {/* Columna: Nombre de sucursal */}
-        <div className={styles.branchName}>
-          {branch.name || `Sucursal ${branch.id}`}
-        </div>
-
-        {/* Columnas: Días de la semana */}
-        {DAYS_OF_WEEK.map(day => {
-          const schedule = getScheduleForDay(day.value);
-          console.log(day.value, schedule);
-          return (
-            <div
-              key={day.value}
-              className={`${styles.dayCell} ${!schedule || schedule.isClosed ? styles.dayClosed : styles.dayOpen}`}
-              onClick={() => !isLoading && handleCellClick(day.value)}
-              title={`Click para editar ${day.label}`}
-            >
-              {formatSchedule(schedule)}
+    <div className={styles.container}>
+      {/* #section Schedule table */}
+      <div className={styles.scheduleTable}>
+        {/* #section Header row - Nombres de días */}
+        <div className={styles.headerRow}>
+          {DAYS_OF_WEEK.map(day => (
+            <div key={day.value} className={styles.headerCell}>
+              {day.label}
             </div>
-          );
-        })}
-
-        {/* Columna: Acciones */}
-        <div className={styles.actions}>
-          <button
-            className="btn-sec btn-xs"
-            onClick={handleApplyToAll}
-            disabled={isLoading || schedules.length === 0}
-            title="Aplicar estos horarios a todas las sucursales"
-          >
-            📢 Aplicar a todas
-          </button>
+          ))}
         </div>
-      </div>
+        {/* #end-section */}
 
-      {/* Editor de día - Modal centrado */}
+        {/* #section Data row - Horarios */}
+        <div className={styles.dataRow}>
+          {DAYS_OF_WEEK.map(day => {
+            const schedule = getScheduleForDay(day.value);
+            const isClosed = !schedule || schedule.isClosed;
+            
+            return (
+              <div
+                key={day.value}
+                className={`${styles.dayCell} ${isClosed ? styles.dayClosed : styles.dayOpen}`}
+                onClick={() => !isLoading && handleCellClick(day.value)}
+                title={`Click para editar ${day.label}`}
+              >
+                {formatSchedule(schedule)}
+              </div>
+            );
+          })}
+        </div>
+        {/* #end-section */}
+      </div>
+      {/* #end-section */}
+
+      {/* #section Footer with copy/paste buttons */}
+      <div className={styles.footer}>
+        <button
+          className="btn-sec btn-sm"
+          onClick={handleCopyConfig}
+          disabled={isLoading || schedules.length === 0}
+          title="Copiar configuración de esta sucursal"
+        >
+          📋 Copiar configuración
+        </button>
+        
+        {copiedConfig && copiedConfig.schedules.length > 0 && copiedConfig.companyId === companyId && (
+          <button
+            className="btn-pri btn-sm"
+            onClick={handlePasteConfig}
+            disabled={isLoading}
+            title="Pegar configuración copiada"
+          >
+            📥 Pegar configuración ({copiedConfig.schedules.length})
+          </button>
+        )}
+      </div>
+      {/* #end-section */}
+
+      {/* Editor de día */}
       {editingDay && (
         <ScheduleDayEditor
           dayOfWeek={editingDay}
@@ -142,9 +247,9 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
           onCancel={() => setEditingDay(null)}
         />
       )}
-    </>
+    </div>
   );
-  // #end-section
 };
+
 export default ScheduleRow;
 // #end-component
