@@ -5,13 +5,15 @@ import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
 import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
+import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
+import BranchNameModal from '../../../components/BranchNameModal/BranchNameModal';
 import CompanyFormModal from '../../../components/CompanyFormModal/CompanyFormModal';
 import { useCompanies } from '../../../hooks/useCompanies';
-import type { Company } from '../../../store/Companies.types';
+import { useBranches } from '../../../hooks/useBranches';
+import type { Company, CompanyFormData } from '../../../store/Companies.types';
+import type { BranchWithLocation } from '../../../store/Branches.types';
 import styles from './CompaniesPage.module.css';
-import type { CompanyFormData } from '../../../store/Companies.types';
 // #end-section
-
 // #component CompaniesPage
 const CompaniesPage = () => {
   // #variable appLogoUrl
@@ -29,41 +31,36 @@ const CompaniesPage = () => {
     checkNameAvailability
   } = useCompanies();
   // #end-hook
-  // #state [showModa, setShowModal]
+  // #state [showModal, setShowModal]
   const [showModal, setShowModal] = useState(false);
   // #end-state
   // #state [editingCompany, setEditingCompany]
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined);
   // #end-state
-  // #state [expandedCompanyId, setExpandedCompanyId] 
-  const [expandedCompanyId, setExpandedCompanyId] = useState<number | null>(null);
-  // #end-state
-
   // #event -> loadCompanies
   useEffect(() => {
     loadCompanies();
   }, [loadCompanies]);
   // #end-event
-
-  // #function handleOpenCreateModal - open the modal with the form for create a new company
+  // #function handleOpenCreateModal
   const handleOpenCreateModal = () => {
     setEditingCompany(undefined);
     setShowModal(true);
   };
   // #end-function
-  // #function handleOpenEditModal - handle when open modal for edit the company's name
+  // #function handleOpenEditModal
   const handleOpenEditModal = (company: Company) => {
     setEditingCompany(company);
     setShowModal(true);
   };
   // #end-function
-  // #function handleCloseModal - close modal window
+  // #function handleCloseModal
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingCompany(undefined);
   };
   // #end-function
-  // #function handleSubmit - create or update company and then close de modal window
+  // #function handleSubmit
   const handleSubmit = async (data: CompanyFormData) => {
     if (editingCompany) {
       await updateCompany(editingCompany.id, data);
@@ -73,26 +70,17 @@ const CompaniesPage = () => {
     handleCloseModal();
   };
   // #end-function
-  // #function handleDelete - delete company and its branches
+  // #function handleDelete
   const handleDelete = async (id: number) => {
     if (confirm('¿Estás seguro de eliminar esta compañía y todas sus sucursales?')) {
       await deleteCompany(id);
-      // Si la compañía eliminada estaba expandida, colapsar
-      if (expandedCompanyId === id) {
-        setExpandedCompanyId(null);
-      }
     }
-  };
-  // #end-function
-  // #function handleToggleCompany - logic when expand an specific company
-  const handleToggleCompany = (companyId: number) => {
-    setExpandedCompanyId(expandedCompanyId === companyId ? null : companyId);
   };
   // #end-function
   // #section return
   return (
     <div className={styles.container}>
-      {/* #section AppHeader - header for the page */}
+      {/* #section AppHeader */}
       <AppHeader
         appLogoUrl={appLogoUrl}
         appName="Kitchen Solutions"
@@ -104,12 +92,19 @@ const CompaniesPage = () => {
       <div className={styles.content}>
         <DashboardNavbar />
         <main className={styles.main}>
-          {/* #section - title */}
+          {/* #section Title */}
           <div className={styles.header}>
             <h1 className={styles.title}>Mis Compañías</h1>
+            <button 
+              className="btn-pri btn-md" 
+              onClick={handleOpenCreateModal}
+            >
+              + Nueva Compañía
+            </button>
           </div>
           {/* #end-section */}
-          {/* #section Error - show errors */}
+
+          {/* #section Error */}
           {error && (
             <div className={styles.error}>
               <p>❌ {error}</p>
@@ -119,12 +114,14 @@ const CompaniesPage = () => {
             </div>
           )}
           {/* #end-section */}
-          {/* #section Loading - show loader while load companies list */}
+
+          {/* #section Loading */}
           {isLoading && companies.length === 0 && (
             <div className={styles.loading}>Cargando compañías...</div>
           )}
           {/* #end-section */}
-          {/* #section Empty State - show only if no companies created */}
+
+          {/* #section Empty State */}
           {!isLoading && companies.length === 0 && !error && (
             <EmptyState
               title="No hay compañías"
@@ -135,18 +132,19 @@ const CompaniesPage = () => {
             />
           )}
           {/* #end-section */}
-          {/* #section Show Companies list - show only if no companies created */}
+
+          {/* #section Companies List */}
           {companies.length > 0 && (
             <div className={styles.accordionList}>
               {companies.map((company) => (
                 <CompanyAccordion
                   key={company.id}
                   company={company}
-                  isExpanded={expandedCompanyId === company.id}
-                  onToggle={() => handleToggleCompany(company.id)}
                   onEdit={() => handleOpenEditModal(company)}
                   onDelete={() => handleDelete(company.id)}
-                />
+                >
+                  <BranchesSection companyId={company.id} />
+                </CompanyAccordion>
               ))}
             </div>
           )}
@@ -154,7 +152,7 @@ const CompaniesPage = () => {
         </main>
       </div>
 
-      {/* #section CompanyFormModal - Modal window for create a new company */}
+      {/* #section CompanyFormModal */}
       {showModal && (
         <CompanyFormModal
           company={editingCompany}
@@ -168,6 +166,137 @@ const CompaniesPage = () => {
   );
   // #end-section
 };
-
 export default CompaniesPage;
+// #end-component
+// #component BranchesSection
+/**
+ * Componente interno que maneja la sección de sucursales de una compañía.
+ * Encapsula toda la lógica de CRUD de branches, modales y estados.
+ */
+function BranchesSection({ companyId }: { companyId: number }) {
+  // #hook useBranches
+  const {
+    branches,
+    isLoading,
+    loadBranches,
+    createBranch,
+    updateBranchName,
+    deleteBranch
+  } = useBranches(companyId);
+  // #end-hook
+  // #state [showNameModal, setShowNameModal]
+  const [showNameModal, setShowNameModal] = useState(false);
+  // #end-state
+  // #state [selectedBranch, setSelectedBranch]
+  const [selectedBranch, setSelectedBranch] = useState<BranchWithLocation | null>(null);
+  // #end-state
+  // #event - Load branches on mount
+  useEffect(() => {
+    loadBranches();
+  }, [loadBranches]);
+  // #end-event
+  // #event handleCreateBranch
+  const handleCreateBranch = async () => {
+    try {
+      await createBranch({ companyId });
+    } catch (error) {
+      console.error('Error creando sucursal:', error);
+    }
+  };
+  // #end-event
+  // #event handleEditName
+  const handleEditName = (branch: BranchWithLocation) => {
+    setSelectedBranch(branch);
+    setShowNameModal(true);
+  };
+  // #end-event
+  // #event handleDeleteBranch
+  const handleDeleteBranch = async (branchId: number) => {
+    if (confirm('¿Estás seguro de eliminar esta sucursal?')) {
+      try {
+        await deleteBranch(branchId);
+      } catch (error) {
+        console.error('Error eliminando sucursal:', error);
+      }
+    }
+  };
+  // #end-event
+  // #event handleSaveName
+  const handleSaveName = async (name: string | null) => {
+    if (!selectedBranch) return;
+    try {
+      await updateBranchName(selectedBranch.id, name);
+      await loadBranches(true);
+      setShowNameModal(false);
+      setSelectedBranch(null);
+    } catch (error) {
+      console.error('Error guardando nombre:', error);
+      throw error;
+    }
+  };
+  // #end-event
+  // #section return
+  return (
+    <>
+      <div className={styles.branchesSection}>
+        {/* #section Header */}
+        <div className={styles.branchesHeader}>
+          <h4 className={styles.sectionTitle}>Sucursales</h4>
+          <button
+            className="btn-pri btn-sm"
+            onClick={handleCreateBranch}
+            disabled={isLoading}
+          >
+            + Nueva Sucursal
+          </button>
+        </div>
+        {/* #end-section */}
+
+        {/* #section Loading state */}
+        {isLoading && branches.length === 0 && (
+          <p className={styles.loading}>Cargando sucursales...</p>
+        )}
+        {/* #end-section */}
+
+        {/* #section Empty state */}
+        {!isLoading && branches.length === 0 && (
+          <p className={styles.emptyMessage}>
+            No hay sucursales. Crea la primera para comenzar.
+          </p>
+        )}
+        {/* #end-section */}
+
+        {/* #section Branch list */}
+        {!isLoading && branches.length > 0 && (
+          <div className={styles.branchList}>
+            {branches.map((branch, index) => (
+              <BranchAccordion
+                key={branch.id}
+                branch={branch}
+                displayIndex={index + 1}
+                onEdit={() => handleEditName(branch)}
+                onDelete={() => handleDeleteBranch(branch.id)}
+              />
+            ))}
+          </div>
+        )}
+        {/* #end-section */}
+      </div>
+
+      {/* #section Modal for edit branch name */}
+      {showNameModal && selectedBranch && (
+        <BranchNameModal
+          branch={selectedBranch}
+          onClose={() => {
+            setShowNameModal(false);
+            setSelectedBranch(null);
+          }}
+          onSave={handleSaveName}
+        />
+      )}
+      {/* #end-section */}
+    </>
+  );
+  // #end-section
+}
 // #end-component

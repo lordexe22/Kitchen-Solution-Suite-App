@@ -39,18 +39,6 @@
 }
 /* #end-style */
 
-/* #style .expandIcon */
-.expandIcon {
-  font-size: 1rem;
-  color: #6b7280;
-  transition: transform 200ms ease;
-}
-
-.expandIcon.isExpanded {
-  transform: rotate(90deg);
-}
-/* #end-style */
-
 /* #style .logo */
 .logo {
   width: 60px;
@@ -77,12 +65,11 @@
 /* #style .info */
 .info {
   flex: 1;
-  min-width: 0;
 }
 /* #end-style */
 
-/* #style .companyName */
-.companyName {
+/* #style .name */
+.name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
@@ -90,8 +77,8 @@
 }
 /* #end-style */
 
-/* #style .companyDescription */
-.companyDescription {
+/* #style .description */
+.description {
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
@@ -102,12 +89,19 @@
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 /* #end-style */
 
-/* #style .children */
-.children {
+/* #style .arrow */
+.arrow {
+  font-size: 1rem;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+/* #end-style */
+
+/* #style .content */
+.content {
   padding: 1.5rem;
   background-color: #f9fafb;
   border-top: 1px solid #e5e7eb;
@@ -123,5 +117,58 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+/* #end-style */
+
+/* #style .companyActions */
+.companyActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+/* #end-style */
+
+/* #style .branchesSection */
+.branchesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* #end-style */
+
+/* #style .branchesHeader */
+.branchesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* #end-style */
+
+/* #style .sectionTitle */
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+/* #end-style */
+
+/* #style .loading */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+/* #end-style */
+
+/* #style .emptyMessage */
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-style: italic;
 }
 /* #end-style */

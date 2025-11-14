@@ -1,237 +1,161 @@
 /* src/components/CompanyAccordion/CompanyAccordion.tsx */
 // #section imports
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import type { Company } from '../../store/Companies.types';
-import { useBranches } from '../../hooks/useBranches';
-import BranchList from '../BranchList/BranchList';
-import BranchLocationModal from '../BranchLocationModal/BranchLocationModal';
-import BranchNameModal from '../BranchNameModal/BranchNameModal';
-import BranchSocialsModal from '../BranchSocialsModal/BranchSocialsModal';
-import type { BranchWithLocation } from '../../store/Branches.types';
 import styles from './CompanyAccordion.module.css';
-import type { BranchLocationFormData } from '../../store/Branches.types';
 // #end-section
+
 // #interface CompanyAccordionProps
 interface CompanyAccordionProps {
   company: Company;
-  isExpanded: boolean;
-  onToggle: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+  children?: ReactNode;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onToggle?: () => void;
 }
 // #end-interface
 
 // #component CompanyAccordion
-const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: CompanyAccordionProps) => {
-  // #hook useBranches
-  const {
-    branches,
-    isLoading,
-    loadBranches,
-    createBranch,
-    updateBranchName,
-    deleteBranch,
-    saveLocation,
-    loadBranchSocials,
-    createSocial,
-    updateSocial,
-    deleteSocial,
-    applySocialsToAllBranches
-  } = useBranches(company.id);
-  // #end-hook
-  // #state [showLocationModal, setShowLocationModal]
-  const [showLocationModal, setShowLocationModal] = useState(false);
+/**
+ * Componente acordeón reutilizable para mostrar información de una compañía.
+ * 
+ * Características:
+ * - Header con logo, nombre y descripción de la compañía
+ * - Botones opcionales de editar/eliminar (solo se muestran si se pasan los callbacks)
+ * - Contenido expandible mediante children (cualquier componente)
+ * - Estado de expansión interno con indicador visual
+ * - Animaciones suaves de apertura/cierre
+ */
+const CompanyAccordion = ({ company, children, onEdit, onDelete, onToggle }: CompanyAccordionProps) => {
+  // #const allowEdit, allowDelete, hasChildren
+  const allowEdit = typeof onEdit === 'function';
+  const allowDelete = typeof onDelete === 'function';
+  const hasChildren = !!children;
+  // #end-const
+
+  // #state [isExpanded, setIsExpanded]
+  const [isExpanded, setIsExpanded] = useState(false);
   // #end-state
-  // #state [showNameModal, setShowNameModal]
-  const [showNameModal, setShowNameModal] = useState(false);
-  // #end-state
-  // #state [showSocialsModal, setShowSocialsModal]
-  const [showSocialsModal, setShowSocialsModal] = useState(false);
-  // #end-state
-  // #state [selectedBranch, setSelectedBranch]
-  const [selectedBranch, setSelectedBranch] = useState<BranchWithLocation | null>(null);
-  // #end-state
-  // #event handleToggle - fetch branches if expand company's branches
-  const handleToggle = async () => {
-    if (!isExpanded) {
-      await loadBranches();
+
+  // #event handleToggle
+  /**
+   * Maneja el evento de expandir/colapsar el acordeón.
+   * Cambia el estado interno y notifica al padre si existe callback.
+   */
+  const handleToggle = () => {
+    setIsExpanded(prev => {
+      const newState = !prev;
+      // Notificar al padre después de cambiar estado
+      if (onToggle) onToggle();
+      return newState;
+    });
+  };
+  // #end-event
+
+  // #event handleEdit
+  /**
+   * Maneja el evento de edición.
+   * Detiene la propagación para evitar expandir/colapsar.
+   */
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allowEdit) onEdit();
+  };
+  // #end-event
+
+  // #event handleDelete
+  /**
+   * Maneja el evento de eliminación.
+   * Detiene la propagación para evitar expandir/colapsar.
+   */
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allowDelete) onDelete();
+  };
+  // #end-event
+
+  // #function getCompanyInitials
+  /**
+   * Obtiene las iniciales del nombre de la compañía para mostrar
+   * como placeholder cuando no hay logo.
+   */
+  const getCompanyInitials = (): string => {
+    const words = company.name.trim().split(' ');
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
     }
-    onToggle();
+    return (words[0][0] + words[1][0]).toUpperCase();
   };
-  // #end-event
-  // #event handleCreateBranch
-  const handleCreateBranch = async () => {
-    try {
-      await createBranch({ companyId: company.id });
-    } catch (error) {
-      console.error('Error creando sucursal:', error);
-    }
-  };
-  // #end-event
-  // #event handleEditLocation
-  const handleEditLocation = (branch: BranchWithLocation) => {
-    setSelectedBranch(branch);
-    setShowLocationModal(true);
-  };
-  // #end-event
-  // #event handleEditName
-  const handleEditName = (branch: BranchWithLocation) => {
-    setSelectedBranch(branch);
-    setShowNameModal(true);
-  };
-  // #end-event
-  // #event handleEditSocials
-  const handleEditSocials = (branch: BranchWithLocation) => {
-    setSelectedBranch(branch);
-    setShowSocialsModal(true);
-  };
-  // #end-event
-  // #event handleDeleteBranch
-  const handleDeleteBranch = async (branchId: number) => {
-    if (confirm('¿Estás seguro de eliminar esta sucursal?')) {
-      try {
-        await deleteBranch(branchId);
-      } catch (error) {
-        console.error('Error eliminando sucursal:', error);
-      }
-    }
-  };
-  // #end-event
-  // #event handleSaveLocation
-  const handleSaveLocation = async (data: BranchLocationFormData) => {
-    if (!selectedBranch) return;
-    try {
-      await saveLocation(selectedBranch.id, data);
-      await loadBranches(true); // Refrescar
-      setShowLocationModal(false);
-      setSelectedBranch(null);
-    } catch (error) {
-      console.error('Error guardando ubicación:', error);
-      throw error;
-    }
-  };
-  // #end-event
-  // #event handleSaveName
-  const handleSaveName = async (name: string | null) => {
-    if (!selectedBranch) return;
-    try {
-      await updateBranchName(selectedBranch.id, name);
-      await loadBranches(true); // Refrescar
-      setShowNameModal(false);
-      setSelectedBranch(null);
-    } catch (error) {
-      console.error('Error guardando nombre:', error);
-      throw error;
-    }
-  };
-  // #end-event
+  // #end-function
+
   // #section return
   return (
-    <>
-      <div className={styles.accordion}>
-        {/* #section Header */}
-        <div className={styles.header} onClick={handleToggle}>
-          <div className={styles.headerLeft}>
-            <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
-            <h3 className={styles.companyName}>{company.name}</h3>
-            {company.description && (
-              <span className={styles.description}>{company.description}</span>
+    <div className={styles.accordion}>
+      {/* #section Header */}
+      <div className={styles.header} onClick={handleToggle}>
+        {/* #section Header Left - show company data */}
+        <div className={styles.headerLeft}>
+          <span className={`${styles.expandIcon} ${isExpanded ? styles.isExpanded : ''}`}>
+            ▶
+          </span>
+
+          {/* #section Logo */}
+          <div className={styles.logo}>
+            {company.logoUrl ? (
+              <img src={company.logoUrl} alt={`Logo de ${company.name}`} />
+            ) : (
+              getCompanyInitials()
             )}
           </div>
-          <div className={styles.headerRight} onClick={(e) => e.stopPropagation()}>
-            <button className="btn-sec btn-sm" onClick={onEdit}>
-              ✏️ Editar
-            </button>
-            <button className="btn-danger btn-sm" onClick={onDelete}>
-              🗑️ Eliminar
-            </button>
+          {/* #end-section */}
+
+          {/* #section Company Info */}
+          <div className={styles.info}>
+            <h3 className={styles.companyName}>
+              {company.name}
+            </h3>
+            {company.description && (
+              <p className={styles.companyDescription}>
+                {company.description}
+              </p>
+            )}
           </div>
+          {/* #end-section */}
         </div>
         {/* #end-section */}
-        {/* #section Expanded content of a specific branch */}
-        {isExpanded && (
-          <div className={styles.content}>
-            <div className={styles.branchesSection}>
-              <div className={styles.branchesHeader}>
-                <h4 className={styles.sectionTitle}>Sucursales</h4>
-                <button
-                  className="btn-pri btn-sm"
-                  onClick={handleCreateBranch}
-                  disabled={isLoading}
-                >
-                  + Nueva Sucursal
-                </button>
-              </div>
 
-              {isLoading && branches.length === 0 && (
-                <p className={styles.loading}>Cargando sucursales...</p>
-              )}
-
-              {!isLoading && branches.length === 0 && (
-                <p className={styles.empty}>
-                  No hay sucursales. Crea la primera para comenzar.
-                </p>
-              )}
-
-              {!isLoading && branches.length > 0 && (
-                <BranchList
-                  branches={branches}
-                  onEditLocation={handleEditLocation}
-                  onEditName={handleEditName}
-                  onEditSocials={handleEditSocials}
-                  onDelete={handleDeleteBranch}
-                />
-              )}
-            </div>
-          </div>
-        )}
+        {/* #section Header Right - show action buttons */}
+        <div className={styles.headerRight}>
+          {allowEdit && (
+            <button 
+              className="btn-sec btn-sm" 
+              onClick={handleEdit}
+            >
+              ✏️ Editar
+            </button>
+          )}
+          {allowDelete && (
+            <button 
+              className="btn-danger btn-sm" 
+              onClick={handleDelete}
+            >
+              🗑️ Eliminar
+            </button>
+          )}
+        </div>
         {/* #end-section */}
       </div>
+      {/* #end-section */}
 
-
-      {/* #section Modal for create new branches */}
-      {showLocationModal && selectedBranch && (
-        <BranchLocationModal
-          branch={selectedBranch}
-          onClose={() => {
-            setShowLocationModal(false);
-            setSelectedBranch(null);
-          }}
-          onSave={handleSaveLocation}
-        />
+      {/* #section Expanded content */}
+      {isExpanded && hasChildren && (
+        <div className={styles.children}>
+          {children}
+        </div>
       )}
       {/* #end-section */}
-      {/* #section Modal for edit the branch's name */}
-      {showNameModal && selectedBranch && (
-        <BranchNameModal
-          branch={selectedBranch}
-          onClose={() => {
-            setShowNameModal(false);
-            setSelectedBranch(null);
-          }}
-          onSave={handleSaveName}
-        />
-      )}
-      {/* #end-section */}
-      {/* #section Modal for edit Social Media branch data */}
-      {showSocialsModal && selectedBranch && (
-        <BranchSocialsModal
-          branch={selectedBranch}
-          companyId={company.id}
-          totalBranches={branches.length}
-          onClose={() => {
-            setShowSocialsModal(false);
-            setSelectedBranch(null);
-          }}
-          onLoadSocials={loadBranchSocials}
-          onCreateSocial={createSocial}
-          onUpdateSocial={updateSocial}
-          onDeleteSocial={deleteSocial}
-          onApplyToAll={applySocialsToAllBranches}
-        />
-      )}
-      {/* #end-section */}
-    </>
+    </div>
   );
   // #end-section
 };

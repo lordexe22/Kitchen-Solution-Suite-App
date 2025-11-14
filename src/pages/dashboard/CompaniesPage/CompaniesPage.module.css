@@ -1,5 +1,4 @@
 /* src/pages/dashboard/CompaniesPage/CompaniesPage.module.css */
-
 /* #style .container */
 .container {
   width: 100vw;
@@ -9,7 +8,6 @@
   overflow: hidden;
 }
 /* #end-style */
-
 /* #style .content */
 .content {
   display: flex;
@@ -17,7 +15,6 @@
   overflow: hidden;
 }
 /* #end-style */
-
 /* #style .main */
 .main {
   flex: 1;
@@ -26,7 +23,6 @@
   background-color: #f9fafb;
 }
 /* #end-style */
-
 /* #style .header */
 .header {
   display: flex;
@@ -35,7 +31,6 @@
   margin-bottom: 2rem;
 }
 /* #end-style */
-
 /* #style .title */
 .title {
   font-size: 2rem;
@@ -44,7 +39,6 @@
   margin: 0;
 }
 /* #end-style */
-
 /* #style .error */
 .error {
   background-color: #fef2f2;
@@ -63,7 +57,6 @@
   font-weight: 500;
 }
 /* #end-style */
-
 /* #style .loading */
 .loading {
   text-align: center;
@@ -72,11 +65,48 @@
   font-size: 1.1rem;
 }
 /* #end-style */
-
 /* #style .accordionList */
 .accordionList {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+/* #end-style */
+/* #style .branchesSection */
+.branchesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* #end-style */
+/* #style .branchesHeader */
+.branchesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+/* #end-style */
+/* #style .sectionTitle */
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+/* #end-style */
+/* #style .emptyMessage */
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+/* #end-style */
+/* #style .branchList */
+.branchList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 /* #end-style */

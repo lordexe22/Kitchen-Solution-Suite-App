@@ -1,13 +1,12 @@
 /* src/components/ScheduleRow/ScheduleRow.tsx */
 // #section imports
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import type { BranchWithLocation, BranchSchedule, DayOfWeek } from '../../store/Branches.types';
 import { DAYS_OF_WEEK } from '../../store/Branches.types';
 import ScheduleDayEditor from '../ScheduleDayEditor/ScheduleDayEditor';
 import styles from './ScheduleRow.module.css';
 import '/src/styles/button.css';
 // #end-section
-
 // #interface ScheduleRowProps
 interface ScheduleRowProps {
   /** Sucursal */
@@ -22,17 +21,15 @@ interface ScheduleRowProps {
   isLoading?: boolean;
 }
 // #end-interface
-
 // #component ScheduleRow
 /**
  * Componente que muestra una fila con los horarios de una sucursal.
  * Permite editar cada día individualmente.
  */
 const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoading }: ScheduleRowProps) => {
+  // #state [editingDay, setEditingDay]
   const [editingDay, setEditingDay] = useState<DayOfWeek | null>(null);
-  const [editorPosition, setEditorPosition] = useState<{ top: number; left: number } | undefined>();
-  const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
+  // #end-state
   // #function getScheduleForDay
   /**
    * Obtiene el horario de un día específico.
@@ -41,7 +38,6 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     return schedules.find(s => s.dayOfWeek === day);
   };
   // #end-function
-
   // #function formatSchedule
   /**
    * Formatea el horario para mostrar en la celda.
@@ -53,56 +49,35 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     return `${schedule.openTime}-${schedule.closeTime}`;
   };
   // #end-function
-
   // #function handleCellClick
   /**
    * Maneja el click en una celda de día.
    */
   const handleCellClick = (day: DayOfWeek) => {
-    const cellElement = cellRefs.current[day];
-    if (cellElement) {
-      const rect = cellElement.getBoundingClientRect();
-      setEditorPosition({
-        top: rect.bottom + 8,
-        left: rect.left
-      });
-    }
     setEditingDay(day);
   };
   // #end-function
-
   // #function handleSaveSchedule
   /**
    * Guarda el horario editado.
    */
   const handleSaveSchedule = async (data: { openTime: string | null; closeTime: string | null; isClosed: boolean }) => {
-    if (!editingDay) return;
+    const updatedSchedules = schedules.map(s => 
+      s.dayOfWeek === editingDay
+        ? { ...s, ...data }
+        : s
+    );
 
-    // Crear una copia de los horarios actuales
-    const updatedSchedules = [...schedules];
-    
-    // Buscar si ya existe un horario para este día
-    const existingIndex = updatedSchedules.findIndex(s => s.dayOfWeek === editingDay);
-    
-    if (existingIndex >= 0) {
-      // Actualizar existente
-      updatedSchedules[existingIndex] = {
-        ...updatedSchedules[existingIndex],
-        openTime: data.openTime,
-        closeTime: data.closeTime,
-        isClosed: data.isClosed
-      };
-    } else {
-      // Crear nuevo
+    // Si no existe un schedule para este día, crearlo
+    if (!schedules.find(s => s.dayOfWeek === editingDay)) {
+      const now = new Date().toISOString();
       updatedSchedules.push({
-        id: 0, // Temporal, el backend asignará el ID real
+        id: 0, // Temporal, el backend asignará el ID
         branchId: branch.id,
-        dayOfWeek: editingDay,
-        openTime: data.openTime,
-        closeTime: data.closeTime,
-        isClosed: data.isClosed,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        dayOfWeek: editingDay!,
+        createdAt: now,
+        updatedAt: now,
+        ...data
       });
     }
 
@@ -110,50 +85,33 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
     setEditingDay(null);
   };
   // #end-function
-
   // #function handleApplyToAll
   /**
    * Aplica los horarios de esta sucursal a todas.
    */
   const handleApplyToAll = async () => {
-    if (schedules.length === 0) {
-      alert('No hay horarios configurados para aplicar');
-      return;
-    }
-
-    if (confirm('¿Aplicar estos horarios a todas las sucursales de la empresa?\n\nEsto reemplazará los horarios existentes.')) {
+    if (confirm('¿Aplicar estos horarios a todas las sucursales de la compañía?')) {
       await onApplyToAll(branch.id);
     }
   };
   // #end-function
-
+  // #section return
   return (
     <>
-      <div className={styles.row}>
+      <div className={styles.scheduleRow}>
         {/* Columna: Nombre de sucursal */}
-        <div className={styles.branchInfo}>
-          <span className={styles.branchName}>
-            📍 {branch.name || `Sucursal #${branch.id}`}
-          </span>
-          {branch.location && (
-            <span className={styles.branchLocation}>
-              {branch.location.city}, {branch.location.state}
-            </span>
-          )}
+        <div className={styles.branchName}>
+          {branch.name || `Sucursal ${branch.id}`}
         </div>
 
         {/* Columnas: Días de la semana */}
         {DAYS_OF_WEEK.map(day => {
           const schedule = getScheduleForDay(day.value);
-          const isClosed = !schedule || schedule.isClosed;
-          
+          console.log(day.value, schedule);
           return (
             <div
               key={day.value}
-              ref={el => { 
-                if (el) cellRefs.current[day.value] = el;
-              }}
-              className={`${styles.dayCell} ${isClosed ? styles.dayClosed : styles.dayOpen}`}
+              className={`${styles.dayCell} ${!schedule || schedule.isClosed ? styles.dayClosed : styles.dayOpen}`}
               onClick={() => !isLoading && handleCellClick(day.value)}
               title={`Click para editar ${day.label}`}
             >
@@ -175,19 +133,18 @@ const ScheduleRow = ({ branch, schedules, onUpdateSchedules, onApplyToAll, isLoa
         </div>
       </div>
 
-      {/* Editor de día */}
+      {/* Editor de día - Modal centrado */}
       {editingDay && (
         <ScheduleDayEditor
           dayOfWeek={editingDay}
           schedule={getScheduleForDay(editingDay)}
           onSave={handleSaveSchedule}
           onCancel={() => setEditingDay(null)}
-          position={editorPosition}
         />
       )}
     </>
   );
+  // #end-section
 };
-
 export default ScheduleRow;
 // #end-component

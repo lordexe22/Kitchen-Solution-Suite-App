@@ -1,5 +1,6 @@
+// #section imports
 import type { DropdownMenuItem, UserDisplayMode } from './AppHeader.types';
-
+// #end-section
 // #section Textos por defecto
 /**
  * Textos por defecto del AppHeader
@@ -13,7 +14,6 @@ export const APP_HEADER_TEXTS = {
   notificationsButton: 'Notificaciones',
 } as const;
 // #end-section
-
 // #section Íconos por defecto
 /**
  * URLs/símbolos de íconos por defecto
@@ -27,7 +27,6 @@ export const APP_HEADER_ICONS = {
   dropdownArrow: '▼',
 } as const;
 // #end-section
-
 // #section Configuración del menú desplegable
 /**
  * Función para crear los items del dropdown del usuario
@@ -66,7 +65,6 @@ export const createDropdownMenuItems = (callbacks: {
   },
 ];
 // #end-section
-
 // #section Opciones de configuración visual
 /**
  * Opciones de configuración visual del AppHeader

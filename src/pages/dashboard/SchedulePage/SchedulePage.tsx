@@ -4,131 +4,169 @@ import { useEffect, useState } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
+import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
+import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
 import ScheduleRow from '../../../components/ScheduleRow/ScheduleRow';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
 import type { BranchSchedule } from '../../../store/Branches.types';
-import type { Company } from '../../../store/Companies.types';
 import styles from './SchedulePage.module.css';
 // #end-section
+
 // #component SchedulesPage
 const SchedulesPage = () => {
+  // #variable appLogoUrl
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
-  const { companies, loadCompanies, isLoading: isLoadingCompanies } = useCompanies();
-  const [error, setError] = useState<string | null>(null);
+  // #end-variable
 
-  // Cargar empresas al montar
+  // #hook useCompanies
+  const { 
+    companies, 
+    loadCompanies, 
+    isLoading: isLoadingCompanies 
+  } = useCompanies();
+  // #end-hook
+
+  // #state [error, setError]
+  const [error, setError] = useState<string | null>(null);
+  // #end-state
+
+  // #effect - Load companies on mount
   useEffect(() => {
     loadCompanies();
   }, [loadCompanies]);
+  // #end-effect
 
+  // #section return
   return (
     <div className={styles.container}>
+      {/* #section AppHeader */}
       <AppHeader
         appLogoUrl={appLogoUrl}
         appName="Kitchen Solutions"
         onLogin={() => {}}
         onLogout={() => {}}
       />
+      {/* #end-section */}
+
       <div className={styles.content}>
         <DashboardNavbar />
         <main className={styles.main}>
-          {/* Header */}
+          {/* #section Header */}
           <div className={styles.header}>
             <h1 className={styles.title}>🕐 Horarios de Atención</h1>
             <p className={styles.subtitle}>
               Configura los horarios de todas tus sucursales. Click en cada día para editar.
             </p>
           </div>
+          {/* #end-section */}
 
-          {/* Error */}
+          {/* #section Error */}
           {error && (
             <div className={styles.error}>
               <p>❌ {error}</p>
               <button onClick={() => setError(null)}>✕</button>
             </div>
           )}
+          {/* #end-section */}
 
-          {/* Loading */}
+          {/* #section Loading */}
           {isLoadingCompanies && (
-            <div className={styles.loading}>Cargando empresas...</div>
+            <div className={styles.loading}>Cargando compañías...</div>
           )}
+          {/* #end-section */}
 
-          {/* Empty State */}
+          {/* #section Empty State */}
           {!isLoadingCompanies && companies.length === 0 && (
             <EmptyState
-              title="No hay empresas"
-              description="Crea tu primera empresa para comenzar a configurar horarios"
+              title="No hay compañías"
+              description="Crea tu primera compañía para comenzar a configurar horarios"
               actionButtonText="Ir a Compañías"
               onActionClick={() => window.location.href = '/dashboard/companies'}
               icon="🏢"
             />
           )}
+          {/* #end-section */}
 
-          {/* Lista de empresas con sus sucursales */}
+          {/* #section Companies List */}
           {companies.length > 0 && (
-            <div className={styles.companiesList}>
-              {companies.map(company => (
-                <CompanySchedulesSection
+            <div className={styles.accordionList}>
+              {companies.map((company) => (
+                <CompanyAccordion
                   key={company.id}
                   company={company}
-                  onError={setError}
-                />
+                >
+                  <BranchSchedulesSection 
+                    companyId={company.id} 
+                    onError={setError}
+                  />
+                </CompanyAccordion>
               ))}
             </div>
           )}
+          {/* #end-section */}
         </main>
       </div>
     </div>
   );
+  // #end-section
 };
 
 export default SchedulesPage;
 // #end-component
-// #component CompanySchedulesSection
-/**
- * Sección de horarios para una compañía.
- * Carga sucursales y horarios automáticamente al montar.
- */
-interface CompanySchedulesSectionProps {
-  company: Company;
-  onError: (error: string) => void;
-}
 
-const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionProps) => {
+// #component BranchSchedulesSection
+/**
+ * Componente interno que maneja la sección de horarios de sucursales.
+ * Carga branches, schedules y renderiza BranchAccordion expandibles.
+ */
+function BranchSchedulesSection({ 
+  companyId, 
+  onError 
+}: { 
+  companyId: number; 
+  onError: (error: string) => void;
+}) {
+  // #hook useBranches
   const { 
     branches, 
+    isLoading,
     loadBranches, 
-    isLoading: isLoadingBranches, 
     loadBranchSchedules, 
     updateSchedules, 
     applySchedulesToAll,
     updateBranchSchedules 
-  } = useBranches(company.id);
-  
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [loadingBranchId, setLoadingBranchId] = useState<number | null>(null);
-  const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
-  const [branchSchedulesMap, setBranchSchedulesMap] = useState<Map<number, BranchSchedule[]>>(new Map());
+  } = useBranches(companyId);
+  // #end-hook
 
-  // ✅ CARGAR SUCURSALES AL MONTAR (no al expandir)
+  // #state [branchSchedulesMap, setBranchSchedulesMap]
+  const [branchSchedulesMap, setBranchSchedulesMap] = useState<Map<number, BranchSchedule[]>>(new Map());
+  // #end-state
+
+  // #state [isLoadingSchedules, setIsLoadingSchedules]
+  const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
+  // #end-state
+
+  // #state [loadingBranchId, setLoadingBranchId]
+  const [loadingBranchId, setLoadingBranchId] = useState<number | null>(null);
+  // #end-state
+
+  // #effect - Load branches on mount
   useEffect(() => {
     loadBranches();
   }, [loadBranches]);
+  // #end-effect
 
-  // ✅ CARGAR HORARIOS CUANDO LAS SUCURSALES ESTÉN DISPONIBLES
+  // #effect - Load schedules when branches are available
   useEffect(() => {
     if (branches.length > 0 && !isLoadingSchedules) {
-      // Verificar si ya se cargaron los horarios
       const needsSchedules = branches.some(branch => !branchSchedulesMap.has(branch.id));
       
       if (needsSchedules) {
         setIsLoadingSchedules(true);
         
-        // Cargar horarios en paralelo
         Promise.all(
           branches.map(async (branch) => {
-            // Solo cargar si no tiene horarios ya
             if (!branchSchedulesMap.has(branch.id)) {
               try {
                 const schedules = await loadBranchSchedules(branch.id);
@@ -145,11 +183,9 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
       }
     }
   }, [branches, loadBranchSchedules, updateBranchSchedules, isLoadingSchedules, branchSchedulesMap]);
+  // #end-effect
 
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  };
-
+  // #event handleUpdateSchedules
   const handleUpdateSchedules = async (branchId: number, schedules: BranchSchedule[]) => {
     setLoadingBranchId(branchId);
     onError('');
@@ -163,8 +199,6 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
       }));
 
       const updatedSchedules = await updateSchedules(branchId, schedulesData);
-      
-      // Actualizar en el mapa local
       setBranchSchedulesMap(prev => new Map(prev).set(branchId, updatedSchedules));
       updateBranchSchedules(branchId, updatedSchedules);
       
@@ -175,7 +209,9 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
       setLoadingBranchId(null);
     }
   };
+  // #end-event
 
+  // #event handleApplyToAll
   const handleApplyToAll = async (sourceBranchId: number) => {
     onError('');
     setLoadingBranchId(sourceBranchId);
@@ -200,61 +236,57 @@ const CompanySchedulesSection = ({ company, onError }: CompanySchedulesSectionPr
       setLoadingBranchId(null);
     }
   };
+  // #end-event
 
+  // #section return
   return (
-    <div className={styles.companySection}>
-      {/* Header del acordeón */}
-      <button
-        className={`${styles.companyHeader} ${isExpanded ? styles.expanded : ''}`}
-        onClick={handleToggle}
-      >
-        <div className={styles.companyInfo}>
-          <h3 className={styles.companyName}>
-            {company.logoUrl && (
-              <img src={company.logoUrl} alt={company.name} className={styles.companyLogo} />
-            )}
-            {company.name}
-          </h3>
-          {company.description && (
-            <p className={styles.companyDescription}>{company.description}</p>
-          )}
+    <>
+      <div className={styles.branchesSection}>
+        {/* #section Header */}
+        <div className={styles.branchesHeader}>
+          <h4 className={styles.sectionTitle}>Sucursales</h4>
         </div>
-        <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
-      </button>
+        {/* #end-section */}
 
-      {/* Contenido expandible */}
-      {isExpanded && (
-        <div className={styles.companyContent}>
-          {(isLoadingBranches || isLoadingSchedules) && (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Cargando horarios...</p>
-            </div>
-          )}
+        {/* #section Loading state */}
+        {(isLoading || isLoadingSchedules) && branches.length === 0 && (
+          <p className={styles.loading}>Cargando horarios...</p>
+        )}
+        {/* #end-section */}
 
-          {!isLoadingBranches && !isLoadingSchedules && branches.length === 0 && (
-            <div className={styles.emptyState}>
-              <p>No hay sucursales en esta compañía</p>
-            </div>
-          )}
+        {/* #section Empty state */}
+        {!isLoading && !isLoadingSchedules && branches.length === 0 && (
+          <p className={styles.emptyMessage}>
+            No hay sucursales en esta compañía.
+          </p>
+        )}
+        {/* #end-section */}
 
-          {!isLoadingBranches && !isLoadingSchedules && branches.length > 0 && (
-            <div className={styles.branchesGrid}>
-              {branches.map((branch) => (
+        {/* #section Branch list */}
+        {branches.length > 0 && (
+          <div className={styles.branchList}>
+            {branches.map((branch, index) => (
+              <BranchAccordion
+                key={branch.id}
+                branch={branch}
+                displayIndex={index + 1}
+                expandable={true}
+              >
                 <ScheduleRow
-                  key={branch.id}
                   branch={branch}
                   schedules={branchSchedulesMap.get(branch.id) || []}
                   onUpdateSchedules={handleUpdateSchedules}
                   onApplyToAll={handleApplyToAll}
                   isLoading={loadingBranchId === branch.id}
                 />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+              </BranchAccordion>
+            ))}
+          </div>
+        )}
+        {/* #end-section */}
+      </div>
+    </>
   );
-};
+  // #end-section
+}
 // #end-component

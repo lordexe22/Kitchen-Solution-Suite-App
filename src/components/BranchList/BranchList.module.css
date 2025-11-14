@@ -1,5 +1,49 @@
 /* src/components/BranchList/BranchList.module.css */
 
+/* #style .branchesSection */
+.branchesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* #end-style */
+
+/* #style .branchesHeader */
+.branchesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+/* #end-style */
+
+/* #style .sectionTitle */
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+/* #end-style */
+
+/* #style .loading */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+/* #end-style */
+
+/* #style .emptyMessage */
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+/* #end-style */
+
 /* #style .list */
 .list {
   display: flex;

@@ -1,22 +1,20 @@
 /* src/App.tsx */
 // #section Imports
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAutoLogin } from "./hooks/useAutoLogin";
 import MainPage from "./pages/public/MainPage/MainPage";
 import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
 import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
 import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
 import ProductsPage from "./pages/dashboard/ProductsPage/ProductsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useAutoLogin } from "./hooks/useAutoLogin";
 import SchedulesPage from "./pages/dashboard/SchedulePage/SchedulePage";
 import SocialsPage from "./pages/dashboard/SocialsPage/SocialsPage";
 // #end-section
-
 // #component App
 function App() {
   const { isCheckingAuth } = useAutoLogin();
-
-  // #section return
+  // #section render load window while is loading user
   if (isCheckingAuth) {
     return (
       <div style={{ 
@@ -31,13 +29,14 @@ function App() {
       </div>
     );
   }
-
+  // #end-section
+  // #section render pages
   return (
     <Routes>
-      {/* Rutas públicas */}
+      {/* #route - public -- <MainPage /> */}
       <Route path="/" element={<MainPage />} />
-      
-      {/* Rutas protegidas del Dashboard */}
+      {/* #end-route */}
+      {/* #route - /dashboard -- <WelcomePage /> */}
       <Route 
         path="/dashboard" 
         element={
@@ -46,6 +45,8 @@ function App() {
           </ProtectedRoute>
         } 
       />
+      {/* #end-route */}
+      {/* #route - /dashboard/companies -- <CompaniesPage /> */}
       <Route 
         path="/dashboard/companies" 
         element={
@@ -54,6 +55,8 @@ function App() {
           </ProtectedRoute>
         } 
       />
+      {/* #end-route */}
+      {/* #route - /dashboard/employees -- <EmployeesPage /> */}
       <Route 
         path="/dashboard/employees" 
         element={
@@ -62,6 +65,8 @@ function App() {
           </ProtectedRoute>
         } 
       />
+      {/* #end-route */}
+      {/* #route - /dashboard/products -- <ProductsPage /> */}
       <Route 
         path="/dashboard/products" 
         element={
@@ -70,6 +75,8 @@ function App() {
           </ProtectedRoute>
         } 
       />
+      {/* #end-route */}
+      {/* #route - /dashboard/schedules -- <SchedulesPage /> */}
       <Route 
         path="/dashboard/schedules" 
         element={
@@ -78,7 +85,8 @@ function App() {
           </ProtectedRoute>
         } 
       />
-      
+      {/* #end-route       */}
+      {/* #route - /dashboard/socials -- <SocialsPage /> */}
         <Route 
           path="/dashboard/socials" 
           element={
@@ -87,9 +95,10 @@ function App() {
             </ProtectedRoute>
           } 
         />
-      
-      {/* Ruta por defecto */}
+      {/* #end-route       */}
+      {/* #route - default       */}
       <Route path="*" element={<Navigate to="/" />} />
+      {/* #end-route       */}
     </Routes>
   );
   // #end-section

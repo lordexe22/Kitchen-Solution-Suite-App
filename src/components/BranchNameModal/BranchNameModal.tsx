@@ -6,7 +6,6 @@ import styles from './BranchNameModal.module.css';
 import '/src/styles/modal.css';
 import '/src/styles/button.css';
 // #end-section
-
 // #interface BranchNameModalProps
 interface BranchNameModalProps {
   branch: BranchWithLocation;
@@ -14,7 +13,6 @@ interface BranchNameModalProps {
   onSave: (name: string | null) => Promise<void>;
 }
 // #end-interface
-
 // #component BranchNameModal
 const BranchNameModal = ({ branch, onClose, onSave }: BranchNameModalProps) => {
   const [name, setName] = useState<string>(branch.name || '');

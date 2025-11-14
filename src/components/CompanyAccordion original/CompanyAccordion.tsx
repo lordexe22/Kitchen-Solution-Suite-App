@@ -1,27 +1,28 @@
-/* src/components/BranchList/BranchList.tsx */
+/* src/components/CompanyAccordion/CompanyAccordion.tsx */
 // #section imports
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import type { Company } from '../../store/Companies.types';
 import { useBranches } from '../../hooks/useBranches';
-import BranchAccordion from '../BranchAccordion/BranchAccordion';
+import BranchList from '../BranchList/BranchList';
 import BranchLocationModal from '../BranchLocationModal/BranchLocationModal';
 import BranchNameModal from '../BranchNameModal/BranchNameModal';
 import BranchSocialsModal from '../BranchSocialsModal/BranchSocialsModal';
-import type { BranchWithLocation, BranchLocationFormData } from '../../store/Branches.types';
-import styles from './BranchList.module.css';
+import type { BranchWithLocation } from '../../store/Branches.types';
+import styles from './CompanyAccordion.module.css';
+import type { BranchLocationFormData } from '../../store/Branches.types';
 // #end-section
-
-// #interface BranchListProps
-interface BranchListProps {
-  companyId: number;
+// #interface CompanyAccordionProps
+interface CompanyAccordionProps {
+  company: Company;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 // #end-interface
 
-// #component BranchList
-/**
- * Componente que maneja la lista de sucursales de una compañía.
- * Encapsula toda la lógica de CRUD de branches, modales y estados.
- */
-const BranchList = ({ companyId }: BranchListProps) => {
+// #component CompanyAccordion
+const CompanyAccordion = ({ company, isExpanded, onToggle, onEdit, onDelete }: CompanyAccordionProps) => {
   // #hook useBranches
   const {
     branches,
@@ -36,62 +37,55 @@ const BranchList = ({ companyId }: BranchListProps) => {
     updateSocial,
     deleteSocial,
     applySocialsToAllBranches
-  } = useBranches(companyId);
+  } = useBranches(company.id);
   // #end-hook
-
   // #state [showLocationModal, setShowLocationModal]
   const [showLocationModal, setShowLocationModal] = useState(false);
   // #end-state
-
   // #state [showNameModal, setShowNameModal]
   const [showNameModal, setShowNameModal] = useState(false);
   // #end-state
-
   // #state [showSocialsModal, setShowSocialsModal]
   const [showSocialsModal, setShowSocialsModal] = useState(false);
   // #end-state
-
   // #state [selectedBranch, setSelectedBranch]
   const [selectedBranch, setSelectedBranch] = useState<BranchWithLocation | null>(null);
   // #end-state
-
-  // #effect - Load branches on mount
-  useEffect(() => {
-    loadBranches();
-  }, [loadBranches]);
-  // #end-effect
-
+  // #event handleToggle - fetch branches if expand company's branches
+  const handleToggle = async () => {
+    if (!isExpanded) {
+      await loadBranches();
+    }
+    onToggle();
+  };
+  // #end-event
   // #event handleCreateBranch
   const handleCreateBranch = async () => {
     try {
-      await createBranch({ companyId });
+      await createBranch({ companyId: company.id });
     } catch (error) {
       console.error('Error creando sucursal:', error);
     }
   };
   // #end-event
-
   // #event handleEditLocation
   const handleEditLocation = (branch: BranchWithLocation) => {
     setSelectedBranch(branch);
     setShowLocationModal(true);
   };
   // #end-event
-
   // #event handleEditName
   const handleEditName = (branch: BranchWithLocation) => {
     setSelectedBranch(branch);
     setShowNameModal(true);
   };
   // #end-event
-
   // #event handleEditSocials
   const handleEditSocials = (branch: BranchWithLocation) => {
     setSelectedBranch(branch);
     setShowSocialsModal(true);
   };
   // #end-event
-
   // #event handleDeleteBranch
   const handleDeleteBranch = async (branchId: number) => {
     if (confirm('¿Estás seguro de eliminar esta sucursal?')) {
@@ -103,13 +97,12 @@ const BranchList = ({ companyId }: BranchListProps) => {
     }
   };
   // #end-event
-
   // #event handleSaveLocation
   const handleSaveLocation = async (data: BranchLocationFormData) => {
     if (!selectedBranch) return;
     try {
       await saveLocation(selectedBranch.id, data);
-      await loadBranches(true);
+      await loadBranches(true); // Refrescar
       setShowLocationModal(false);
       setSelectedBranch(null);
     } catch (error) {
@@ -118,13 +111,12 @@ const BranchList = ({ companyId }: BranchListProps) => {
     }
   };
   // #end-event
-
   // #event handleSaveName
   const handleSaveName = async (name: string | null) => {
     if (!selectedBranch) return;
     try {
       await updateBranchName(selectedBranch.id, name);
-      await loadBranches(true);
+      await loadBranches(true); // Refrescar
       setShowNameModal(false);
       setSelectedBranch(null);
     } catch (error) {
@@ -133,58 +125,71 @@ const BranchList = ({ companyId }: BranchListProps) => {
     }
   };
   // #end-event
-
   // #section return
   return (
     <>
-      <div className={styles.branchesSection}>
+      <div className={styles.accordion}>
         {/* #section Header */}
-        <div className={styles.branchesHeader}>
-          <h4 className={styles.sectionTitle}>Sucursales</h4>
-          <button
-            className="btn-pri btn-sm"
-            onClick={handleCreateBranch}
-            disabled={isLoading}
-          >
-            + Nueva Sucursal
-          </button>
+        <div className={styles.header} onClick={handleToggle}>
+          <div className={styles.headerLeft}>
+            <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
+            <h3 className={styles.companyName}>{company.name}</h3>
+            {company.description && (
+              <span className={styles.description}>{company.description}</span>
+            )}
+          </div>
+          <div className={styles.headerRight} onClick={(e) => e.stopPropagation()}>
+            <button className="btn-sec btn-sm" onClick={onEdit}>
+              ✏️ Editar
+            </button>
+            <button className="btn-danger btn-sm" onClick={onDelete}>
+              🗑️ Eliminar
+            </button>
+          </div>
         </div>
         {/* #end-section */}
+        {/* #section Expanded content of a specific branch */}
+        {isExpanded && (
+          <div className={styles.content}>
+            <div className={styles.branchesSection}>
+              <div className={styles.branchesHeader}>
+                <h4 className={styles.sectionTitle}>Sucursales</h4>
+                <button
+                  className="btn-pri btn-sm"
+                  onClick={handleCreateBranch}
+                  disabled={isLoading}
+                >
+                  + Nueva Sucursal
+                </button>
+              </div>
 
-        {/* #section Loading state */}
-        {isLoading && branches.length === 0 && (
-          <p className={styles.loading}>Cargando sucursales...</p>
-        )}
-        {/* #end-section */}
+              {isLoading && branches.length === 0 && (
+                <p className={styles.loading}>Cargando sucursales...</p>
+              )}
 
-        {/* #section Empty state */}
-        {!isLoading && branches.length === 0 && (
-          <p className={styles.emptyMessage}>
-            No hay sucursales. Crea la primera para comenzar.
-          </p>
-        )}
-        {/* #end-section */}
+              {!isLoading && branches.length === 0 && (
+                <p className={styles.empty}>
+                  No hay sucursales. Crea la primera para comenzar.
+                </p>
+              )}
 
-        {/* #section Branch list */}
-        {!isLoading && branches.length > 0 && (
-          <div className={styles.list}>
-            {branches.map((branch, index) => (
-              <BranchAccordion
-                key={branch.id}
-                branch={branch}
-                displayIndex={index + 1}
-                onEditLocation={() => handleEditLocation(branch)}
-                onEditName={() => handleEditName(branch)}
-                onEditSocials={() => handleEditSocials(branch)}
-                onDelete={() => handleDeleteBranch(branch.id)}
-              />
-            ))}
+              {!isLoading && branches.length > 0 && (
+                <BranchList
+                  branches={branches}
+                  onEditLocation={handleEditLocation}
+                  onEditName={handleEditName}
+                  onEditSocials={handleEditSocials}
+                  onDelete={handleDeleteBranch}
+                />
+              )}
+            </div>
           </div>
         )}
         {/* #end-section */}
       </div>
 
-      {/* #section Modal for edit branch location */}
+
+      {/* #section Modal for create new branches */}
       {showLocationModal && selectedBranch && (
         <BranchLocationModal
           branch={selectedBranch}
@@ -196,8 +201,7 @@ const BranchList = ({ companyId }: BranchListProps) => {
         />
       )}
       {/* #end-section */}
-
-      {/* #section Modal for edit branch name */}
+      {/* #section Modal for edit the branch's name */}
       {showNameModal && selectedBranch && (
         <BranchNameModal
           branch={selectedBranch}
@@ -209,12 +213,11 @@ const BranchList = ({ companyId }: BranchListProps) => {
         />
       )}
       {/* #end-section */}
-
-      {/* #section Modal for edit branch socials */}
+      {/* #section Modal for edit Social Media branch data */}
       {showSocialsModal && selectedBranch && (
         <BranchSocialsModal
           branch={selectedBranch}
-          companyId={companyId}
+          companyId={company.id}
           totalBranches={branches.length}
           onClose={() => {
             setShowSocialsModal(false);
@@ -233,5 +236,5 @@ const BranchList = ({ companyId }: BranchListProps) => {
   // #end-section
 };
 
-export default BranchList;
+export default CompanyAccordion;
 // #end-component

@@ -1,6 +1,7 @@
 /* src/components/BranchAccordion/BranchAccordion.tsx */
 // #section imports
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import type { BranchWithLocation } from '../../store/Branches.types';
 import styles from './BranchAccordion.module.css';
 // #end-section
@@ -9,28 +10,83 @@ import styles from './BranchAccordion.module.css';
 interface BranchAccordionProps {
   branch: BranchWithLocation;
   displayIndex: number;
-  onEditLocation: () => void;
-  onEditName: () => void;
-  onEditSocials: () => void;
-  onDelete: () => void;
+  children?: ReactNode;
+  expandable?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onToggle?: () => void;
 }
 // #end-interface
 
 // #component BranchAccordion
 /**
- * Acordeón colapsable para cada sucursal.
- * Muestra nombre, dirección y código postal en el header.
- * Al expandir, muestra opciones de configuración.
+ * Componente acordeón reutilizable para mostrar información de una sucursal.
+ * 
+ * Características:
+ * - Header con nombre/dirección de la sucursal
+ * - Botones opcionales de editar/eliminar (solo se muestran si se pasan los callbacks)
+ * - Contenido expandible opcional mediante children
+ * - Estado de expansión interno con indicador visual
+ * - Configurable si es expandible o no
  */
 const BranchAccordion = ({
   branch,
   displayIndex,
-  onEditLocation,
-  onEditName,
-  onEditSocials,
-  onDelete
+  children,
+  expandable = false,
+  onEdit,
+  onDelete,
+  onToggle
 }: BranchAccordionProps) => {
+  // #const allowEdit, allowDelete, hasChildren, isExpandable
+  const allowEdit = typeof onEdit === 'function';
+  const allowDelete = typeof onDelete === 'function';
+  const hasChildren = !!children;
+  const isExpandable = expandable && hasChildren;
+  // #end-const
+
+  // #state [isExpanded, setIsExpanded]
   const [isExpanded, setIsExpanded] = useState(false);
+  // #end-state
+
+  // #event handleToggle
+  /**
+   * Maneja el evento de expandir/colapsar el acordeón.
+   * Solo funciona si el acordeón es expandible.
+   */
+  const handleToggle = () => {
+    if (!isExpandable) return;
+    
+    setIsExpanded(prev => {
+      const newState = !prev;
+      // Notificar al padre después de cambiar estado
+      if (onToggle) onToggle();
+      return newState;
+    });
+  };
+  // #end-event
+
+  // #event handleEdit
+  /**
+   * Maneja el evento de edición.
+   * Detiene la propagación para evitar expandir/colapsar.
+   */
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allowEdit) onEdit();
+  };
+  // #end-event
+
+  // #event handleDelete
+  /**
+   * Maneja el evento de eliminación.
+   * Detiene la propagación para evitar expandir/colapsar.
+   */
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allowDelete) onDelete();
+  };
+  // #end-event
 
   // #function getDisplayName
   /**
@@ -67,63 +123,63 @@ const BranchAccordion = ({
   };
   // #end-function
 
+  // #section return
   return (
     <div className={styles.accordion}>
-      {/* #section Header*/}
+      {/* #section Header */}
       <div 
         className={styles.header}
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={handleToggle}
+        style={{ cursor: isExpandable ? 'pointer' : 'default' }}
       >
+        {/* #section Header Left - show branch data */}
         <div className={styles.headerLeft}>
-          <span className={styles.expandIcon}>
-            {isExpanded ? '▼' : '▶'}
-          </span>
+          {/* Solo mostrar flecha si es expandible */}
+          {isExpandable && (
+            <span className={`${styles.expandIcon} ${isExpanded ? styles.isExpanded : ''}`}>
+              ▶
+            </span>
+          )}
+          
           <span className={styles.branchName}>
             {getDisplayName()}
-          </span>          
+          </span>
         </div>
+        {/* #end-section */}
 
+        {/* #section Header Right - show action buttons */}
         <div className={styles.headerRight}>
-          <button 
-            className="btn-sec btn-sm" 
-            onClick={onEditName}
-          >
-            ✏️ Nombre
-          </button>
-          <button 
-            className="btn-sec btn-sm" 
-            onClick={onEditLocation}
-          >
-            📍 Ubicación
-          </button>
+          {allowEdit && (
+            <button 
+              className="btn-sec btn-sm" 
+              onClick={handleEdit}
+            >
+              ✏️ Editar
+            </button>
+          )}
+          {allowDelete && (
+            <button 
+              className="btn-danger btn-sm" 
+              onClick={handleDelete}
+            >
+              🗑️ Eliminar
+            </button>
+          )}
         </div>
+        {/* #end-section */}
       </div>
       {/* #end-section */}
+
       {/* #section Expanded content */}
-      {isExpanded && (
-        <div className={styles.content}>
-          <div className={styles.configSection}>
-            <h4 className={styles.configTitle}>⚙️ Configuración de la Sucursal</h4>
-            <div className={styles.configGrid}>
-              <button 
-                className="btn-sec btn-sm" 
-                onClick={onEditSocials}
-              >
-                🌐 Redes Sociales
-              </button>
-              <button 
-                className="btn-danger btn-sm" 
-                onClick={onDelete}
-              >
-                🗑️ Eliminar
-              </button>
-            </div>
-          </div>
+      {isExpanded && isExpandable && (
+        <div className={styles.children}>
+          {children}
         </div>
       )}
       {/* #end-section */}
     </div>
   );
+  // #end-section
 };
 
 export default BranchAccordion;

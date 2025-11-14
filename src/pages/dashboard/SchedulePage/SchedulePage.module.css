@@ -1,6 +1,6 @@
 /* src/pages/dashboard/SchedulesPage/SchedulesPage.module.css */
 
-/* #style .container - Contenedor principal */
+/* #style .container */
 .container {
   width: 100vw;
   height: 100vh;
@@ -10,7 +10,7 @@
 }
 /* #end-style */
 
-/* #style .content - Contenedor de navbar + main */
+/* #style .content */
 .content {
   display: flex;
   flex: 1;
@@ -18,7 +18,7 @@
 }
 /* #end-style */
 
-/* #style .main - Área principal de contenido */
+/* #style .main */
 .main {
   flex: 1;
   padding: 2rem;
@@ -27,7 +27,7 @@
 }
 /* #end-style */
 
-/* #style .header - Encabezado de página */
+/* #style .header */
 .header {
   margin-bottom: 2rem;
 }
@@ -46,7 +46,7 @@
 }
 /* #end-style */
 
-/* #style .error - Mensaje de error */
+/* #style .error */
 .error {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
@@ -55,9 +55,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.error p {
+  margin: 0;
   color: #dc2626;
-  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .error button {
@@ -75,115 +79,62 @@
 }
 /* #end-style */
 
-/* #style .loading - Estado de carga */
+/* #style .loading */
 .loading {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   color: #6b7280;
-  font-size: 0.875rem;
+  font-size: 1.1rem;
 }
 /* #end-style */
 
-/* #style .companiesList - Lista de empresas */
-.companiesList {
+/* #style .accordionList */
+.accordionList {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 /* #end-style */
 
-/* #style .companySection - Sección de empresa */
-.companySection {
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+/* #style .branchesSection */
+.branchesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 /* #end-style */
 
-/* #style .companyHeader - Header de empresa */
-.companyHeader {
-  padding: 1.5rem;
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+/* #style .branchesHeader */
+.branchesHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  margin-bottom: 0.5rem;
 }
+/* #end-style */
 
-.companyHeader:hover {
-  background-color: #f3f4f6;
-}
-
-.companyInfo {
-  flex: 1;
-}
-
-.companyName {
-  font-size: 1.25rem;
+/* #style .sectionTitle */
+.sectionTitle {
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #111827;
-  margin: 0 0 0.25rem 0;
-}
-
-.companyDescription {
-  font-size: 0.875rem;
-  color: #6b7280;
+  color: #374151;
   margin: 0;
 }
-
-.companyBadge {
-  padding: 0.375rem 0.75rem;
-  background-color: #dbeafe;
-  color: #1e40af;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
 /* #end-style */
 
-/* #style .companyContent - Contenido de empresa */
-.companyContent {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-/* #end-style */
-
-/* #style .tableHeader - Encabezados de tabla */
-.tableHeader {
-  display: grid;
-  grid-template-columns: 200px repeat(7, 1fr) 150px;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.columnBranch,
-.columnDay,
-.columnActions {
-  text-align: center;
-}
-
-.columnBranch {
-  text-align: left;
-}
-/* #end-style */
-
-/* #style .emptyMessage - Mensaje vacío */
+/* #style .emptyMessage */
 .emptyMessage {
   text-align: center;
   padding: 2rem;
   color: #9ca3af;
-  font-size: 0.875rem;
+  font-style: italic;
+}
+/* #end-style */
+
+/* #style .branchList */
+.branchList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 /* #end-style */
