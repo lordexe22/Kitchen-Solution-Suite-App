@@ -4,22 +4,22 @@ export type UserState = 'pending' | 'active' | 'suspended' | null;
 
 // #type UserDataStore
 export interface UserDataStore {
-  email: string | null;
   firstName: string | null;
   lastName: string | null;
-  imageUrl?: string | null;
-  type: UserType;
-  state: UserState;
+  email: string | null;
+  imageUrl: string | null;  // ← Debe ser string | null
+  type: string | null;
+  state: string | null;
   isAuthenticated: boolean;
 
-  setFirstName: (firstName: string) => void;
-  setLastName: (lastName: string) => void;
-  setEmail: (email: string) => void;
-  setImageUrl: (url: string) => void;
-  setType: (type: UserType) => void;
-  setState: (state: UserState) => void;
+  setFirstName: (firstName: string | null) => void;
+  setLastName: (lastName: string | null) => void;
+  setEmail: (email: string | null) => void;
+  setImageUrl: (url: string | null) => void;  // ← Debe aceptar string | null
+  setType: (type: string | null) => void;
+  setState: (state: string | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
 
   reset: () => void;
-};
+}
 // #end-type
