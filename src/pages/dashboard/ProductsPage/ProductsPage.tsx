@@ -2,6 +2,7 @@
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import styles from './ProductsPage.module.css';
+import { TagCreatorModal } from '../../../modules/tagCreator';
 
 const ProductsPage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
@@ -16,6 +17,7 @@ const ProductsPage = () => {
       />
       <div className={styles.content}>
         <DashboardNavbar />
+        <TagCreatorModal isOpen={true} onClose={()=>{}} onConfirm={()=>{}}/>
         <main className={styles.main}>
           <h1 className={styles.title}>Productos</h1>
         </main>
