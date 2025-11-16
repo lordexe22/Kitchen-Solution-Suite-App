@@ -53,24 +53,21 @@
 
 /* #style .logo */
 .logo {
-  width: 60px;
-  height: 60px;
-  border-radius: 0.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 700;
-  flex-shrink: 0;
+  background-color: transparent; /* ← Importante: sin background por defecto */
 }
 
 .logo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 0.5rem;
 }
 /* #end-style */
 
@@ -123,5 +120,20 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+/* #end-style */
+
+/* #style .logoPlaceholder - Placeholder con iniciales */
+.logoPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3b82f6; /* ← Color de fondo solo para el placeholder */
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-radius: 50%;
 }
 /* #end-style */

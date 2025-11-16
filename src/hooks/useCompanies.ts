@@ -10,8 +10,8 @@ import {
   checkCompanyNameAvailability as checkNameService
 } from '../services/companies/companies.service';
 import type { CompanyFormData } from '../store/Companies.types';
+import { uploadCompanyLogo } from '../services/companies/companiyLogo.service';
 // #end-section
-
 // #hook useCompanies
 /**
  * Hook personalizado para gestionar compañías.
@@ -146,6 +146,31 @@ export const useCompanies = () => {
   }, []);
   // #end-function
 
+  // #function uploadLogo
+/**
+   * Sube el logo de una compañía.
+   * 
+   * @param companyId - ID de la compañía
+   * @param file - Archivo de imagen
+   */
+  const uploadLogo = useCallback(async (companyId: number, file: File) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updatedCompany = await uploadCompanyLogo(companyId, file);
+      updateCompanyInStore(companyId, updatedCompany);
+      return updatedCompany;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al subir logo';
+      setError(errorMessage);
+      console.error('Error uploading logo:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [updateCompanyInStore]);
+  // #end-function
+
   return {
     // Estado
     companies,
@@ -158,7 +183,8 @@ export const useCompanies = () => {
     updateCompany,
     deleteCompany,
     checkNameAvailability,
-    clearCompanies
+    clearCompanies,
+    uploadLogo
   };
 };
 // #end-hook

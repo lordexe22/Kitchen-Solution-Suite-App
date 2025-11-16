@@ -105,7 +105,9 @@ const CompanyAccordion = ({ company, children, onEdit, onDelete, onToggle }: Com
             {company.logoUrl ? (
               <img src={company.logoUrl} alt={`Logo de ${company.name}`} />
             ) : (
-              getCompanyInitials()
+              <div className={styles.logoPlaceholder}>
+                {getCompanyInitials()}
+              </div>
             )}
           </div>
           {/* #end-section */}

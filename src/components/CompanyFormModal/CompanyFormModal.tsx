@@ -16,6 +16,8 @@ interface CompanyFormModalProps {
   onClose: () => void;
   /** Callback para crear o actualizar */
   onSubmit: (data: CompanyFormData) => Promise<void>;
+  /** Callback para subir logo */
+  onUploadLogo?: (companyId: number, file: File) => Promise<Company>; // ← CAMBIAR Promise<void> a Promise<Company>
   /** Función para verificar disponibilidad del nombre */
   onCheckNameAvailability?: (name: string) => Promise<boolean>;
 }
@@ -26,6 +28,7 @@ const CompanyFormModal = ({
   company,
   onClose,
   onSubmit,
+  onUploadLogo,
   onCheckNameAvailability
 }: CompanyFormModalProps) => {
   const isEditing = !!company;
@@ -41,13 +44,15 @@ const CompanyFormModal = ({
     defaultValues: {
       name: company?.name || '',
       description: company?.description || '',
-      logoUrl: company?.logoUrl || ''
     }
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingName, setIsCheckingName] = useState(false);
   const [nameAvailable, setNameAvailable] = useState<boolean | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(company?.logoUrl || null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   const watchedName = watch('name');
 
@@ -62,8 +67,6 @@ const CompanyFormModal = ({
     maxLength: { value: 500, message: 'La descripción no puede superar 500 caracteres' }
   });
 
-  register('logoUrl');
-
   // Verificar disponibilidad del nombre al escribir (solo al crear)
   useEffect(() => {
     if (isEditing || !onCheckNameAvailability || !watchedName) {
@@ -71,7 +74,6 @@ const CompanyFormModal = ({
       return;
     }
 
-    // Si el nombre es igual al original (al editar), no verificar
     if (company && watchedName === (company as Company).name) {
       setNameAvailable(null);
       return;
@@ -102,10 +104,60 @@ const CompanyFormModal = ({
     return () => clearTimeout(timer);
   }, [watchedName, isEditing, company, onCheckNameAvailability, setError, clearErrors]);
 
+  // Manejar selección de archivo
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Por favor selecciona una imagen válida (JPG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('La imagen es demasiado grande. Máximo 5MB');
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Crear preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Limpiar archivo seleccionado
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl(company?.logoUrl || null);
+  };
+
   const handleFormSubmit = handleSubmit(async (data) => {
     setIsLoading(true);
     try {
+      // 1. Crear o actualizar la compañía
       await onSubmit(data);
+
+      // 2. Si se seleccionó un archivo Y existe onUploadLogo, subir el logo
+      if (selectedFile && onUploadLogo && company?.id) {
+        setIsUploadingLogo(true);
+        try {
+          await onUploadLogo(company.id, selectedFile);
+        } catch (error) {
+          console.error('Error uploading logo:', error);
+          alert('La compañía se guardó pero hubo un error al subir el logo');
+        } finally {
+          setIsUploadingLogo(false);
+        }
+      }
+
       onClose();
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -136,7 +188,7 @@ const CompanyFormModal = ({
           style={{ position: 'absolute', top: 0, right: 0 }}
           onClick={onClose}
           aria-label="Cerrar ventana"
-          disabled={isLoading}
+          disabled={isLoading || isUploadingLogo}
         >
           ×
         </button>
@@ -159,7 +211,7 @@ const CompanyFormModal = ({
                   id="name"
                   placeholder="Ej: Mi Empresa"
                   aria-invalid={errors.name ? 'true' : 'false'}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingLogo}
                   {...register('name')}
                   className={styles.input}
                 />
@@ -183,30 +235,47 @@ const CompanyFormModal = ({
                   rows={4}
                   maxLength={500}
                   aria-invalid={errors.description ? 'true' : 'false'}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingLogo}
                   {...register('description')}
                   className={styles.textarea}
                 />
                 {renderErrors(errors.description)}
               </div>
 
-              {/* Logo URL */}
+              {/* Logo Upload */}
               <div className={styles.formGroup}>
-                <label htmlFor="logoUrl" className={styles.label}>
-                  URL del Logo (opcional)
+                <label htmlFor="logoFile" className={styles.label}>
+                  Logo de la compañía (opcional)
                 </label>
+
+                {/* Preview */}
+                {previewUrl && (
+                  <div className={styles.logoPreview}>
+                    <img src={previewUrl} alt="Preview logo" />
+                    {selectedFile && (
+                      <button
+                        type="button"
+                        onClick={handleClearFile}
+                        className={styles.removeButton}
+                        disabled={isLoading || isUploadingLogo}
+                      >
+                        ✕ Quitar
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Input de archivo */}
                 <input
-                  type="text"
-                  id="logoUrl"
-                  placeholder="https://ejemplo.com/logo.png"
-                  aria-invalid={errors.logoUrl ? 'true' : 'false'}
-                  disabled={isLoading}
-                  {...register('logoUrl')}
-                  className={styles.input}
+                  type="file"
+                  id="logoFile"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handleFileChange}
+                  disabled={isLoading || isUploadingLogo}
+                  className={styles.fileInput}
                 />
-                {renderErrors(errors.logoUrl)}
                 <span className={styles.helperText}>
-                  Más adelante podrás subir imágenes directamente
+                  Formatos: JPG, PNG, GIF, WEBP. Máximo 5MB
                 </span>
               </div>
 
@@ -216,16 +285,27 @@ const CompanyFormModal = ({
                   type="button"
                   className="btn-sec btn-md"
                   onClick={onClose}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingLogo}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   className="btn-pri btn-md"
-                  disabled={isLoading || isCheckingName || (nameAvailable === false && !isEditing)}
+                  disabled={
+                    isLoading || 
+                    isUploadingLogo || 
+                    isCheckingName || 
+                    (nameAvailable === false && !isEditing)
+                  }
                 >
-                  {isLoading ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Compañía'}
+                  {isLoading 
+                    ? 'Guardando...' 
+                    : isUploadingLogo
+                    ? 'Subiendo logo...'
+                    : isEditing 
+                    ? 'Guardar Cambios' 
+                    : 'Crear Compañía'}
                 </button>
               </div>
             </div>

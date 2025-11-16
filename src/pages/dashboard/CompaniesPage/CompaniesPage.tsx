@@ -28,7 +28,8 @@ const CompaniesPage = () => {
     createCompany,
     updateCompany,
     deleteCompany,
-    checkNameAvailability
+    checkNameAvailability,
+    uploadLogo
   } = useCompanies();
   // #end-hook
   // #state [showModal, setShowModal]
@@ -158,6 +159,7 @@ const CompaniesPage = () => {
           company={editingCompany}
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
+          onUploadLogo={uploadLogo} // ← AGREGAR ESTA LÍNEA
           onCheckNameAvailability={checkNameAvailability}
         />
       )}
