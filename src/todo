@@ -3,7 +3,11 @@
 ✅ - El logo en las secciones redes sociales y horarios es muy grande (especificar tamaño máximo)
 ✅ - Mal estructurado el header de la seccion horarios (revisar estilos)
 ✅ - Crear un modulo para la creacion de categorias
-1 - Crear un store para las categorias
-2 - Guardar las categorias creadas en la base de datos
-3 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
-4 - Crear un modulo para la creacion de productos
+✅ - Crear un store para las categorias
+✅ - Guardar las categorias creadas en la base de datos
+1 - Agregar caracteristica para que los banners de las categorias cambien de posicion y recuerden el orden en que se deben mostrar
+2 - Crear un modulo para la creacion de productos
+3 - Permitir copiar productos y aplicarlos a otras categorias
+4 - Permitir copiar banners y todo su contenido para pegarlos en otras sucursales
+5 - Permitir importar y exportar productos por medio de una tabla de excel
+6 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)

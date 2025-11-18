@@ -8,9 +8,11 @@ import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccord
 import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
+import { useCategories } from '../../../hooks/useCategories';
 import { CategoryCreatorModal } from '../../../modules/categoryCreator';
 import type { CategoryConfiguration } from '../../../modules/categoryCreator';
 import { generateBackgroundCSS } from '../../../modules/categoryCreator';
+import type { CategoryWithParsedGradient } from '../../../store/Categories.types';
 import styles from './ProductsPage.module.css';
 // #end-section
 
@@ -123,34 +125,130 @@ function BranchCategoriesSection({
   } = useBranches(companyId);
   // #end-hook
 
-  // #state [showCategoryModal, setShowCategoryModal]
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  // #end-state
-
-  // #state [selectedBranchId, setSelectedBranchId]
-  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
-  // #end-state
-
-  // #state [editingCategory, setEditingCategory]
-  const [editingCategory, setEditingCategory] = useState<{ branchId: number; index: number; config: CategoryConfiguration } | null>(null);
-  // #end-state
-
-  // #state [categories, setCategories]
-  const [categories, setCategories] = useState<Map<number, CategoryConfiguration[]>>(new Map());
-  // #end-state
-
   // #effect - Load branches on mount
   useEffect(() => {
     loadBranches();
   }, [loadBranches]);
   // #end-effect
 
+  // #section return
+  return (
+    <div className={styles.branchesSection}>
+      {/* #section Header */}
+      <div className={styles.branchesHeader}>
+        <h4 className={styles.sectionTitle}>Sucursales</h4>
+      </div>
+      {/* #end-section */}
+
+      {/* #section Loading state */}
+      {isLoading && branches.length === 0 && (
+        <p className={styles.loading}>Cargando sucursales...</p>
+      )}
+      {/* #end-section */}
+
+      {/* #section Empty state */}
+      {!isLoading && branches.length === 0 && (
+        <p className={styles.emptyMessage}>
+          No hay sucursales. Crea sucursales en la sección de Compañías.
+        </p>
+      )}
+      {/* #end-section */}
+
+      {/* #section Branch list */}
+      {branches.length > 0 && (
+        <div className={styles.branchList}>
+          {branches.map((branch, index) => (
+            <BranchAccordion
+              key={branch.id}
+              branch={branch}
+              displayIndex={index + 1}
+              expandable={true}
+            >
+              <CategoriesContainer branchId={branch.id} />
+            </BranchAccordion>
+          ))}
+        </div>
+      )}
+      {/* #end-section */}
+    </div>
+  );
+  // #end-section
+}
+// #end-component
+
+// #component CategoriesContainer
+/**
+ * Contenedor de categorías de una sucursal.
+ * Maneja el CRUD de categorías usando el hook useCategories.
+ */
+function CategoriesContainer({ branchId }: { branchId: number }) {
+  // #hook useCategories
+  const {
+    categories,
+    isLoading,
+    loadCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory
+  } = useCategories(branchId);
+  // #end-hook
+
+  // #state [showCategoryModal, setShowCategoryModal]
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  // #end-state
+
+  // #state [editingCategory, setEditingCategory]
+  const [editingCategory, setEditingCategory] = useState<{
+    category: CategoryWithParsedGradient;
+    index: number;
+  } | null>(null);
+  // #end-state
+
+  // #effect - Load categories on mount
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+  // #end-effect
+
+  // #function categoryToConfiguration
+  /**
+   * Convierte una Category del backend a CategoryConfiguration del modal.
+   */
+  const categoryToConfiguration = (category: CategoryWithParsedGradient): CategoryConfiguration => {
+    return {
+      name: category.name,
+      description: category.description || undefined,
+      imageUrl: category.imageUrl || undefined,
+      textColor: category.textColor,
+      backgroundMode: category.backgroundMode,
+      backgroundColor: category.backgroundColor,
+      gradient: category.gradient
+    };
+  };
+  // #end-function
+
+  // #function configurationToFormData
+  /**
+   * Convierte CategoryConfiguration a CategoryFormData para el backend.
+   */
+  const configurationToFormData = (config: CategoryConfiguration) => {
+    return {
+      name: config.name,
+      description: config.description || undefined, // ← Cambiado de null a undefined
+      imageUrl: config.imageUrl || undefined, // ← Cambiado de null a undefined
+      textColor: config.textColor,
+      backgroundMode: config.backgroundMode,
+      backgroundColor: config.backgroundColor,
+      gradient: config.gradient
+    };
+  };
+  // #end-function
+
   // #event handleOpenCreateModal
   /**
    * Abre modal para crear nueva categoría.
    */
-  const handleOpenCreateModal = (branchId: number) => {
-    setSelectedBranchId(branchId);
+  const handleOpenCreateModal = () => {
     setEditingCategory(null);
     setShowCategoryModal(true);
   };
@@ -160,14 +258,9 @@ function BranchCategoriesSection({
   /**
    * Abre modal para editar categoría existente.
    */
-  const handleOpenEditModal = (branchId: number, categoryIndex: number) => {
-    const branchCategories = categories.get(branchId) || [];
-    const category = branchCategories[categoryIndex];
-    if (category) {
-      setSelectedBranchId(branchId);
-      setEditingCategory({ branchId, index: categoryIndex, config: category });
-      setShowCategoryModal(true);
-    }
+  const handleOpenEditModal = (category: CategoryWithParsedGradient, index: number) => {
+    setEditingCategory({ category, index });
+    setShowCategoryModal(true);
   };
   // #end-event
 
@@ -175,26 +268,24 @@ function BranchCategoriesSection({
   /**
    * Guarda categoría (crear o editar).
    */
-  const handleSaveCategory = (config: CategoryConfiguration) => {
-    const targetBranchId = editingCategory?.branchId || selectedBranchId;
-    if (!targetBranchId) return;
-
-    const branchCategories = categories.get(targetBranchId) || [];
-    
-    if (editingCategory) {
-      // Editar existente
-      const updatedCategories = [...branchCategories];
-      updatedCategories[editingCategory.index] = config;
-      setCategories(new Map(categories).set(targetBranchId, updatedCategories));
-    } else {
-      // Crear nueva
-      const updatedCategories = [...branchCategories, config];
-      setCategories(new Map(categories).set(targetBranchId, updatedCategories));
+  const handleSaveCategory = async (config: CategoryConfiguration) => {
+    try {
+      const formData = configurationToFormData(config);
+      
+      if (editingCategory) {
+        // Editar existente
+        await updateCategory(editingCategory.category.id, formData);
+      } else {
+        // Crear nueva
+        await createCategory(formData);
+      }
+      
+      setShowCategoryModal(false);
+      setEditingCategory(null);
+    } catch (error) {
+      console.error('Error saving category:', error);
+      alert('Error al guardar la categoría. Por favor intenta de nuevo.');
     }
-    
-    setShowCategoryModal(false);
-    setSelectedBranchId(null);
-    setEditingCategory(null);
   };
   // #end-event
 
@@ -202,140 +293,113 @@ function BranchCategoriesSection({
   /**
    * Elimina una categoría.
    */
-  const handleDeleteCategory = (branchId: number, categoryIndex: number) => {
+  const handleDeleteCategory = async (categoryId: number) => {
     if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
 
-    const branchCategories = categories.get(branchId) || [];
-    const updatedCategories = branchCategories.filter((_, idx) => idx !== categoryIndex);
-    
-    setCategories(new Map(categories).set(branchId, updatedCategories));
+    try {
+      await deleteCategory(categoryId);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Error al eliminar la categoría. Por favor intenta de nuevo.');
+    }
   };
   // #end-event
 
   // #section return
   return (
-    <>
-      <div className={styles.branchesSection}>
-        {/* #section Header */}
-        <div className={styles.branchesHeader}>
-          <h4 className={styles.sectionTitle}>Sucursales</h4>
+    <div className={styles.categoriesContainer}>
+      {/* #section Botón crear categoría */}
+      <button
+        className="btn-pri btn-sm"
+        onClick={handleOpenCreateModal}
+        disabled={isLoading}
+      >
+        + Nueva Categoría
+      </button>
+      {/* #end-section */}
+
+      {/* #section Loading state */}
+      {isLoading && categories.length === 0 && (
+        <p className={styles.loading}>Cargando categorías...</p>
+      )}
+      {/* #end-section */}
+
+      {/* #section Lista de categorías */}
+      {categories.length > 0 && (
+        <div className={styles.categoriesList}>
+          {categories.map((category, index) => (
+            <div
+              key={category.id}
+              className={styles.categoryCard}
+              style={{
+                background: generateBackgroundCSS(categoryToConfiguration(category)),
+                color: category.textColor
+              }}
+            >
+              <div className={styles.categoryContent}>
+                <h4 className={styles.categoryName}>
+                  {category.name}
+                </h4>
+                {category.description && (
+                  <p className={styles.categoryDescription}>
+                    {category.description}
+                  </p>
+                )}
+              </div>
+              
+              {category.imageUrl && (
+                <img 
+                  src={category.imageUrl} 
+                  alt={category.name}
+                  className={styles.categoryImage}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              
+              <div className={styles.categoryActions}>
+                <button
+                  className={styles.actionBtn}
+                  onClick={() => handleOpenEditModal(category, index)}
+                  title="Editar"
+                >
+                  ✏️
+                </button>
+                <button
+                  className={styles.actionBtn}
+                  onClick={() => handleDeleteCategory(category.id)}
+                  title="Eliminar"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        {/* #end-section */}
+      )}
+      {/* #end-section */}
 
-        {/* #section Loading state */}
-        {isLoading && branches.length === 0 && (
-          <p className={styles.loading}>Cargando sucursales...</p>
-        )}
-        {/* #end-section */}
-
-        {/* #section Empty state */}
-        {!isLoading && branches.length === 0 && (
-          <p className={styles.emptyMessage}>
-            No hay sucursales. Crea sucursales en la sección de Compañías.
-          </p>
-        )}
-        {/* #end-section */}
-
-        {/* #section Branch list */}
-        {branches.length > 0 && (
-          <div className={styles.branchList}>
-            {branches.map((branch, index) => (
-              <BranchAccordion
-                key={branch.id}
-                branch={branch}
-                displayIndex={index + 1}
-                expandable={true}
-              >
-                <div className={styles.categoriesContainer}>
-                  {/* #section Botón crear categoría */}
-                  <button
-                    className="btn-pri btn-sm"
-                    onClick={() => handleOpenCreateModal(branch.id)}
-                  >
-                    + Nueva Categoría
-                  </button>
-                  {/* #end-section */}
-
-                  {/* #section Lista de categorías */}
-                  {categories.get(branch.id) && categories.get(branch.id)!.length > 0 && (
-                    <div className={styles.categoriesList}>
-                      {categories.get(branch.id)!.map((category, catIndex) => (
-                        <div
-                          key={catIndex}
-                          className={styles.categoryCard}
-                          style={{
-                            background: generateBackgroundCSS(category),
-                            color: category.textColor
-                          }}
-                        >
-                          <div className={styles.categoryContent}>
-                            <h4 className={styles.categoryName}>
-                              {category.name}
-                            </h4>
-                            {category.description && (
-                              <p className={styles.categoryDescription}>
-                                {category.description}
-                              </p>
-                            )}
-                          </div>
-                          
-                          {category.imageUrl && (
-                            <img 
-                              src={category.imageUrl} 
-                              alt={category.name}
-                              className={styles.categoryImage}
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          
-                          <div className={styles.categoryActions}>
-                            <button
-                              className={styles.actionBtn}
-                              onClick={() => handleOpenEditModal(branch.id, catIndex)}
-                              title="Editar"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              className={styles.actionBtn}
-                              onClick={() => handleDeleteCategory(branch.id, catIndex)}
-                              title="Eliminar"
-                            >
-                              🗑️
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* #end-section */}
-                </div>
-              </BranchAccordion>
-            ))}
-          </div>
-        )}
-        {/* #end-section */}
-      </div>
-
-      {/* #section CategoryCreatorModal */}
+      {/* #section Modal de creación/edición */}
       {showCategoryModal && (
         <CategoryCreatorModal
           isOpen={showCategoryModal}
           onClose={() => {
             setShowCategoryModal(false);
-            setSelectedBranchId(null);
             setEditingCategory(null);
           }}
           onConfirm={handleSaveCategory}
-          initialConfig={editingCategory?.config}
-          title={editingCategory ? 'Editar Categoría' : 'Crear Categoría'}
+          initialConfig={
+            editingCategory 
+              ? categoryToConfiguration(editingCategory.category)
+              : undefined
+          }
+          title={editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
           confirmText={editingCategory ? 'Guardar' : 'Crear'}
         />
       )}
       {/* #end-section */}
-    </>
+    </div>
   );
   // #end-section
 }
