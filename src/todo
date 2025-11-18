@@ -1,5 +1,8 @@
-1 ✅  - En la pagina de redes sociales falta poner un boton de redireccionamiento cuando no existen sucursales creadas
-2 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
-3 ✅ - La sección compañia no muestra el logo
-4 ✅ - El logo en las secciones redes sociales y horarios es muy grande (especificar tamaño máximo)
-5 ✅ - Mal estructurado el header de la seccion horarios (revisar estilos)
+✅  - En la pagina de redes sociales falta poner un boton de redireccionamiento cuando no existen sucursales creadas
+✅ - La sección compañia no muestra el logo
+✅ - El logo en las secciones redes sociales y horarios es muy grande (especificar tamaño máximo)
+✅ - Mal estructurado el header de la seccion horarios (revisar estilos)
+1 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
+2 - Crear un modulo para la creacion de productos
+3 - Crear un modulo para la creacion de categorias
+4 - 
