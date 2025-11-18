@@ -2,7 +2,8 @@
 ✅ - La sección compañia no muestra el logo
 ✅ - El logo en las secciones redes sociales y horarios es muy grande (especificar tamaño máximo)
 ✅ - Mal estructurado el header de la seccion horarios (revisar estilos)
-1 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
-2 - Crear un modulo para la creacion de productos
-3 - Crear un modulo para la creacion de categorias
-4 - 
+✅ - Crear un modulo para la creacion de categorias
+1 - Crear un store para las categorias
+2 - Guardar las categorias creadas en la base de datos
+3 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
+4 - Crear un modulo para la creacion de productos

@@ -5,7 +5,6 @@ import type { CategoryCreatorModalProps, GradientColors } from './categoryCreato
 import { useCategoryCreator } from './categoryCreator.hooks';
 import { 
   MODAL_TEXTS, 
-  PRESET_ICONS, 
   ANGLE_PRESETS,
   GRADIENT_PRESETS 
 } from './categoryCreator.config';
@@ -15,14 +14,14 @@ import {
 } from './categoryCreator.utils';
 import styles from './categoryCreator.module.css';
 // #end-section
+
 // #component CategoryCreatorModal
 /**
  * Modal para crear/editar categorías de productos.
  * 
  * Características:
  * - Nombre y descripción
- * - Ícono opcional
- * - Imagen opcional (Cloudinary)
+ * - Imagen opcional (archivo local o URL)
  * - Color de texto personalizable
  * - Fondo sólido o gradiente
  * - Preview en tiempo real (abajo del formulario)
@@ -48,7 +47,6 @@ export function CategoryCreatorModal({
     config,
     setName,
     setDescription,
-    setIcon,
     setImageUrl,
     setTextColor,
     setBackgroundMode,
@@ -56,15 +54,14 @@ export function CategoryCreatorModal({
     setGradientAngle,
     setGradientColors,
     applyGradientPreset,
-    reset,
     isValid,
     errors
   } = useCategoryCreator(initialConfig);
   // #end-hook
+  
   // #state inputValues - Para inputs temporales
   const [nameInput, setNameInput] = useState(config.name);
   const [descriptionInput, setDescriptionInput] = useState(config.description || '');
-  const [iconInput, setIconInput] = useState(config.icon || '');
   const [imageUrlInput, setImageUrlInput] = useState(config.imageUrl || '');
   const [textColorInput, setTextColorInput] = useState(config.textColor);
   const [bgColorInput, setBgColorInput] = useState(config.backgroundColor);
@@ -73,109 +70,182 @@ export function CategoryCreatorModal({
   const [gradientColorInputs, setGradientColorInputs] = useState<string[]>(
     config.gradient?.colors || ['#3B82F6', '#8B5CF6']
   );
+  
+  // Estado para manejo de imagen
+  const [imageInputMode, setImageInputMode] = useState<'file' | 'url'>('file');
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   // #end-state
+  
   // #event - Sincronizar inputs con config
   useEffect(() => {
     setNameInput(config.name);
     setDescriptionInput(config.description || '');
-    setIconInput(config.icon || '');
     setImageUrlInput(config.imageUrl || '');
     setTextColorInput(config.textColor);
     setBgColorInput(config.backgroundColor);
-    if (config.gradient) {
-      setGradientColorInputs([...config.gradient.colors]);
+    setGradientColorInputs(config.gradient?.colors || ['#3B82F6', '#8B5CF6']);
+    
+    // Si hay imageUrl inicial, mostrar en modo URL y como preview
+    if (config.imageUrl) {
+      setImageInputMode('url');
+      setImagePreviewUrl(config.imageUrl);
     }
   }, [config]);
   // #end-event
-  // #function handleConfirm
-  const handleConfirm = () => {
-    if (!isValid) return;
-    onConfirm(config);
-    onClose();
-  };
-  // #end-function
-  // #function handleCancel
-  const handleCancel = () => {
-    reset();
-    onClose();
-  };
-  // #end-function
-  // #function handleGradientColorChange
-  const handleGradientColorChange = (index: number, value: string) => {
-    const newInputs = [...gradientColorInputs];
-    newInputs[index] = value;
-    setGradientColorInputs(newInputs);
-    
-    // Solo actualizar config si es color válido
-    if (isValidHexColor(value)) {
-      const newColors = [...newInputs] as GradientColors;
-      setGradientColors(newColors);
-    }
-  };
-  // #end-function
-  // #function handleAddGradientColor
-  const handleAddGradientColor = () => {
-    if (gradientColorInputs.length >= 4) return;
-    const newInputs = [...gradientColorInputs, '#FFFFFF'];
-    setGradientColorInputs(newInputs);
-    setGradientColors(newInputs as GradientColors);
-  };
-  // #end-function
-  // #function handleRemoveGradientColor
-  const handleRemoveGradientColor = (index: number) => {
-    if (gradientColorInputs.length <= 2) return;
-    const newInputs = gradientColorInputs.filter((_, i) => i !== index);
-    setGradientColorInputs(newInputs);
-    setGradientColors(newInputs as GradientColors);
-  };
-  // #end-function
-  // #function handleTextColorChange
+  
+  // #event handleTextColorChange
+  /**
+   * Maneja cambios en el color de texto.
+   */
   const handleTextColorChange = (value: string) => {
     setTextColorInput(value);
     if (isValidHexColor(value)) {
       setTextColor(value);
     }
   };
-  // #end-function
-  // #function handleBgColorChange
+  // #end-event
+  
+  // #event handleBgColorChange
+  /**
+   * Maneja cambios en el color de fondo sólido.
+   */
   const handleBgColorChange = (value: string) => {
     setBgColorInput(value);
     if (isValidHexColor(value)) {
       setBackgroundColor(value);
     }
   };
-  // #end-function
-  // #variable previewStyles
-  const previewStyles = {
-    background: generateBackgroundCSS(config),
-    color: config.textColor
+  // #end-event
+  
+  // #event handleGradientColorChange
+  /**
+   * Maneja cambios en un color del gradiente.
+   */
+  const handleGradientColorChange = (index: number, value: string) => {
+    const newInputs = [...gradientColorInputs];
+    newInputs[index] = value;
+    setGradientColorInputs(newInputs);
+    
+    if (isValidHexColor(value)) {
+      const newColors = [...newInputs].filter(isValidHexColor) as GradientColors;
+      if (newColors.length >= 2 && newColors.length <= 4) {
+        setGradientColors(newColors);
+      }
+    }
   };
-  // #end-variable
+  // #end-event
+  
+  // #event handleAddGradientColor
+  /**
+   * Agrega un nuevo color al gradiente.
+   */
+  const handleAddGradientColor = () => {
+    if (gradientColorInputs.length < 4) {
+      const newInputs = [...gradientColorInputs, '#3B82F6'];
+      setGradientColorInputs(newInputs);
+      const newColors = newInputs.filter(isValidHexColor) as GradientColors;
+      setGradientColors(newColors);
+    }
+  };
+  // #end-event
+  
+  // #event handleRemoveGradientColor
+  /**
+   * Elimina un color del gradiente.
+   */
+  const handleRemoveGradientColor = (index: number) => {
+    if (gradientColorInputs.length > 2) {
+      const newInputs = gradientColorInputs.filter((_, i) => i !== index);
+      setGradientColorInputs(newInputs);
+      const newColors = newInputs.filter(isValidHexColor) as GradientColors;
+      setGradientColors(newColors);
+    }
+  };
+  // #end-event
+  
+  // #event handleImageFileChange
+  /**
+   * Maneja la selección de archivo de imagen.
+   */
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validar tipo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Formato no válido. Solo JPG, PNG, GIF, WEBP');
+      return;
+    }
+    
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo es muy grande. Máximo 5MB');
+      return;
+    }
+    
+    // Crear preview y guardar en config
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      setImagePreviewUrl(dataUrl);
+      // CRÍTICO: Guardar la imagen base64 en el config
+      setImageUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+  // #end-event
+  
+  // #event handleClearImageFile
+  /**
+   * Limpia el archivo de imagen seleccionado.
+   */
+  const handleClearImageFile = () => {
+    setImagePreviewUrl(null);
+    setImageUrl(undefined);
+    
+    // Limpiar input file
+    const fileInput = document.getElementById('category-image-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+  // #end-event
+  
+  // #event handleSubmit
+  /**
+   * Maneja el envío del formulario.
+   */
+  const handleSubmit = () => {
+    if (!isValid) return;
+    
+    // El config ya tiene la imageUrl actualizada (sea base64 o URL)
+    onConfirm(config);
+  };
+  // #end-event
+  
+  // Si no está abierto, no renderizar
   if (!isOpen) return null;
+  
+  // #section render
   return (
-    <>
-      {/* #section Overlay */}
-      <div className={styles.overlay} onClick={handleCancel} />
-      {/* #end-section */}
-      {/* #section Modal */}
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {/* #section Header */}
-        <div className={styles.header}>
-          <h2 className={styles.title}>{title}</h2>
-          <button 
-            className={styles.closeBtn}
-            onClick={handleCancel}
-            aria-label="Cerrar"
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className={styles.modalHeader}>
+          <h2 className={styles.modalTitle}>{title}</h2>
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
           >
-            ×
+            ✕
           </button>
         </div>
-        {/* #end-section */}
-        {/* #section Body */}
-        <div className={styles.body}>
-          {/* #section Form */}
-          <div className={styles.form}>
-            
+        
+        {/* Body */}
+        <div className={styles.modalBody}>
+          <form className={styles.form}>
             {/* Nombre */}
             <div className={styles.field}>
               <label className={styles.label}>
@@ -211,58 +281,91 @@ export function CategoryCreatorModal({
               />
             </div>
             
-            {/* Ícono */}
-            <div className={styles.field}>
-              <label className={styles.label}>
-                {MODAL_TEXTS.iconLabel}
-              </label>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder={MODAL_TEXTS.iconPlaceholder}
-                value={iconInput}
-                onChange={(e) => {
-                  setIconInput(e.target.value);
-                  setIcon(e.target.value || undefined);
-                }}
-                maxLength={2}
-              />
-              
-              {/* Presets de íconos */}
-              <div className={styles.presetIcons}>
-                {Object.values(PRESET_ICONS).flat().map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    className={`${styles.presetIconBtn} ${
-                      config.icon === emoji ? styles.active : ''
-                    }`}
-                    onClick={() => {
-                      setIconInput(emoji);
-                      setIcon(emoji);
-                    }}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* URL de Imagen */}
+            {/* Imagen */}
             <div className={styles.field}>
               <label className={styles.label}>
                 {MODAL_TEXTS.imageLabel}
               </label>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder={MODAL_TEXTS.imagePlaceholder}
-                value={imageUrlInput}
-                onChange={(e) => {
-                  setImageUrlInput(e.target.value);
-                  setImageUrl(e.target.value || undefined);
-                }}
-              />
+              
+              {/* Tabs: Subir archivo / URL */}
+              <div className={styles.tabs}>
+                <button
+                  type="button"
+                  className={`${styles.tab} ${
+                    imageInputMode === 'file' ? styles.active : ''
+                  }`}
+                  onClick={() => {
+                    setImageInputMode('file');
+                    setImageUrlInput('');
+                    if (!imagePreviewUrl) {
+                      setImageUrl(undefined);
+                    }
+                  }}
+                >
+                  📁 {MODAL_TEXTS.imageUploadTab}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.tab} ${
+                    imageInputMode === 'url' ? styles.active : ''
+                  }`}
+                  onClick={() => {
+                    setImageInputMode('url');
+                    setImagePreviewUrl(null);
+                  }}
+                >
+                  🔗 {MODAL_TEXTS.imageUrlTab}
+                </button>
+              </div>
+              
+              {/* Contenido según tab seleccionado */}
+              {imageInputMode === 'file' ? (
+                <div className={styles.fileUploadSection}>
+                  <input
+                    type="file"
+                    id="category-image-upload"
+                    className={styles.fileInput}
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={handleImageFileChange}
+                  />
+                  <label htmlFor="category-image-upload" className={styles.fileLabel}>
+                    📎 {MODAL_TEXTS.imageSelectButton}
+                  </label>
+                  <p className={styles.helperText}>{MODAL_TEXTS.imageHelperText}</p>
+                  
+                  {/* Preview de imagen seleccionada */}
+                  {imagePreviewUrl && (
+                    <div className={styles.imagePreviewContainer}>
+                      <img
+                        src={imagePreviewUrl}
+                        alt="Preview"
+                        className={styles.imagePreview}
+                      />
+                      <button
+                        type="button"
+                        className={styles.clearImageBtn}
+                        onClick={handleClearImageFile}
+                      >
+                        ✕ {MODAL_TEXTS.imageClearButton}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.urlInputSection}>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    placeholder={MODAL_TEXTS.imageUrlPlaceholder}
+                    value={imageUrlInput}
+                    onChange={(e) => {
+                      setImageUrlInput(e.target.value);
+                      setImageUrl(e.target.value || undefined);
+                      setImagePreviewUrl(e.target.value || null);
+                    }}
+                  />
+                </div>
+              )}
             </div>
             
             {/* Color de texto */}
@@ -287,6 +390,7 @@ export function CategoryCreatorModal({
                 />
               </div>
             </div>
+            
             {/* Tabs: Sólido / Gradiente */}
             <div className={styles.field}>
               <label className={styles.label}>
@@ -341,43 +445,32 @@ export function CategoryCreatorModal({
             
             {config.backgroundMode === 'gradient' && config.gradient && (
               <>
-                {/* Ángulo del gradiente */}
+                {/* Dirección del gradiente */}
                 <div className={styles.field}>
                   <label className={styles.label}>
                     {MODAL_TEXTS.gradientAngleLabel}
                   </label>
-                  <div className={styles.angleControl}>
-                    {/* Presets de ángulos */}
-                    <div className={styles.anglePresets}>
-                      {ANGLE_PRESETS.map((preset) => (
+                  <div className={styles.anglePresets}>
+                    {ANGLE_PRESETS.map((preset) => {
+                      // Generar el gradiente con los colores actuales
+                      const previewGradient = `linear-gradient(${preset.value}deg, ${config.gradient!.colors.join(', ')})`;
+                      
+                      return (
                         <button
                           key={preset.value}
                           type="button"
                           className={`${styles.anglePresetBtn} ${
                             config.gradient?.angle === preset.value ? styles.active : ''
                           }`}
+                          style={{ background: previewGradient }}
                           onClick={() => setGradientAngle(preset.value)}
                           title={preset.description}
+                          aria-label={preset.description}
                         >
-                          {preset.label}
+                          {/* Sin contenido, solo el gradiente de fondo */}
                         </button>
-                      ))}
-                    </div>
-                    
-                    {/* Slider fino */}
-                    <div className={styles.angleSlider}>
-                      <input
-                        type="range"
-                        className={styles.slider}
-                        min="0"
-                        max="360"
-                        value={config.gradient.angle}
-                        onChange={(e) => setGradientAngle(Number(e.target.value))}
-                      />
-                      <span className={styles.angleValue}>
-                        {config.gradient.angle}°
-                      </span>
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
                 
@@ -401,7 +494,7 @@ export function CategoryCreatorModal({
                             className={styles.colorInput}
                             value={color}
                             onChange={(e) => handleGradientColorChange(index, e.target.value)}
-                            placeholder="#FFFFFF"
+                            placeholder="#3B82F6"
                             maxLength={7}
                           />
                         </div>
@@ -434,114 +527,95 @@ export function CategoryCreatorModal({
                   <label className={styles.label}>
                     {MODAL_TEXTS.presetsLabel}
                   </label>
-                  <div className={styles.presetsGrid}>
-                    {GRADIENT_PRESETS.map((preset) => (
-                      <button
-                        key={preset.name}
-                        type="button"
-                        className={styles.presetBtn}
-                        style={{
-                          background: `linear-gradient(${preset.gradient.angle}deg, ${preset.gradient.colors.join(', ')})`
-                        }}
-                        onClick={() => {
-                          applyGradientPreset(preset.gradient);
-                          setGradientColorInputs([...preset.gradient.colors]);
-                        }}
-                        title={preset.name}
-                      >
-                        <span style={{ 
-                          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                          filter: 'drop-shadow(0 1px 2px rgba(255,255,255,0.5))'
-                        }}>
-                          {preset.emoji}
-                        </span>
-                        <span className={styles.presetName}>
-                          {preset.name}
-                        </span>
-                      </button>
-                    ))}
+                  <div className={styles.gradientPresets}>
+                    {GRADIENT_PRESETS.map((preset) => {
+                      const presetGradientCSS = `linear-gradient(${preset.gradient.angle}deg, ${preset.gradient.colors.join(', ')})`;
+                      
+                      return (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          className={styles.presetBtn}
+                          style={{ background: presetGradientCSS }}
+                          onClick={() => {
+                            applyGradientPreset(preset.gradient);
+                            setGradientColorInputs([...preset.gradient.colors]);
+                          }}
+                          title={preset.name}
+                        >
+                          <span className={styles.presetEmoji}>{preset.emoji}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </>
             )}
             
-          </div>
-          {/* #end-section Form */}
-        </div>
-        {/* #end-section Body */}
-
-        {/* #section Preview */}
-        <div className={styles.preview}>
-          <h4 className={styles.previewTitle}>{MODAL_TEXTS.previewTitle}</h4>
-          <div className={styles.previewArea}>
-            <div 
-              className={styles.categoryCard}
-              style={previewStyles}
-            >
-              <div className={styles.categoryHeader}>
-                {config.icon && (
-                  <span className={styles.categoryIcon}>
-                    {config.icon}
-                  </span>
-                )}
-                <h3 className={styles.categoryName}>
-                  {config.name || 'Nombre de categoría'}
-                </h3>
+            {/* Errores de validación */}
+            {errors.length > 0 && (
+              <div className={styles.errors}>
+                {errors.map((error, index) => (
+                  <p key={index} className={styles.error}>
+                    {error}
+                  </p>
+                ))}
               </div>
-              
+            )}
+          </form>
+        </div>
+        
+        {/* Preview Section - Fixed at bottom */}
+        <div className={styles.previewSection}>
+          <h3 className={styles.previewTitle}>{MODAL_TEXTS.previewTitle}</h3>
+          <div
+            className={styles.previewCard}
+            style={{
+              background: generateBackgroundCSS(config),
+              color: config.textColor
+            }}
+          >
+            <div className={styles.previewContent}>
+              <h4 className={styles.previewName}>
+                {config.name || 'Nombre de categoría'}
+              </h4>
               {config.description && (
-                <p className={styles.categoryDescription}>
+                <p className={styles.previewDescription}>
                   {config.description}
                 </p>
               )}
-              
-              {config.imageUrl && (
-                <img 
-                  src={config.imageUrl} 
-                  alt={config.name}
-                  className={styles.categoryImage}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
             </div>
+            {(config.imageUrl || imagePreviewUrl) && (
+              <img
+                src={imagePreviewUrl || config.imageUrl}
+                alt="Preview"
+                className={styles.previewImage}
+              />
+            )}
           </div>
-          
-          {/* Errors */}
-          {errors.length > 0 && (
-            <div className={styles.errors}>
-              {errors.map((error, index) => (
-                <p key={index} className={styles.errorText}>
-                  ⚠️ {error}
-                </p>
-              ))}
-            </div>
-          )}
         </div>
-
-        {/* #end-section */}
-        {/* #section Footer */}
-        <div className={styles.footer}>
-          <button 
-            className="btn-sec btn-md"
-            onClick={handleCancel}
+        
+        {/* Footer */}
+        <div className={styles.modalFooter}>
+          <button
+            type="button"
+            className={styles.cancelButton}
+            onClick={onClose}
           >
             {cancelText}
           </button>
-          <button 
-            className="btn-pri btn-md"
-            onClick={handleConfirm}
+          <button
+            type="button"
+            className={styles.confirmButton}
+            onClick={handleSubmit}
             disabled={!isValid}
           >
             {confirmText}
           </button>
         </div>
-        {/* #end-section Footer */}
-        
       </div>
-      {/* #end-section Modal */}
-    </>
+    </div>
   );
+  // #end-section
 }
 // #end-component

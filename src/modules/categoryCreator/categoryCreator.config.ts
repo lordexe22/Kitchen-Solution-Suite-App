@@ -11,7 +11,6 @@ import type { CategoryConfiguration, GradientPreset } from './categoryCreator.ty
 export const DEFAULT_CATEGORY_CONFIG: CategoryConfiguration = {
   name: '',
   description: undefined,
-  icon: undefined,
   imageUrl: undefined,
   textColor: '#FFFFFF',
   backgroundMode: 'solid',
@@ -122,20 +121,6 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
 ];
 // #end-variable
 
-// #variable PRESET_ICONS
-/**
- * Íconos predefinidos comunes para categorías (emojis).
- * Organizados por tipo de negocio.
- */
-export const PRESET_ICONS = {
-  food: ['🍕', '🍔', '🌮', '🍜', '🍱', '🍰', '🥗', '🍖', '🍝', '🥘'],
-  drinks: ['☕', '🍺', '🍷', '🥤', '🧃', '🍹', '🥛', '🧋'],
-  shopping: ['👕', '👗', '👠', '👜', '💄', '🎁', '📱', '💻'],
-  services: ['✂️', '🔧', '🔨', '🎨', '📚', '🏥', '🚗', '🏠'],
-  symbols: ['⭐', '✨', '🔥', '💚', '💛', '💙', '💜', '🧡']
-};
-// #end-variable
-
 // #variable ANGLE_PRESETS
 /**
  * Presets de ángulos comunes para gradientes lineales.
@@ -194,17 +179,20 @@ export const MODAL_TEXTS = {
   namePlaceholder: 'Ej: Pizzas',
   descriptionLabel: 'Descripción (opcional)',
   descriptionPlaceholder: 'Describe esta categoría...',
-  iconLabel: 'Ícono (opcional)',
-  iconPlaceholder: 'Selecciona un emoji',
   imageLabel: 'Imagen (opcional)',
-  imagePlaceholder: 'URL de imagen de Cloudinary',
+  imageUploadTab: 'Subir archivo',
+  imageUrlTab: 'URL',
+  imageSelectButton: 'Seleccionar imagen',
+  imageHelperText: 'JPG, PNG, GIF, WEBP - Máximo 5MB',
+  imageUrlPlaceholder: 'https://res.cloudinary.com/...',
+  imageClearButton: 'Limpiar',
   textColorLabel: 'Color de texto',
   backgroundModeLabel: 'Tipo de fondo',
   solidTab: 'Sólido',
   gradientTab: 'Gradiente',
   backgroundColorLabel: 'Color de fondo',
   gradientTypeLabel: 'Tipo de gradiente',
-  gradientAngleLabel: 'Ángulo',
+  gradientAngleLabel: 'Dirección del gradiente',
   gradientColorsLabel: 'Colores del gradiente',
   addColorButton: '+ Agregar color',
   removeColorButton: 'Eliminar',

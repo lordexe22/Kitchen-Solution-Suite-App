@@ -32,10 +32,6 @@ const ProductsPage = () => {
   } = useCompanies();
   // #end-hook
 
-  // #state [error, setError]
-  const [error, setError] = useState<string | null>(null);
-  // #end-state
-
   // #effect - Load companies on mount
   useEffect(() => {
     loadCompanies();
@@ -66,17 +62,6 @@ const ProductsPage = () => {
           </div>
           {/* #end-section */}
 
-          {/* #section Error */}
-          {error && (
-            <div className={styles.error}>
-              <p>❌ {error}</p>
-              <button className="btn-sec btn-sm" onClick={loadCompanies}>
-                Reintentar
-              </button>
-            </div>
-          )}
-          {/* #end-section */}
-
           {/* #section Loading */}
           {isLoadingCompanies && companies.length === 0 && (
             <div className={styles.loading}>Cargando compañías...</div>
@@ -84,7 +69,7 @@ const ProductsPage = () => {
           {/* #end-section */}
 
           {/* #section Empty State */}
-          {!isLoadingCompanies && companies.length === 0 && !error && (
+          {!isLoadingCompanies && companies.length === 0 && (
             <EmptyState
               title="No hay compañías"
               description="Crea tu primera compañía en la sección de Compañías para comenzar"
@@ -104,8 +89,7 @@ const ProductsPage = () => {
                   onDelete={() => {}}
                 >
                   <BranchCategoriesSection 
-                    companyId={company.id} 
-                    onError={setError}
+                    companyId={company.id}
                   />
                 </CompanyAccordion>
               ))}
@@ -127,11 +111,9 @@ export default ProductsPage;
  * Sección que muestra las sucursales de una compañía con sus categorías.
  */
 function BranchCategoriesSection({ 
-  companyId, 
-  onError 
+  companyId
 }: { 
-  companyId: number; 
-  onError: (error: string) => void;
+  companyId: number;
 }) {
   // #hook useBranches
   const { 
@@ -287,34 +269,26 @@ function BranchCategoriesSection({
                           }}
                         >
                           <div className={styles.categoryContent}>
-                            <div className={styles.categoryHeader}>
-                              {category.icon && (
-                                <span className={styles.categoryIcon}>
-                                  {category.icon}
-                                </span>
-                              )}
-                              <h5 className={styles.categoryName}>
-                                {category.name}
-                              </h5>
-                            </div>
-                            
+                            <h4 className={styles.categoryName}>
+                              {category.name}
+                            </h4>
                             {category.description && (
                               <p className={styles.categoryDescription}>
                                 {category.description}
                               </p>
                             )}
-                            
-                            {category.imageUrl && (
-                              <img 
-                                src={category.imageUrl} 
-                                alt={category.name}
-                                className={styles.categoryImage}
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            )}
                           </div>
+                          
+                          {category.imageUrl && (
+                            <img 
+                              src={category.imageUrl} 
+                              alt={category.name}
+                              className={styles.categoryImage}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
                           
                           <div className={styles.categoryActions}>
                             <button

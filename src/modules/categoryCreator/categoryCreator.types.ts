@@ -49,7 +49,6 @@ export type BackgroundMode = 'solid' | 'gradient';
  * {
  *   name: "Pizzas",
  *   description: "Deliciosas pizzas artesanales",
- *   icon: "🍕",
  *   imageUrl: "https://res.cloudinary.com/...",
  *   textColor: "#FFFFFF",
  *   backgroundMode: "gradient",
@@ -67,9 +66,6 @@ export interface CategoryConfiguration {
   
   /** Descripción opcional */
   description?: string;
-  
-  /** Ícono opcional (emoji) */
-  icon?: string;
   
   /** URL de imagen (Cloudinary) - opcional */
   imageUrl?: string;
@@ -132,9 +128,6 @@ export interface UseCategoryCreatorReturn {
   
   /** Actualizar descripción */
   setDescription: (description: string | undefined) => void;
-  
-  /** Actualizar ícono */
-  setIcon: (icon: string | undefined) => void;
   
   /** Actualizar URL de imagen */
   setImageUrl: (url: string | undefined) => void;

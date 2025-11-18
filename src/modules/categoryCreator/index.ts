@@ -34,7 +34,6 @@ export {
 export {
   DEFAULT_CATEGORY_CONFIG,
   GRADIENT_PRESETS,
-  PRESET_ICONS,
   ANGLE_PRESETS
 } from './categoryCreator.config';
 // #end-section

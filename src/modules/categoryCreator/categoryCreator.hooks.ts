@@ -54,12 +54,6 @@ export function useCategoryCreator(
   }, []);
   // #end-function
   
-  // #function setIcon
-  const setIcon = useCallback((icon: string | undefined) => {
-    setConfig(prev => ({ ...prev, icon }));
-  }, []);
-  // #end-function
-  
   // #function setImageUrl
   const setImageUrl = useCallback((imageUrl: string | undefined) => {
     setConfig(prev => ({ ...prev, imageUrl }));
@@ -143,7 +137,6 @@ export function useCategoryCreator(
     config,
     setName,
     setDescription,
-    setIcon,
     setImageUrl,
     setTextColor,
     setBackgroundMode,

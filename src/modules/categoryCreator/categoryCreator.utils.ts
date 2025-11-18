@@ -58,19 +58,18 @@ export function validateCategoryConfiguration(config: CategoryConfiguration): st
       errors.push(`El ángulo debe estar entre ${CATEGORY_VALIDATION_RULES.gradientAngle.min} y ${CATEGORY_VALIDATION_RULES.gradientAngle.max}`);
     }
     
-    // Validar colores
+    // Validar cantidad de colores
     if (colors.length < CATEGORY_VALIDATION_RULES.gradientColors.minColors) {
       errors.push(`El gradiente debe tener al menos ${CATEGORY_VALIDATION_RULES.gradientColors.minColors} colores`);
     }
-    
     if (colors.length > CATEGORY_VALIDATION_RULES.gradientColors.maxColors) {
       errors.push(`El gradiente no puede tener más de ${CATEGORY_VALIDATION_RULES.gradientColors.maxColors} colores`);
     }
     
-    // Validar formato de cada color
+    // Validar cada color
     colors.forEach((color, index) => {
       if (!CATEGORY_VALIDATION_RULES.backgroundColor.pattern.test(color)) {
-        errors.push(`El color ${index + 1} del gradiente no es válido`);
+        errors.push(`El color ${index + 1} del gradiente debe ser un código hexadecimal válido`);
       }
     });
   }
@@ -81,15 +80,14 @@ export function validateCategoryConfiguration(config: CategoryConfiguration): st
 
 // #function isValidHexColor
 /**
- * Verifica si un string es un color hexadecimal válido.
+ * Valida si un string es un color hexadecimal válido.
  * 
- * @param color - String a validar
+ * @param color - Color a validar
  * @returns true si es válido
  * 
  * @example
- * isValidHexColor('#3B82F6') // true
- * isValidHexColor('#FF0')    // false (debe ser 6 dígitos)
- * isValidHexColor('blue')    // false
+ * isValidHexColor('#FF6B6B') // true
+ * isValidHexColor('red') // false
  */
 export function isValidHexColor(color: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(color);
@@ -98,139 +96,85 @@ export function isValidHexColor(color: string): boolean {
 
 // #function generateGradientCSS
 /**
- * Genera el CSS para un gradiente.
+ * Genera el CSS de un gradiente.
  * 
  * @param gradient - Configuración del gradiente
  * @returns String CSS del gradiente
  * 
  * @example
- * generateGradientCSS({
+ * const css = generateGradientCSS({
  *   type: 'linear',
  *   angle: 135,
  *   colors: ['#FF6B6B', '#FFD93D']
- * })
- * // Returns: 'linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%)'
+ * });
+ * // Returns: 'linear-gradient(135deg, #FF6B6B, #FFD93D)'
  */
 export function generateGradientCSS(gradient: GradientConfig): string {
   const { type, angle, colors } = gradient;
   
   if (type === 'linear') {
-    // Calcular posiciones automáticas si no se especifican
-    const colorStops = colors.map((color, i) => {
-      const position = (i * (100 / (colors.length - 1))).toFixed(0);
-      return `${color} ${position}%`;
-    }).join(', ');
-    
-    return `linear-gradient(${angle}deg, ${colorStops})`;
+    return `linear-gradient(${angle}deg, ${colors.join(', ')})`;
+  } else {
+    return `radial-gradient(circle, ${colors.join(', ')})`;
   }
-  
-  if (type === 'radial') {
-    const colorStops = colors.map((color, i) => {
-      const position = (i * (100 / (colors.length - 1))).toFixed(0);
-      return `${color} ${position}%`;
-    }).join(', ');
-    
-    return `radial-gradient(circle, ${colorStops})`;
-  }
-  
-  return '';
 }
 // #end-function
 
 // #function generateBackgroundCSS
 /**
- * Genera el CSS completo del fondo según la configuración.
+ * Genera el CSS completo del background según la configuración.
  * 
  * @param config - Configuración de la categoría
- * @returns String CSS para aplicar al background
+ * @returns String CSS del background
+ * 
+ * @example
+ * const css = generateBackgroundCSS(config);
+ * // Returns: 'linear-gradient(135deg, #FF6B6B, #FFD93D)' o '#3B82F6'
  */
 export function generateBackgroundCSS(config: CategoryConfiguration): string {
-  if (config.backgroundMode === 'solid') {
-    return config.backgroundColor;
-  }
-  
   if (config.backgroundMode === 'gradient' && config.gradient) {
     return generateGradientCSS(config.gradient);
   }
-  
   return config.backgroundColor;
-}
-// #end-function
-
-// #function hexToRgb
-/**
- * Convierte un color hexadecimal a RGB.
- * 
- * @param hex - Color en formato hexadecimal
- * @returns Objeto con valores r, g, b o null si es inválido
- */
-export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
-}
-// #end-function
-
-// #function getLuminance
-/**
- * Calcula la luminancia relativa de un color RGB.
- * Usado para determinar contraste.
- * 
- * @param r - Valor red (0-255)
- * @param g - Valor green (0-255)
- * @param b - Valor blue (0-255)
- * @returns Luminancia (0-1)
- */
-export function getLuminance(r: number, g: number, b: number): number {
-  const [rs, gs, bs] = [r, g, b].map((c) => {
-    const val = c / 255;
-    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 // #end-function
 
 // #function getContrastColor
 /**
- * Calcula un color de contraste (blanco o negro) basado en el fondo.
- * Útil para asegurar legibilidad del texto.
+ * Obtiene un color de contraste (blanco o negro) según el color de fondo.
+ * Usa el algoritmo de luminancia relativa.
  * 
- * @param backgroundColor - Color de fondo (hex)
- * @returns '#FFFFFF' o '#000000'
+ * @param hexColor - Color hexadecimal
+ * @returns '#000000' o '#FFFFFF'
  * 
  * @example
- * getContrastColor('#3B82F6') // '#FFFFFF'
+ * getContrastColor('#FF6B6B') // '#FFFFFF'
  * getContrastColor('#FFD93D') // '#000000'
  */
-export function getContrastColor(backgroundColor: string): string {
-  const rgb = hexToRgb(backgroundColor);
-  if (!rgb) return '#FFFFFF';
+export function getContrastColor(hexColor: string): string {
+  // Convertir hex a RGB
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
   
-  const luminance = getLuminance(rgb.r, rgb.g, rgb.b);
+  // Calcular luminancia relativa
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Si es claro, texto oscuro; si es oscuro, texto claro
   return luminance > 0.5 ? '#000000' : '#FFFFFF';
 }
 // #end-function
 
 // #function getContrastColorForGradient
 /**
- * Calcula un color de contraste óptimo para un gradiente.
- * Promedia la luminancia de todos los colores.
+ * Obtiene un color de contraste para un gradiente.
+ * Usa el primer color del gradiente como referencia.
  * 
- * @param colors - Array de colores del gradiente (hex)
- * @returns '#FFFFFF' o '#000000'
+ * @param gradient - Configuración del gradiente
+ * @returns '#000000' o '#FFFFFF'
  */
-export function getContrastColorForGradient(colors: string[]): string {
-  const luminances = colors.map(color => {
-    const rgb = hexToRgb(color);
-    if (!rgb) return 0.5;
-    return getLuminance(rgb.r, rgb.g, rgb.b);
-  });
-  
-  const avgLuminance = luminances.reduce((a, b) => a + b, 0) / luminances.length;
-  return avgLuminance > 0.5 ? '#000000' : '#FFFFFF';
+export function getContrastColorForGradient(gradient: GradientConfig): string {
+  return getContrastColor(gradient.colors[0]);
 }
 // #end-function
 
