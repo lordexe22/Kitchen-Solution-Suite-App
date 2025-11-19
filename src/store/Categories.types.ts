@@ -32,7 +32,7 @@ export type GradientColors =
 export interface GradientConfig {
   type: GradientType;
   angle: number;
-  colors: GradientColors; // ← Cambiado de string[] a GradientColors
+  colors: GradientColors;
 }
 // #end-interface
 
@@ -51,6 +51,7 @@ export interface Category {
   backgroundMode: BackgroundMode;
   backgroundColor: string;
   gradientConfig: string | null; // JSON string desde la BD
+  sortOrder: number; // ← CAMPO NUEVO
   createdAt: string;
   updatedAt: string;
 }
@@ -73,8 +74,8 @@ export interface CategoryWithParsedGradient extends Omit<Category, 'gradientConf
 export type CategoryFormData = {
   branchId: number;
   name: string;
-  description?: string; // ← Cambiado a opcional (undefined en lugar de null)
-  imageUrl?: string; // ← Cambiado a opcional (undefined en lugar de null)
+  description?: string;
+  imageUrl?: string;
   textColor?: string;
   backgroundMode?: BackgroundMode;
   backgroundColor?: string;

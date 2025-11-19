@@ -100,3 +100,25 @@ export const getCategoryById = async (id: number): Promise<Category> => {
   return response.category;
 };
 // #end-function
+
+// #function reorderCategories
+/**
+ * Actualiza el orden de múltiples categorías.
+ * 
+ * @async
+ * @param {Array<{ id: number, sortOrder: number }>} updates - Array de actualizaciones
+ * @returns {Promise<void>}
+ * @throws {Error} Si la solicitud falla
+ * 
+ * @example
+ * await reorderCategories([
+ *   { id: 1, sortOrder: 1 },
+ *   { id: 2, sortOrder: 2 }
+ * ]);
+ */
+export const reorderCategories = async (
+  updates: Array<{ id: number; sortOrder: number }>
+): Promise<void> => {
+  await httpClient.patch('/categories/reorder', { updates });
+};
+// #end-function

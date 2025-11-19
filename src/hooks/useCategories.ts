@@ -7,6 +7,7 @@ import {
   createCategory as createCategoryService,
   updateCategory as updateCategoryService,
   deleteCategory as deleteCategoryService,
+  reorderCategories as reorderCategoriesService,
 } from '../services/categories/categories.service';
 import type { CategoryFormData } from '../store/Categories.types';
 // #end-section
@@ -142,6 +143,35 @@ export const useCategories = (branchId: number) => {
   }, [branchId, removeCategory]);
   // #end-function
 
+  // #function reorderCategories
+  /**
+   * Reordena las categorías.
+   * Actualiza el sortOrder en el backend y en el store local.
+   */
+  const reorderCategories = useCallback(async (
+    updates: Array<{ id: number; sortOrder: number }>
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Enviar al backend
+      await reorderCategoriesService(updates);
+      
+      // Actualizar el store local con los nuevos sortOrder
+      updates.forEach(({ id, sortOrder }) => {
+        updateCategoryInStore(id, { sortOrder });
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al reordenar categorías';
+      setError(errorMessage);
+      console.error('Error reordering categories:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [updateCategoryInStore]);
+  // #end-function
+
   // #function refreshCategories
   /**
    * Recarga las categorías forzando un fetch.
@@ -159,6 +189,7 @@ export const useCategories = (branchId: number) => {
     createCategory,
     updateCategory,
     deleteCategory,
+    reorderCategories,
     refreshCategories
   };
 };

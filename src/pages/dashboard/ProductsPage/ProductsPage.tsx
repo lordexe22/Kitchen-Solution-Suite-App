@@ -6,13 +6,28 @@ import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
 import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
 import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
+import DraggableCategory from '../../../components/DraggableCategory/DraggableCategory';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryCreatorModal } from '../../../modules/categoryCreator';
 import type { CategoryConfiguration } from '../../../modules/categoryCreator';
-import { generateBackgroundCSS } from '../../../modules/categoryCreator';
 import type { CategoryWithParsedGradient } from '../../../store/Categories.types';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import styles from './ProductsPage.module.css';
 // #end-section
 
@@ -189,7 +204,8 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     loadCategories,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    reorderCategories
   } = useCategories(branchId);
   // #end-hook
 
@@ -209,6 +225,19 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     loadCategories();
   }, [loadCategories]);
   // #end-effect
+
+  // #sensors - Configuración de sensores para drag & drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px de movimiento antes de activar el drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  // #end-sensors
 
   // #function categoryToConfiguration
   /**
@@ -234,8 +263,8 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   const configurationToFormData = (config: CategoryConfiguration) => {
     return {
       name: config.name,
-      description: config.description || undefined, // ← Cambiado de null a undefined
-      imageUrl: config.imageUrl || undefined, // ← Cambiado de null a undefined
+      description: config.description || undefined,
+      imageUrl: config.imageUrl || undefined,
       textColor: config.textColor,
       backgroundMode: config.backgroundMode,
       backgroundColor: config.backgroundColor,
@@ -305,6 +334,42 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   };
   // #end-event
 
+  // #event handleDragEnd
+  /**
+   * Maneja el fin del drag & drop.
+   * Reordena las categorías y guarda en el backend.
+   */
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = categories.findIndex((cat) => cat.id === active.id);
+    const newIndex = categories.findIndex((cat) => cat.id === over.id);
+
+    // Reordenar localmente
+    const reordered = arrayMove(categories, oldIndex, newIndex);
+
+    // Crear array de updates con los nuevos sortOrder
+    const updates = reordered.map((cat, index) => ({
+      id: cat.id,
+      sortOrder: index + 1
+    }));
+
+    try {
+      // Guardar en backend
+      await reorderCategories(updates);
+    } catch (error) {
+      console.error('Error reordering categories:', error);
+      alert('Error al reordenar. Por favor intenta de nuevo.');
+      // Recargar para sincronizar con el backend
+      loadCategories(true);
+    }
+  };
+  // #end-event
+
   // #section return
   return (
     <div className={styles.categoriesContainer}>
@@ -324,59 +389,29 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
       )}
       {/* #end-section */}
 
-      {/* #section Lista de categorías */}
+      {/* #section Lista de categorías con drag & drop */}
       {categories.length > 0 && (
-        <div className={styles.categoriesList}>
-          {categories.map((category, index) => (
-            <div
-              key={category.id}
-              className={styles.categoryCard}
-              style={{
-                background: generateBackgroundCSS(categoryToConfiguration(category)),
-                color: category.textColor
-              }}
-            >
-              <div className={styles.categoryContent}>
-                <h4 className={styles.categoryName}>
-                  {category.name}
-                </h4>
-                {category.description && (
-                  <p className={styles.categoryDescription}>
-                    {category.description}
-                  </p>
-                )}
-              </div>
-              
-              {category.imageUrl && (
-                <img 
-                  src={category.imageUrl} 
-                  alt={category.name}
-                  className={styles.categoryImage}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={categories.map(cat => cat.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className={styles.categoriesList}>
+              {categories.map((category) => (
+                <DraggableCategory
+                  key={category.id}
+                  category={category}
+                  onEdit={() => handleOpenEditModal(category, categories.indexOf(category))}
+                  onDelete={() => handleDeleteCategory(category.id)}
                 />
-              )}
-              
-              <div className={styles.categoryActions}>
-                <button
-                  className={styles.actionBtn}
-                  onClick={() => handleOpenEditModal(category, index)}
-                  title="Editar"
-                >
-                  ✏️
-                </button>
-                <button
-                  className={styles.actionBtn}
-                  onClick={() => handleDeleteCategory(category.id)}
-                  title="Eliminar"
-                >
-                  🗑️
-                </button>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
       {/* #end-section */}
 
