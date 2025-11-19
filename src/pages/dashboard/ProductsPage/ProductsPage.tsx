@@ -20,7 +20,10 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent
+  type DragEndEvent,
+  type DragStartEvent,
+  DragOverlay,
+  type UniqueIdentifier
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -79,35 +82,24 @@ const ProductsPage = () => {
           </div>
           {/* #end-section */}
 
-          {/* #section Loading */}
-          {isLoadingCompanies && companies.length === 0 && (
-            <div className={styles.loading}>Cargando compañías...</div>
-          )}
-          {/* #end-section */}
-
-          {/* #section Empty State */}
+          {/* #section Empty state - No companies */}
           {!isLoadingCompanies && companies.length === 0 && (
-            <EmptyState
-              title="No hay compañías"
-              description="Crea tu primera compañía en la sección de Compañías para comenzar"
-              icon="🏢"
+            <EmptyState 
+              title="Sin compañías registradas" 
+              description="Crea tu primera compañía en la sección de Compañías para comenzar." 
             />
           )}
           {/* #end-section */}
 
-          {/* #section Companies List */}
+          {/* #section Company list */}
           {companies.length > 0 && (
-            <div className={styles.accordionList}>
+            <div className={styles.companyList}>
               {companies.map((company) => (
                 <CompanyAccordion
                   key={company.id}
                   company={company}
-                  onEdit={() => {}}
-                  onDelete={() => {}}
                 >
-                  <BranchCategoriesSection 
-                    companyId={company.id}
-                  />
+                  <BranchList companyId={company.id} />
                 </CompanyAccordion>
               ))}
             </div>
@@ -118,23 +110,17 @@ const ProductsPage = () => {
     </div>
   );
   // #end-section
-};
-
-export default ProductsPage;
+}
 // #end-component
 
-// #component BranchCategoriesSection
+// #component BranchList
 /**
- * Sección que muestra las sucursales de una compañía con sus categorías.
+ * Lista de sucursales de una compañía.
  */
-function BranchCategoriesSection({ 
-  companyId
-}: { 
-  companyId: number;
-}) {
+function BranchList({ companyId }: { companyId: number }) {
   // #hook useBranches
-  const { 
-    branches, 
+  const {
+    branches,
     isLoading,
     loadBranches
   } = useBranches(companyId);
@@ -148,22 +134,14 @@ function BranchCategoriesSection({
 
   // #section return
   return (
-    <div className={styles.branchesSection}>
-      {/* #section Header */}
-      <div className={styles.branchesHeader}>
-        <h4 className={styles.sectionTitle}>Sucursales</h4>
-      </div>
-      {/* #end-section */}
-
+    <div className={styles.branchContainer}>
       {/* #section Loading state */}
-      {isLoading && branches.length === 0 && (
-        <p className={styles.loading}>Cargando sucursales...</p>
-      )}
+      {isLoading && <p>Cargando sucursales...</p>}
       {/* #end-section */}
 
-      {/* #section Empty state */}
+      {/* #section Empty state - No branches */}
       {!isLoading && branches.length === 0 && (
-        <p className={styles.emptyMessage}>
+        <p className={styles.emptyBranches}>
           No hay sucursales. Crea sucursales en la sección de Compañías.
         </p>
       )}
@@ -199,7 +177,7 @@ function BranchCategoriesSection({
 function CategoriesContainer({ branchId }: { branchId: number }) {
   // #hook useCategories
   const {
-    categories,
+    categories: categoriesFromStore,
     isLoading,
     loadCategories,
     createCategory,
@@ -208,6 +186,14 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     reorderCategories
   } = useCategories(branchId);
   // #end-hook
+
+  // #state [localCategories, setLocalCategories] - Estado local para drag & drop optimista
+  const [localCategories, setLocalCategories] = useState<CategoryWithParsedGradient[]>([]);
+  // #end-state
+
+  // #state [activeId, setActiveId] - ID del elemento que se está arrastrando
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  // #end-state
 
   // #state [showCategoryModal, setShowCategoryModal]
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -226,6 +212,12 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   }, [loadCategories]);
   // #end-effect
 
+  // #effect - Sincronizar categorías del store con el estado local
+  useEffect(() => {
+    setLocalCategories(categoriesFromStore);
+  }, [categoriesFromStore]);
+  // #end-effect
+
   // #sensors - Configuración de sensores para drag & drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -238,6 +230,13 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     })
   );
   // #end-sensors
+
+  // #function getActiveCategory - Obtener la categoría que se está arrastrando
+  const getActiveCategory = () => {
+    if (!activeId) return null;
+    return localCategories.find(cat => cat.id === activeId);
+  };
+  // #end-function
 
   // #function categoryToConfiguration
   /**
@@ -334,23 +333,38 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   };
   // #end-event
 
+  // #event handleDragStart
+  /**
+   * Se ejecuta cuando comienza el drag.
+   * Guarda el ID del elemento que se está arrastrando.
+   */
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id);
+  };
+  // #end-event
+
   // #event handleDragEnd
   /**
    * Maneja el fin del drag & drop.
-   * Reordena las categorías y guarda en el backend.
+   * Actualiza el estado local inmediatamente para UX fluida,
+   * luego persiste en el backend.
    */
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+
+    // Limpiar activeId
+    setActiveId(null);
 
     if (!over || active.id === over.id) {
       return;
     }
 
-    const oldIndex = categories.findIndex((cat) => cat.id === active.id);
-    const newIndex = categories.findIndex((cat) => cat.id === over.id);
+    const oldIndex = localCategories.findIndex((cat) => cat.id === active.id);
+    const newIndex = localCategories.findIndex((cat) => cat.id === over.id);
 
-    // Reordenar localmente
-    const reordered = arrayMove(categories, oldIndex, newIndex);
+    // Actualizar estado local INMEDIATAMENTE
+    const reordered = arrayMove(localCategories, oldIndex, newIndex);
+    setLocalCategories(reordered);
 
     // Crear array de updates con los nuevos sortOrder
     const updates = reordered.map((cat, index) => ({
@@ -358,15 +372,26 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
       sortOrder: index + 1
     }));
 
+    // Persistir en backend
     try {
-      // Guardar en backend
       await reorderCategories(updates);
+      console.log('✅ Categorías reordenadas exitosamente');
     } catch (error) {
-      console.error('Error reordering categories:', error);
-      alert('Error al reordenar. Por favor intenta de nuevo.');
-      // Recargar para sincronizar con el backend
+      console.error('❌ Error reordering categories:', error);
+      alert('Error al reordenar. Se revertirán los cambios.');
+      
+      // Rollback: recargar desde el backend
       loadCategories(true);
     }
+  };
+  // #end-event
+
+  // #event handleDragCancel
+  /**
+   * Se ejecuta cuando se cancela el drag.
+   */
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
   // #end-event
 
@@ -384,33 +409,46 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
       {/* #end-section */}
 
       {/* #section Loading state */}
-      {isLoading && categories.length === 0 && (
+      {isLoading && localCategories.length === 0 && (
         <p className={styles.loading}>Cargando categorías...</p>
       )}
       {/* #end-section */}
 
       {/* #section Lista de categorías con drag & drop */}
-      {categories.length > 0 && (
+      {localCategories.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
           <SortableContext
-            items={categories.map(cat => cat.id)}
+            items={localCategories.map(cat => cat.id)}
             strategy={verticalListSortingStrategy}
           >
             <div className={styles.categoriesList}>
-              {categories.map((category) => (
+              {localCategories.map((category) => (
                 <DraggableCategory
                   key={category.id}
                   category={category}
-                  onEdit={() => handleOpenEditModal(category, categories.indexOf(category))}
+                  onEdit={() => handleOpenEditModal(category, localCategories.indexOf(category))}
                   onDelete={() => handleDeleteCategory(category.id)}
                 />
               ))}
             </div>
           </SortableContext>
+
+          {/* 🔧 DragOverlay: Renderiza el elemento que se está arrastrando */}
+          <DragOverlay>
+            {activeId ? (
+              <DraggableCategory
+                category={getActiveCategory()!}
+                onEdit={() => {}}
+                onDelete={() => {}}
+              />
+            ) : null}
+          </DragOverlay>
         </DndContext>
       )}
       {/* #end-section */}
@@ -439,3 +477,5 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-section
 }
 // #end-component
+
+export default ProductsPage;

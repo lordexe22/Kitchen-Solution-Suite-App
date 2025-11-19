@@ -32,13 +32,20 @@ export default function DraggableCategory({
     setNodeRef,
     transform,
     transition,
-    isDragging
-  } = useSortable({ id: category.id });
+    isDragging,
+    isSorting
+  } = useSortable({ 
+    id: category.id,
+    // 🔧 SOLUCIÓN: Prevenir animaciones de layout automáticas durante el sorting
+    animateLayoutChanges: () => false,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    // 🔧 Solo aplicar transición si NO está en sorting (previene el salto)
+    transition: isSorting ? undefined : transition,
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 'auto',
   };
 
   // Convertir category a configuration para generateBackgroundCSS

@@ -30,6 +30,7 @@ export const useCategories = (branchId: number) => {
     setCategoriesForBranch,
     addCategory,
     updateCategory: updateCategoryInStore,
+    updateMultipleCategories: updateMultipleCategoriesInStore,
     removeCategory,
   } = useCategoriesStore();
 
@@ -157,10 +158,13 @@ export const useCategories = (branchId: number) => {
       // Enviar al backend
       await reorderCategoriesService(updates);
       
-      // Actualizar el store local con los nuevos sortOrder
-      updates.forEach(({ id, sortOrder }) => {
-        updateCategoryInStore(id, { sortOrder });
-      });
+      // Actualizar el store local con los nuevos sortOrder usando batch update
+      updateMultipleCategoriesInStore(
+        updates.map(({ id, sortOrder }) => ({
+          id,
+          updates: { sortOrder }
+        }))
+      );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al reordenar categorías';
       setError(errorMessage);
@@ -169,7 +173,7 @@ export const useCategories = (branchId: number) => {
     } finally {
       setIsLoading(false);
     }
-  }, [updateCategoryInStore]);
+  }, [updateMultipleCategoriesInStore]);
   // #end-function
 
   // #function refreshCategories

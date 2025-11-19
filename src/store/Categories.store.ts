@@ -23,6 +23,7 @@ interface CategoriesStore {
   setCategoriesForBranch: (branchId: number, categories: Category[]) => void;
   addCategory: (category: Category) => void;
   updateCategory: (id: number, updates: Partial<Category>) => void;
+  updateMultipleCategories: (updates: Array<{ id: number; updates: Partial<Category> }>) => void;
   removeCategory: (id: number, branchId: number) => void;
   clearCategories: () => void;
   clearCategoriesForBranch: (branchId: number) => void;
@@ -90,9 +91,62 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
             updatedCategories[categoryIndex] = updatedCategory;
           }
           
-          newMap.set(branchId, updatedCategories);
+          // 🆕 Si se actualizó sortOrder, reordenar el array
+          const shouldReorder = updates.sortOrder !== undefined;
+          const finalCategories = shouldReorder
+            ? updatedCategories.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+            : updatedCategories;
+          
+          newMap.set(branchId, finalCategories);
           break;
         }
+      }
+      
+      return { categoriesByBranch: newMap };
+    });
+  },
+  
+  // 🆕 Setter: Actualizar múltiples categorías de una vez (más eficiente para drag & drop)
+  updateMultipleCategories: (updates: Array<{ id: number; updates: Partial<Category> }>) => {
+    set((state) => {
+      const newMap = new Map(state.categoriesByBranch);
+      
+      // Agrupar updates por branchId
+      const updatesByBranch = new Map<number, Array<{ id: number; updates: Partial<Category> }>>();
+      
+      // Buscar branchId de cada categoría
+      for (const update of updates) {
+        for (const [branchId, categories] of newMap.entries()) {
+          if (categories.some(c => c.id === update.id)) {
+            if (!updatesByBranch.has(branchId)) {
+              updatesByBranch.set(branchId, []);
+            }
+            updatesByBranch.get(branchId)!.push(update);
+            break;
+          }
+        }
+      }
+      
+      // Aplicar updates por branch
+      for (const [branchId, branchUpdates] of updatesByBranch.entries()) {
+        const categories = newMap.get(branchId) || [];
+        const updatedCategories = categories.map(cat => {
+          const update = branchUpdates.find(u => u.id === cat.id);
+          if (!update) return cat;
+          
+          const updated = { ...cat, ...update.updates };
+          return update.updates.gradientConfig !== undefined
+            ? parseCategoryGradient(updated as Category)
+            : updated;
+        });
+        
+        // Reordenar si algún update incluyó sortOrder
+        const hasOrderUpdate = branchUpdates.some(u => u.updates.sortOrder !== undefined);
+        const finalCategories = hasOrderUpdate
+          ? updatedCategories.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+          : updatedCategories;
+        
+        newMap.set(branchId, finalCategories);
       }
       
       return { categoriesByBranch: newMap };
