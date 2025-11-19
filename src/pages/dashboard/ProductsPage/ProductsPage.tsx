@@ -32,6 +32,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import styles from './ProductsPage.module.css';
+import ProductCard from '../../../components/ProductCard/ProductCard';
+import ProductFormModal from '../../../components/ProductFormModal/ProductFormModal';
+import { useProducts } from '../../../hooks/useProducts';
+import type { ProductWithCalculatedPrice } from '../../../store/Products.types';
+import type { ProductFormData } from '../../../store/Products.types';
+import { calculateProductPrice } from '../../../store/Products.types';
 // #end-section
 
 // #component ProductsPage
@@ -222,7 +228,7 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // 8px de movimiento antes de activar el drag
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -231,7 +237,7 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   );
   // #end-sensors
 
-  // #function getActiveCategory - Obtener la categoría que se está arrastrando
+  // #function getActiveCategory
   const getActiveCategory = () => {
     if (!activeId) return null;
     return localCategories.find(cat => cat.id === activeId);
@@ -239,9 +245,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-function
 
   // #function categoryToConfiguration
-  /**
-   * Convierte una Category del backend a CategoryConfiguration del modal.
-   */
   const categoryToConfiguration = (category: CategoryWithParsedGradient): CategoryConfiguration => {
     return {
       name: category.name,
@@ -256,9 +259,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-function
 
   // #function configurationToFormData
-  /**
-   * Convierte CategoryConfiguration a CategoryFormData para el backend.
-   */
   const configurationToFormData = (config: CategoryConfiguration) => {
     return {
       name: config.name,
@@ -273,9 +273,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-function
 
   // #event handleOpenCreateModal
-  /**
-   * Abre modal para crear nueva categoría.
-   */
   const handleOpenCreateModal = () => {
     setEditingCategory(null);
     setShowCategoryModal(true);
@@ -283,9 +280,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-event
 
   // #event handleOpenEditModal
-  /**
-   * Abre modal para editar categoría existente.
-   */
   const handleOpenEditModal = (category: CategoryWithParsedGradient, index: number) => {
     setEditingCategory({ category, index });
     setShowCategoryModal(true);
@@ -293,18 +287,13 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-event
 
   // #event handleSaveCategory
-  /**
-   * Guarda categoría (crear o editar).
-   */
   const handleSaveCategory = async (config: CategoryConfiguration) => {
     try {
       const formData = configurationToFormData(config);
       
       if (editingCategory) {
-        // Editar existente
         await updateCategory(editingCategory.category.id, formData);
       } else {
-        // Crear nueva
         await createCategory(formData);
       }
       
@@ -318,9 +307,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-event
 
   // #event handleDeleteCategory
-  /**
-   * Elimina una categoría.
-   */
   const handleDeleteCategory = async (categoryId: number) => {
     if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
 
@@ -334,25 +320,15 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #end-event
 
   // #event handleDragStart
-  /**
-   * Se ejecuta cuando comienza el drag.
-   * Guarda el ID del elemento que se está arrastrando.
-   */
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id);
   };
   // #end-event
 
   // #event handleDragEnd
-  /**
-   * Maneja el fin del drag & drop.
-   * Actualiza el estado local inmediatamente para UX fluida,
-   * luego persiste en el backend.
-   */
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    // Limpiar activeId
     setActiveId(null);
 
     if (!over || active.id === over.id) {
@@ -362,34 +338,26 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     const oldIndex = localCategories.findIndex((cat) => cat.id === active.id);
     const newIndex = localCategories.findIndex((cat) => cat.id === over.id);
 
-    // Actualizar estado local INMEDIATAMENTE
     const reordered = arrayMove(localCategories, oldIndex, newIndex);
     setLocalCategories(reordered);
 
-    // Crear array de updates con los nuevos sortOrder
     const updates = reordered.map((cat, index) => ({
       id: cat.id,
       sortOrder: index + 1
     }));
 
-    // Persistir en backend
     try {
       await reorderCategories(updates);
       console.log('✅ Categorías reordenadas exitosamente');
     } catch (error) {
       console.error('❌ Error reordering categories:', error);
       alert('Error al reordenar. Se revertirán los cambios.');
-      
-      // Rollback: recargar desde el backend
       loadCategories(true);
     }
   };
   // #end-event
 
   // #event handleDragCancel
-  /**
-   * Se ejecuta cuando se cancela el drag.
-   */
   const handleDragCancel = () => {
     setActiveId(null);
   };
@@ -434,12 +402,14 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
                   category={category}
                   onEdit={() => handleOpenEditModal(category, localCategories.indexOf(category))}
                   onDelete={() => handleDeleteCategory(category.id)}
-                />
+                >
+                  {/* Productos de esta categoría */}
+                  <ProductsSection categoryId={category.id} />
+                </DraggableCategory>
               ))}
             </div>
           </SortableContext>
 
-          {/* 🔧 DragOverlay: Renderiza el elemento que se está arrastrando */}
           <DragOverlay>
             {activeId ? (
               <DraggableCategory
@@ -472,6 +442,248 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
         />
       )}
       {/* #end-section */}
+    </div>
+  );
+  // #end-section
+}
+// #end-component
+
+// #component ProductsSection
+/**
+ * Sección de productos de una categoría.
+ * Maneja el CRUD de productos y drag & drop.
+ */
+function ProductsSection({ categoryId }: { categoryId: number }) {
+  // #hook useProducts
+  const {
+    products: productsFromStore,
+    isLoading,
+    loadProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    reorderProducts
+  } = useProducts(categoryId);
+  // #end-hook
+
+  // #state local
+  const [localProducts, setLocalProducts] = useState<ProductWithCalculatedPrice[]>([]);
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductWithCalculatedPrice | null>(null);
+  // #end-state
+
+  // #effect - Load products on mount
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+  // #end-effect
+
+  // #effect - Sincronizar productos del store con el estado local
+  useEffect(() => {
+    // productsFromStore ya viene con imágenes parseadas (ProductWithParsedImages)
+    // Solo necesitamos calcular el precio
+    const processed = productsFromStore.map(product => {
+      // calculateProductPrice espera ProductWithParsedImages, que es lo que tenemos
+      return calculateProductPrice(product);
+    });
+    setLocalProducts(processed);
+  }, [productsFromStore]);
+  // #end-effect
+
+  // #sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  // #end-sensors
+
+  // #function getActiveProduct
+  const getActiveProduct = () => {
+    if (!activeId) return null;
+    return localProducts.find(p => p.id === activeId);
+  };
+  // #end-function
+
+  // #event handleOpenCreateModal
+  const handleOpenCreateModal = () => {
+    setEditingProduct(null);
+    setShowProductModal(true);
+  };
+  // #end-event
+
+  // #event handleOpenEditModal
+  const handleOpenEditModal = (product: ProductWithCalculatedPrice) => {
+    setEditingProduct(product);
+    setShowProductModal(true);
+  };
+  // #end-event
+
+  // #event handleSaveProduct
+  const handleSaveProduct = async (data: Omit<ProductFormData, 'categoryId'>) => {
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, data);
+      } else {
+        await createProduct(data);
+      }
+      
+      setShowProductModal(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      throw error;
+    }
+  };
+  // #end-event
+
+  // #event handleDeleteProduct
+  const handleDeleteProduct = async (productId: number) => {
+    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+
+    try {
+      await deleteProduct(productId);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Error al eliminar el producto. Por favor intenta de nuevo.');
+    }
+  };
+  // #end-event
+
+  // #event handleDragStart
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id);
+  };
+  // #end-event
+
+  // #event handleDragEnd
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    setActiveId(null);
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = localProducts.findIndex((p) => p.id === active.id);
+    const newIndex = localProducts.findIndex((p) => p.id === over.id);
+
+    const reordered = arrayMove(localProducts, oldIndex, newIndex);
+    setLocalProducts(reordered);
+
+    const updates = reordered.map((p, index) => ({
+      id: p.id,
+      sortOrder: index + 1
+    }));
+
+    try {
+      await reorderProducts(updates);
+    } catch (error) {
+      console.error('Error reordering products:', error);
+      alert('Error al reordenar. Se revertirán los cambios.');
+      loadProducts(true);
+    }
+  };
+  // #end-event
+
+  // #event handleDragCancel
+  const handleDragCancel = () => {
+    setActiveId(null);
+  };
+  // #end-event
+
+  // #section return
+  return (
+    <div className={styles.productsContainer}>
+      {/* Botón crear producto */}
+      <button
+        className="btn-pri btn-sm"
+        onClick={handleOpenCreateModal}
+        disabled={isLoading}
+      >
+        + Nuevo Producto
+      </button>
+
+      {/* Loading state */}
+      {isLoading && localProducts.length === 0 && (
+        <p className={styles.loading}>Cargando productos...</p>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && localProducts.length === 0 && (
+        <p className={styles.emptyProducts}>
+          No hay productos en esta categoría. Crea el primero.
+        </p>
+      )}
+
+      {/* Lista de productos con drag & drop */}
+      {localProducts.length > 0 && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <SortableContext
+            items={localProducts.map(p => p.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className={styles.productsList}>
+              {localProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onEdit={() => handleOpenEditModal(product)}
+                  onDelete={() => handleDeleteProduct(product.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+
+          <DragOverlay>
+            {activeId ? (
+              <ProductCard
+                product={getActiveProduct()!}
+                onEdit={() => {}}
+                onDelete={() => {}}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      )}
+
+      {/* Modal de creación/edición */}
+      {showProductModal && (
+        <ProductFormModal
+          isOpen={showProductModal}
+          onClose={() => {
+            setShowProductModal(false);
+            setEditingProduct(null);
+          }}
+          onSubmit={handleSaveProduct}
+          initialData={editingProduct ? {
+            name: editingProduct.name,
+            description: editingProduct.description || undefined,
+            basePrice: parseFloat(editingProduct.basePrice),
+            discount: editingProduct.discount ? parseFloat(editingProduct.discount) : undefined,
+            hasStockControl: editingProduct.hasStockControl,
+            currentStock: editingProduct.currentStock || undefined,
+            stockAlertThreshold: editingProduct.stockAlertThreshold || undefined,
+            stockStopThreshold: editingProduct.stockStopThreshold || undefined,
+            isAvailable: editingProduct.isAvailable
+          } : undefined}
+          title={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+          submitText={editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
+        />
+      )}
     </div>
   );
   // #end-section

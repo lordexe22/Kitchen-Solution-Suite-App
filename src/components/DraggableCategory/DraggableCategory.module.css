@@ -3,7 +3,7 @@
 /* #style .categoryCard - Contenedor de la card con drag handle */
 .categoryCard {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 0;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -34,6 +34,7 @@
   user-select: none;
   flex-shrink: 0;
   transition: background-color 0.2s ease;
+  align-self: stretch;
 }
 
 .dragHandle:hover {
@@ -53,7 +54,15 @@
 }
 /* #end-style */
 
-/* #style .categoryContent - Contenido de la categoría */
+/* #style .categoryWrapper - Wrapper para header y content expandido */
+.categoryWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+/* #end-style */
+
+/* #style .categoryContent - Contenido de la categoría (header) */
 .categoryContent {
   flex: 1;
   display: flex;
@@ -63,6 +72,30 @@
   padding: 1.25rem;
   min-height: 100px;
   position: relative;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.categoryContent:hover {
+  opacity: 0.95;
+}
+/* #end-style */
+
+/* #style .expandIconWrapper - Wrapper del ícono de expandir */
+.expandIconWrapper {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.expandIcon {
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.expandIcon.isExpanded {
+  transform: rotate(90deg);
 }
 /* #end-style */
 
@@ -126,5 +159,25 @@
 .actionBtn:hover {
   background-color: rgba(255, 255, 255, 1);
   transform: scale(1.1);
+}
+/* #end-style */
+
+/* #style .expandedContent - Contenido expandido (productos) */
+.expandedContent {
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-top: 2px solid #e5e7eb;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 /* #end-style */

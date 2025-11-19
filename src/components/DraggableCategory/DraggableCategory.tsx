@@ -1,5 +1,6 @@
 /* src/components/DraggableCategory/DraggableCategory.tsx */
 // #section imports
+import { useState, type ReactNode } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { CategoryWithParsedGradient } from '../../store/Categories.types';
@@ -13,19 +14,30 @@ interface DraggableCategoryProps {
   category: CategoryWithParsedGradient;
   onEdit: () => void;
   onDelete: () => void;
+  children?: ReactNode; // Contenido expandible (productos)
 }
 // #end-interface
 
 // #component DraggableCategory
 /**
- * Card de categoría con capacidad de drag & drop.
+ * Card de categoría con capacidad de drag & drop y expansión.
  * Usa @dnd-kit/sortable para el reordenamiento.
+ * Se expande para mostrar productos cuando tiene children.
  */
 export default function DraggableCategory({
   category,
   onEdit,
-  onDelete
+  onDelete,
+  children
 }: DraggableCategoryProps) {
+  // #state [isExpanded, setIsExpanded]
+  const [isExpanded, setIsExpanded] = useState(false);
+  // #end-state
+
+  // #const hasChildren
+  const hasChildren = !!children;
+  // #end-const
+
   const {
     attributes,
     listeners,
@@ -36,13 +48,11 @@ export default function DraggableCategory({
     isSorting
   } = useSortable({ 
     id: category.id,
-    // 🔧 SOLUCIÓN: Prevenir animaciones de layout automáticas durante el sorting
     animateLayoutChanges: () => false,
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    // 🔧 Solo aplicar transición si NO está en sorting (previene el salto)
     transition: isSorting ? undefined : transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 999 : 'auto',
@@ -59,6 +69,17 @@ export default function DraggableCategory({
     gradient: category.gradient
   };
 
+  // #event handleToggle
+  /**
+   * Expande/colapsa la categoría para mostrar productos.
+   */
+  const handleToggle = () => {
+    if (hasChildren) {
+      setIsExpanded(prev => !prev);
+    }
+  };
+  // #end-event
+
   return (
     <div
       ref={setNodeRef}
@@ -74,51 +95,76 @@ export default function DraggableCategory({
         <span className={styles.dragIcon}>⋮⋮</span>
       </div>
 
-      {/* Category Content */}
-      <div
-        className={styles.categoryContent}
-        style={{
-          background: generateBackgroundCSS(categoryConfig),
-          color: category.textColor
-        }}
-      >
-        <div className={styles.categoryInfo}>
-          <h4 className={styles.categoryName}>{category.name}</h4>
-          {category.description && (
-            <p className={styles.categoryDescription}>
-              {category.description}
-            </p>
+      {/* Category Header */}
+      <div className={styles.categoryWrapper}>
+        <div
+          className={styles.categoryContent}
+          style={{
+            background: generateBackgroundCSS(categoryConfig),
+            color: category.textColor
+          }}
+          onClick={handleToggle}
+        >
+          {/* Expand Icon (si tiene children) */}
+          {hasChildren && (
+            <div className={styles.expandIconWrapper}>
+              <span className={`${styles.expandIcon} ${isExpanded ? styles.isExpanded : ''}`}>
+                ▶
+              </span>
+            </div>
           )}
+
+          <div className={styles.categoryInfo}>
+            <h4 className={styles.categoryName}>{category.name}</h4>
+            {category.description && (
+              <p className={styles.categoryDescription}>
+                {category.description}
+              </p>
+            )}
+          </div>
+
+          {category.imageUrl && (
+            <img
+              src={category.imageUrl}
+              alt={category.name}
+              className={styles.categoryImage}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          )}
+
+          {/* Action Buttons */}
+          <div className={styles.categoryActions}>
+            <button
+              className={styles.actionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              title="Editar"
+            >
+              ✏️
+            </button>
+            <button
+              className={styles.actionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              title="Eliminar"
+            >
+              🗑️
+            </button>
+          </div>
         </div>
 
-        {category.imageUrl && (
-          <img
-            src={category.imageUrl}
-            alt={category.name}
-            className={styles.categoryImage}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+        {/* Expanded Content (Products) */}
+        {isExpanded && hasChildren && (
+          <div className={styles.expandedContent}>
+            {children}
+          </div>
         )}
-
-        {/* Action Buttons */}
-        <div className={styles.categoryActions}>
-          <button
-            className={styles.actionBtn}
-            onClick={onEdit}
-            title="Editar"
-          >
-            ✏️
-          </button>
-          <button
-            className={styles.actionBtn}
-            onClick={onDelete}
-            title="Eliminar"
-          >
-            🗑️
-          </button>
-        </div>
       </div>
     </div>
   );
