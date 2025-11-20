@@ -10,6 +10,7 @@ import {
   reorderCategories as reorderCategoriesService,
 } from '../services/categories/categories.service';
 import type { CategoryFormData } from '../store/Categories.types';
+import { useProductsStore } from '../store/Products.store';
 // #end-section
 
 // #hook useCategories
@@ -33,6 +34,9 @@ export const useCategories = (branchId: number) => {
     updateMultipleCategories: updateMultipleCategoriesInStore,
     removeCategory,
   } = useCategoriesStore();
+
+  // Selector del store de productos para limpiar productos de una categoría cuando se elimina
+  const clearProductsForCategory = useProductsStore(state => state.clearProductsForCategory);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,6 +137,12 @@ export const useCategories = (branchId: number) => {
     try {
       await deleteCategoryService(id);
       removeCategory(id, branchId);
+      // Limpiar productos asociados (si los hay) para que la UI se actualice inmediatamente
+      try {
+        clearProductsForCategory(id);
+      } catch (err) {
+        console.warn('Warning clearing products for deleted category:', err);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al eliminar categoría';
       setError(errorMessage);

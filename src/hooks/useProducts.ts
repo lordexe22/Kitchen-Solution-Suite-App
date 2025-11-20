@@ -1,6 +1,6 @@
 /* src/hooks/useProducts.ts */
 // #section Imports
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useProductsStore } from '../store/Products.store';
 import type { ProductFormData } from '../store/Products.types';
 import {
@@ -11,6 +11,9 @@ import {
   reorderProducts as reorderProductsService
 } from '../services/products/products.service';
 // #end-section
+
+// Referencia vacía única para evitar crear un `[]` nuevo en cada selector
+const EMPTY_PRODUCTS: any[] = [];
 
 // #hook useProducts
 /**
@@ -35,25 +38,17 @@ export const useProducts = (categoryId: number) => {
   const [error, setError] = useState<string | null>(null);
   // #end-state
 
-  // #state from store
-  const {
-    getProductsByCategory,
-    setProducts,
-    addProduct,
-    updateProduct: updateProductInStore,
-    updateMultipleProducts: updateMultipleProductsInStore,
-    removeProduct
-  } = useProductsStore();
+  // #state from store (suscribirse correctamente usando selectores)
+  const setProducts = useProductsStore(state => state.setProducts);
+  const addProduct = useProductsStore(state => state.addProduct);
+  const updateProductInStore = useProductsStore(state => state.updateProduct);
+  const updateMultipleProductsInStore = useProductsStore(state => state.updateMultipleProducts);
+  const removeProduct = useProductsStore(state => state.removeProduct);
+  // Productos de la categoría actual suscritos desde el store.
+  // Evitar devolver un array literal nuevo cuando no hay productos,
+  // para que Zustand/React no entre en un bucle de renders.
+  const products = useProductsStore(state => state.productsByCategory.get(categoryId) ?? EMPTY_PRODUCTS);
   // #end-state
-
-  // #memo products
-  /**
-   * Productos de la categoría actual desde el store.
-   * Se recalcula solo si cambia categoryId.
-   */
-  const products = useMemo(() => {
-    return getProductsByCategory(categoryId);
-  }, [categoryId, getProductsByCategory]);
   // #end-memo
 
   // #function loadProducts
