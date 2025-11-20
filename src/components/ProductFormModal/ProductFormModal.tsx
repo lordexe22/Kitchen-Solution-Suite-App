@@ -3,14 +3,17 @@
 import { useState, useEffect } from 'react';
 import type { ProductFormData } from '../../store/Products.types';
 import styles from './ProductFormModal.module.css';
+import ProductImageManager from '../ProductImageManager/ProductImageManager';
 // #end-section
 
 // #interface ProductFormModalProps
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<ProductFormData, 'categoryId'>) => Promise<void>;
-  initialData?: Partial<ProductFormData>;
+  onSubmit: (data: Omit<ProductFormData, 'categoryId'>, images: string[]) => Promise<void>;
+  initialData?: Partial<Omit<ProductFormData, 'categoryId'>> & { 
+    images?: string[] | string; // Aceptar tanto array como string
+  };
   title?: string;
   submitText?: string;
 }
@@ -39,6 +42,7 @@ export default function ProductFormModal({
   const [stockAlertThreshold, setStockAlertThreshold] = useState('');
   const [stockStopThreshold, setStockStopThreshold] = useState('');
   const [isAvailable, setIsAvailable] = useState(true);
+  const [images, setImages] = useState<string[]>([]);
   // #end-state
 
   // #state ui
@@ -58,6 +62,28 @@ export default function ProductFormModal({
       setStockAlertThreshold(initialData.stockAlertThreshold?.toString() || '');
       setStockStopThreshold(initialData.stockStopThreshold?.toString() || '');
       setIsAvailable(initialData.isAvailable ?? true);
+      
+      // Cargar imágenes si existen
+      if (initialData.images) {
+        try {
+          let parsedImages: string[] = [];
+          
+          if (typeof initialData.images === 'string') {
+            // Si viene como string JSON, parsearlo
+            parsedImages = JSON.parse(initialData.images);
+          } else if (Array.isArray(initialData.images)) {
+            // Si ya es array, usarlo directamente
+            parsedImages = initialData.images;
+          }
+          
+          setImages(parsedImages);
+        } catch (error) {
+          console.error('Error parsing images:', error);
+          setImages([]);
+        }
+      } else {
+        setImages([]);
+      }
     }
   }, [initialData]);
   // #end-effect
@@ -73,6 +99,7 @@ export default function ProductFormModal({
     setStockAlertThreshold('');
     setStockStopThreshold('');
     setIsAvailable(true);
+    setImages([]);
     setError(null);
   };
   // #end-function
@@ -127,7 +154,7 @@ export default function ProductFormModal({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      await onSubmit(formData, images); // <-- PASAR IMÁGENES
       handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar producto');
@@ -191,6 +218,12 @@ export default function ProductFormModal({
               maxLength={1000}
             />
           </div>
+
+          <ProductImageManager
+            images={images}
+            onImagesChange={setImages}
+            maxImages={6}
+          />
 
           {/* Precio y Descuento */}
           <div className={styles.formRow}>

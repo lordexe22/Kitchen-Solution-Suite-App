@@ -38,6 +38,7 @@ import { useProducts } from '../../../hooks/useProducts';
 import type { ProductWithCalculatedPrice } from '../../../store/Products.types';
 import type { ProductFormData } from '../../../store/Products.types';
 import { calculateProductPrice } from '../../../store/Products.types';
+import { uploadProductImages } from '../../../services/products/productsImages.service';
 // #end-section
 
 // #component ProductsPage
@@ -526,12 +527,39 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-event
 
   // #event handleSaveProduct
-  const handleSaveProduct = async (data: Omit<ProductFormData, 'categoryId'>) => {
+  const handleSaveProduct = async (data: Omit<ProductFormData, 'categoryId'>, imageFiles: string[]) => {
     try {
+      let createdOrUpdatedProduct;
+      
       if (editingProduct) {
-        await updateProduct(editingProduct.id, data);
+        // Actualizar producto existente
+        createdOrUpdatedProduct = await updateProduct(editingProduct.id, data);
       } else {
-        await createProduct(data);
+        // Crear nuevo producto
+        createdOrUpdatedProduct = await createProduct(data);
+      }
+
+      // Si hay imágenes, subirlas
+      if (imageFiles.length > 0 && createdOrUpdatedProduct) {
+        try {
+          // Convertir base64 a File objects
+          const files = await Promise.all(
+            imageFiles.map(async (base64, index) => {
+              const response = await fetch(base64);
+              const blob = await response.blob();
+              return new File([blob], `image-${index}.jpg`, { type: blob.type });
+            })
+          );
+
+          // Subir imágenes al backend
+          await uploadProductImages(createdOrUpdatedProduct.id, files);
+          
+          // Recargar productos para obtener las URLs de Cloudinary
+          await loadProducts(true);
+        } catch (imageError) {
+          console.error('Error uploading images:', imageError);
+          alert('Producto creado, pero hubo un error al subir las imágenes');
+        }
       }
       
       setShowProductModal(false);
@@ -660,30 +688,31 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
         </DndContext>
       )}
 
-      {/* Modal de creación/edición */}
-      {showProductModal && (
-        <ProductFormModal
-          isOpen={showProductModal}
-          onClose={() => {
-            setShowProductModal(false);
-            setEditingProduct(null);
-          }}
-          onSubmit={handleSaveProduct}
-          initialData={editingProduct ? {
-            name: editingProduct.name,
-            description: editingProduct.description || undefined,
-            basePrice: parseFloat(editingProduct.basePrice),
-            discount: editingProduct.discount ? parseFloat(editingProduct.discount) : undefined,
-            hasStockControl: editingProduct.hasStockControl,
-            currentStock: editingProduct.currentStock || undefined,
-            stockAlertThreshold: editingProduct.stockAlertThreshold || undefined,
-            stockStopThreshold: editingProduct.stockStopThreshold || undefined,
-            isAvailable: editingProduct.isAvailable
-          } : undefined}
-          title={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-          submitText={editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
-        />
-      )}
+    {/* Modal de creación/edición */}
+    {showProductModal && (
+      <ProductFormModal
+        isOpen={showProductModal}
+        onClose={() => {
+          setShowProductModal(false);
+          setEditingProduct(null);
+        }}
+        onSubmit={handleSaveProduct}
+        initialData={editingProduct ? {
+          name: editingProduct.name,
+          description: editingProduct.description || undefined,
+          basePrice: parseFloat(editingProduct.basePrice),
+          discount: editingProduct.discount ? parseFloat(editingProduct.discount) : undefined,
+          hasStockControl: editingProduct.hasStockControl,
+          currentStock: editingProduct.currentStock || undefined,
+          stockAlertThreshold: editingProduct.stockAlertThreshold || undefined,
+          stockStopThreshold: editingProduct.stockStopThreshold || undefined,
+          isAvailable: editingProduct.isAvailable,
+          images: editingProduct.images // Ya es string[] (array)
+        } : undefined}
+        title={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+        submitText={editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
+      />
+    )}
     </div>
   );
   // #end-section

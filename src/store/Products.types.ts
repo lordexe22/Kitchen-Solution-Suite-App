@@ -62,6 +62,7 @@ export type ProductFormData = {
   stockAlertThreshold?: number;
   stockStopThreshold?: number;
   isAvailable?: boolean;
+  images?: string[];
 };
 // #end-type
 

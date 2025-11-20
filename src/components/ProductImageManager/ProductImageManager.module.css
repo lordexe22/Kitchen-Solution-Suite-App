@@ -1,0 +1,173 @@
+/* src/components/ProductImageManager/ProductImageManager.module.css */
+
+/* #style .container */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* #end-style */
+
+/* #style .header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.helpText {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.counter {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+/* #end-style */
+
+/* #style .imagesList */
+.imagesList {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+/* #end-style */
+
+/* #style .imageItem */
+.imageItem {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+  background-color: #ffffff;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.imageItem:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.imageItem.dragging {
+  cursor: grabbing;
+  opacity: 0.5;
+  z-index: 999;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* #end-style */
+
+/* #style .orderBadge */
+.orderBadge {
+  position: absolute;
+  top: 0.375rem;
+  left: 0.375rem;
+  background-color: rgba(59, 130, 246, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+/* #end-style */
+
+/* #style .removeButton */
+.removeButton {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  background-color: rgba(220, 38, 38, 0.9);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.imageItem:hover .removeButton {
+  opacity: 1;
+}
+
+.removeButton:hover {
+  background-color: rgba(220, 38, 38, 1);
+  transform: scale(1.1);
+}
+/* #end-style */
+
+/* #style .uploadSection */
+.uploadSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.uploadSection:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadButton {
+  padding: 0.625rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadButton:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.uploadButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.uploadHint {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+/* #end-style */
