@@ -17,6 +17,6 @@
 FIXES
 ✅ - No hay input para agregar imagenes en el modal del producto
 ✅ - Los productos no se estan guardando en la abse de datos, al reiniciar, los productos creados desaparecen
-1 - No se actualiza la vista de la categoria cuando se agrega un nuevo producto. Se actualiza solo cuando se abre y se cierra el banner de la categoria
-2 - Al darle click a un producto me gustaria ver una vista ampliada del mismo donde se puedan ver todos los detalles relevantes para la venta, como por ejemplo las demas imagenes, etiquetas, etc.
-3 - La vista de los productos no es en formatos CARD, mas bien es en formato BANNER, similar al formato que tiene actualmente la categoria
+✅ - No se actualiza la vista de la categoria cuando se agrega un nuevo producto. Se actualiza solo cuando se abre y se cierra el banner de la categoria
+✅ - Al darle click a un producto me gustaria ver una vista ampliada del mismo donde se puedan ver todos los detalles relevantes para la venta, como por ejemplo las demas imagenes, etiquetas, etc.
+1 - La vista de los productos no es en formatos CARD, mas bien es en formato BANNER, similar al formato que tiene actualmente la categoria

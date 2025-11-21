@@ -1,72 +1,69 @@
 /* src/components/ProductCard/ProductCard.module.css */
 
-/* #style .productCard - Banner horizontal */
+/* #style .productCard - Card de producto (layout horizontal) */
 .productCard {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
+  background: white;
   border-radius: 0.75rem;
-  overflow: hidden;
-  background-color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
   transition: all 0.2s ease;
-  cursor: default;
-  min-height: 100px;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
 }
 
 .productCard:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+  transform: translateY(-2px);
 }
 
 .productCard.dragging {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
-  z-index: 999;
+  opacity: 0.5;
+  cursor: grabbing;
 }
 
 .productCard.unavailable {
   opacity: 0.6;
+  background-color: #f9fafb;
 }
 /* #end-style */
 
-/* #style .dragHandle - Handle para arrastrar */
+/* #style .dragHandle - Handle para drag & drop */
 .dragHandle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  background-color: #f9fafb;
-  border-right: 2px solid #e5e7eb;
   cursor: grab;
-  user-select: none;
+  color: #9ca3af;
+  padding: 0 0.25rem;
+  transition: color 0.2s ease;
   flex-shrink: 0;
-  transition: background-color 0.2s ease;
 }
 
 .dragHandle:hover {
-  background-color: #e5e7eb;
+  color: #6b7280;
 }
 
 .dragHandle:active {
   cursor: grabbing;
-  background-color: #d1d5db;
 }
 
 .dragIcon {
   font-size: 1rem;
-  color: #9ca3af;
   line-height: 1;
-  font-weight: bold;
 }
 /* #end-style */
 
-/* #style .productContent - Contenido del producto (banner horizontal) */
+/* #style .productContent - Contenido del producto (horizontal) */
 .productContent {
-  flex: 1;
   display: flex;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  position: relative;
+  gap: 1rem;
+  flex: 1;
   align-items: center;
+  min-width: 0;
 }
 /* #end-style */
 

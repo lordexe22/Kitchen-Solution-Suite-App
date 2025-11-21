@@ -12,6 +12,7 @@ interface ProductCardProps {
   product: ProductWithCalculatedPrice;
   onEdit: () => void;
   onDelete: () => void;
+  onClick?: () => void;
 }
 // #end-interface
 
@@ -24,7 +25,8 @@ interface ProductCardProps {
 export default function ProductCard({
   product,
   onEdit,
-  onDelete
+  onDelete,
+  onClick
 }: ProductCardProps) {
   const {
     attributes,
@@ -60,6 +62,15 @@ export default function ProductCard({
       ref={setNodeRef}
       style={style}
       className={`${styles.productCard} ${isDragging ? styles.dragging : ''} ${!product.isAvailable ? styles.unavailable : ''}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      } : undefined}
     >
       {/* Drag Handle */}
       <div
@@ -102,11 +113,11 @@ export default function ProductCard({
           <div className={styles.priceSection}>
             {product.hasDiscount ? (
               <>
-                <span className={styles.originalPrice}>
-                  ${parseFloat(product.basePrice).toFixed(2)}
-                </span>
                 <span className={styles.finalPrice}>
                   ${product.finalPrice.toFixed(2)}
+                </span>
+                <span className={styles.originalPrice}>
+                  ${parseFloat(product.basePrice).toFixed(2)}
                 </span>
                 <span className={styles.discountBadge}>
                   -{product.discount}%
@@ -114,37 +125,37 @@ export default function ProductCard({
               </>
             ) : (
               <span className={styles.finalPrice}>
-                ${product.finalPrice.toFixed(2)}
+                ${parseFloat(product.basePrice).toFixed(2)}
               </span>
             )}
           </div>
 
-          {/* Stock Status */}
+          {/* Stock Section */}
           {product.hasStockControl && (
             <div className={styles.stockSection}>
-              {stockStatus === 'critical' && (
-                <span className={styles.stockBadge + ' ' + styles.stockCritical}>
-                  ⚠️ Stock crítico ({product.currentStock})
+              {stockStatus === 'ok' && (
+                <span className={`${styles.stockBadge} ${styles.stockOk}`}>
+                  Stock: {product.currentStock}
                 </span>
               )}
               {stockStatus === 'low' && (
-                <span className={styles.stockBadge + ' ' + styles.stockLow}>
-                  ⚡ Stock bajo ({product.currentStock})
+                <span className={`${styles.stockBadge} ${styles.stockLow}`}>
+                  Stock bajo: {product.currentStock}
                 </span>
               )}
-              {stockStatus === 'ok' && (
-                <span className={styles.stockBadge + ' ' + styles.stockOk}>
-                  ✓ Stock: {product.currentStock}
+              {stockStatus === 'critical' && (
+                <span className={`${styles.stockBadge} ${styles.stockCritical}`}>
+                  Stock crítico: {product.currentStock}
                 </span>
               )}
             </div>
           )}
 
-          {/* Availability Badge */}
+          {/* Unavailable Badge */}
           {!product.isAvailable && (
-            <div className={styles.unavailableBadge}>
+            <span className={styles.unavailableBadge}>
               No disponible
-            </div>
+            </span>
           )}
         </div>
 
@@ -152,15 +163,21 @@ export default function ProductCard({
         <div className={styles.productActions}>
           <button
             className={styles.actionBtn}
-            onClick={onEdit}
-            title="Editar"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            title="Editar producto"
           >
             ✏️
           </button>
           <button
             className={styles.actionBtn}
-            onClick={onDelete}
-            title="Eliminar"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Eliminar producto"
           >
             🗑️
           </button>

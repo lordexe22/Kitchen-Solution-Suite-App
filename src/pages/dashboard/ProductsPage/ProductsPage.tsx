@@ -7,6 +7,7 @@ import EmptyState from '../../../components/EmptyState/EmptyState';
 import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
 import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
 import DraggableCategory from '../../../components/DraggableCategory/DraggableCategory';
+import ProductDetailModal from '../../../components/ProductDetailModal/ProductDetailModal';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
 import { useCategories } from '../../../hooks/useCategories';
@@ -474,6 +475,11 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   const [editingProduct, setEditingProduct] = useState<ProductWithCalculatedPrice | null>(null);
   // #end-state
 
+  // #state - Modal de detalle de producto
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithCalculatedPrice | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  // #end-state
+
   // #effect - Load products on mount
   useEffect(() => {
     loadProducts();
@@ -627,6 +633,22 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   };
   // #end-event
 
+  // #function handleProductClick - Abrir modal de detalle
+  const handleProductClick = (product: ProductWithCalculatedPrice) => {
+    setSelectedProduct(product);
+    setIsDetailModalOpen(true);
+  };
+  // #end-function
+
+  // #function handleCloseDetailModal - Cerrar modal de detalle
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setTimeout(() => {
+      setSelectedProduct(null);
+    }, 300);
+  };
+  // #end-function
+
   // #section return
   return (
     <div className={styles.productsContainer}>
@@ -671,6 +693,7 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
                   product={product}
                   onEdit={() => handleOpenEditModal(product)}
                   onDelete={() => handleDeleteProduct(product.id)}
+                  onClick={() => handleProductClick(product)}
                 />
               ))}
             </div>
@@ -713,6 +736,13 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
         submitText={editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
       />
     )}
+
+    {/* Modal de detalle de producto */}
+    <ProductDetailModal
+      isOpen={isDetailModalOpen}
+      onClose={handleCloseDetailModal}
+      product={selectedProduct}
+    />
     </div>
   );
   // #end-section
