@@ -375,3 +375,14 @@
   border: 1px dashed #d1d5db;
 }
 /* #end-style */
+
+
+/* #style .actionButtons - Contenedor de botones de acción */
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+/* #end-style */

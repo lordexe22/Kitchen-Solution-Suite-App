@@ -8,14 +8,15 @@ import styles from './ProductCard.module.css';
 // #end-section
 
 // #interface ProductCardProps
+/**
+ * Props del componente ProductCard.
+ */
 interface ProductCardProps {
   product: ProductWithCalculatedPrice;
   onEdit: () => void;
   onDelete: () => void;
   onClick?: () => void;
   onCopy?: () => void;
-  onPaste?: () => void;
-  canPaste?: boolean;
 }
 // #end-interface
 
@@ -24,15 +25,25 @@ interface ProductCardProps {
  * Card de producto con capacidad de drag & drop.
  * Muestra imagen, nombre, descripción, precio y estado de stock.
  * Estilo inspirado en apps de delivery (Uber Eats, Rappi, etc).
+ * 
+ * @param {ProductCardProps} props - Props del componente
+ * @returns {JSX.Element} Card de producto
+ * 
+ * @example
+ * <ProductCard
+ *   product={product}
+ *   onEdit={() => handleEdit(product)}
+ *   onDelete={() => handleDelete(product.id)}
+ *   onClick={() => handleViewDetail(product)}
+ *   onCopy={() => handleCopy(product)}
+ * />
  */
 export default function ProductCard({
   product,
   onEdit,
   onDelete,
   onClick,
-  onCopy,
-  onPaste,
-  canPaste = false
+  onCopy
 }: ProductCardProps) {
   const {
     attributes,
@@ -177,23 +188,6 @@ export default function ProductCard({
               title="Copiar producto"
             >
               📋
-            </button>
-          )}
-          {onPaste && (
-            <button
-              className={styles.actionBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                onPaste();
-              }}
-              disabled={!canPaste}
-              title={canPaste ? "Pegar producto" : "No hay producto copiado"}
-              style={{
-                opacity: canPaste ? 1 : 0.5,
-                cursor: canPaste ? 'pointer' : 'not-allowed'
-              }}
-            >
-              📂
             </button>
           )}
           <button

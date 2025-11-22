@@ -8,9 +8,12 @@ import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccord
 import BranchAccordion from '../../../components/BranchAccordion/BranchAccordion';
 import DraggableCategory from '../../../components/DraggableCategory/DraggableCategory';
 import ProductDetailModal from '../../../components/ProductDetailModal/ProductDetailModal';
+import PasteCategoryModal from '../../../components/PasteCategotyModal/PasteCategotyModal';
+import PasteProductModal from '../../../components/PasteProductModal/PasteProductModal';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
 import { useCategories } from '../../../hooks/useCategories';
+import { useClipboard } from '../../../hooks/useClipboard';
 import { CategoryCreatorModal } from '../../../modules/categoryCreator';
 import type { CategoryConfiguration } from '../../../modules/categoryCreator';
 import type { CategoryWithParsedGradient } from '../../../store/Categories.types';
@@ -165,7 +168,7 @@ function BranchList({ companyId }: { companyId: number }) {
               displayIndex={index + 1}
               expandable={true}
             >
-              <CategoriesContainer branchId={branch.id} />
+              <CategoriesContainer branchId={branch.id} branchName={branch.name || 'Sucursal sin nombre'} />
             </BranchAccordion>
           ))}
         </div>
@@ -182,7 +185,7 @@ function BranchList({ companyId }: { companyId: number }) {
  * Contenedor de categorías de una sucursal.
  * Maneja el CRUD de categorías usando el hook useCategories.
  */
-function CategoriesContainer({ branchId }: { branchId: number }) {
+function CategoriesContainer({ branchId, branchName }: { branchId: number; branchName: string }) {
   // #hook useCategories
   const {
     categories: categoriesFromStore,
@@ -191,34 +194,54 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     createCategory,
     updateCategory,
     deleteCategory,
-    reorderCategories
+    reorderCategories,
+    duplicateCategory
   } = useCategories(branchId);
   // #end-hook
+
+  // #hook useClipboard
+  const clipboard = useClipboard();
+  // #end-hook
+
   // #state [localCategories, setLocalCategories] - Estado local para drag & drop optimista
   const [localCategories, setLocalCategories] = useState<CategoryWithParsedGradient[]>([]);
   // #end-state
+
   // #state [activeId, setActiveId] - ID del elemento que se está arrastrando
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   // #end-state
+
   // #state [showCategoryModal, setShowCategoryModal]
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   // #end-state
+
   // #state [editingCategory, setEditingCategory]
   const [editingCategory, setEditingCategory] = useState<{
     category: CategoryWithParsedGradient;
     index: number;
   } | null>(null);
   // #end-state
-  // #event - Load categories on mount
+
+  // #state [showPasteCategoryModal, setShowPasteCategoryModal]
+  const [showPasteCategoryModal, setShowPasteCategoryModal] = useState(false);
+  // #end-state
+
+  // #state [isPasting, setIsPasting]
+  const [isPasting, setIsPasting] = useState(false);
+  // #end-state
+
+  // #effect - Load categories on mount
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
-  // #end-event
-  // #event - Sincronizar categorías del store con el estado local
+  // #end-effect
+
+  // #effect - Sincronizar categorías del store con el estado local
   useEffect(() => {
     setLocalCategories(categoriesFromStore);
   }, [categoriesFromStore]);
-  // #end-event
+  // #end-effect
+
   // #variable - Configuración de sensores para drag & drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -231,13 +254,21 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     })
   );
   // #end-variable
+
   // #function getActiveCategory
+  /**
+   * Obtiene la categoría que se está arrastrando.
+   */
   const getActiveCategory = () => {
     if (!activeId) return null;
     return localCategories.find(cat => cat.id === activeId);
   };
   // #end-function
+
   // #function categoryToConfiguration
+  /**
+   * Convierte una categoría a configuración para el modal.
+   */
   const categoryToConfiguration = (category: CategoryWithParsedGradient): CategoryConfiguration => {
     return {
       name: category.name,
@@ -250,7 +281,11 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     };
   };
   // #end-function
+
   // #function configurationToFormData
+  /**
+   * Convierte configuración a datos de formulario.
+   */
   const configurationToFormData = (config: CategoryConfiguration) => {
     return {
       name: config.name,
@@ -263,19 +298,31 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     };
   };
   // #end-function
+
   // #event handleOpenCreateModal
+  /**
+   * Abre el modal para crear una nueva categoría.
+   */
   const handleOpenCreateModal = () => {
     setEditingCategory(null);
     setShowCategoryModal(true);
   };
   // #end-event
+
   // #event handleOpenEditModal
+  /**
+   * Abre el modal para editar una categoría existente.
+   */
   const handleOpenEditModal = (category: CategoryWithParsedGradient, index: number) => {
     setEditingCategory({ category, index });
     setShowCategoryModal(true);
   };
   // #end-event
+
   // #event handleSaveCategory
+  /**
+   * Guarda una categoría (crear o editar).
+   */
   const handleSaveCategory = async (config: CategoryConfiguration) => {
     try {
       const formData = configurationToFormData(config);
@@ -294,9 +341,13 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     }
   };
   // #end-event
+
   // #event handleDeleteCategory
+  /**
+   * Elimina una categoría.
+   */
   const handleDeleteCategory = async (categoryId: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
+    if (!confirm('¿Estás seguro de eliminar esta categoría? Se eliminarán también todos sus productos.')) return;
 
     try {
       await deleteCategory(categoryId);
@@ -306,12 +357,95 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     }
   };
   // #end-event
+
+  // #event handleCopyCategory
+  /**
+   * Copia una categoría al clipboard.
+   */
+  const handleCopyCategory = (category: CategoryWithParsedGradient) => {
+    // ✅ FIX: Serializar gradient a JSON string para ClipboardCategory
+    clipboard.copyCategory({
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      imageUrl: category.imageUrl,
+      textColor: category.textColor,
+      backgroundMode: category.backgroundMode,
+      backgroundColor: category.backgroundColor,
+      gradientConfig: category.gradient ? JSON.stringify(category.gradient) : null, // ✅ CORREGIDO
+      branchId: branchId
+    });
+    
+    console.log('✅ Categoría copiada al clipboard:', category.name);
+  };
+  // #end-event
+
+  // #event handleOpenPasteCategoryModal
+  /**
+   * Abre el modal de confirmación para pegar categoría.
+   */
+  const handleOpenPasteCategoryModal = () => {
+    const copiedCategory = clipboard.getCopiedCategory; // ✅ FIX: Sin paréntesis, es una propiedad
+    if (!copiedCategory) {
+      alert('No hay ninguna categoría copiada.');
+      return;
+    }
+
+    // Verificar que no se esté pegando en la misma sucursal
+    if (copiedCategory.branchId === branchId) {
+      alert('No puedes pegar una categoría en la misma sucursal. Navega a otra sucursal para pegarla.');
+      return;
+    }
+
+    setShowPasteCategoryModal(true);
+  };
+  // #end-event
+
+  // #event handleConfirmPasteCategory
+  /**
+   * Confirma y ejecuta el pegado de categoría.
+   */
+  const handleConfirmPasteCategory = async () => {
+    const copiedCategory = clipboard.getCopiedCategory; // ✅ FIX: Sin paréntesis
+    if (!copiedCategory) return;
+
+    setIsPasting(true);
+
+    try {
+      await duplicateCategory(copiedCategory.id, branchId);
+      
+      // Limpiar clipboard después de pegar
+      clipboard.clear();
+      
+      // Cerrar modal
+      setShowPasteCategoryModal(false);
+      
+      // Recargar categorías para mostrar la nueva
+      await loadCategories(true);
+      
+      alert('✅ Categoría duplicada exitosamente con todos sus productos.');
+    } catch (error) {
+      console.error('Error duplicating category:', error);
+      alert('Error al duplicar la categoría. Por favor intenta de nuevo.');
+    } finally {
+      setIsPasting(false);
+    }
+  };
+  // #end-event
+
   // #event handleDragStart
+  /**
+   * Maneja el inicio del arrastre.
+   */
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id);
   };
   // #end-event
+
   // #event handleDragEnd
+  /**
+   * Maneja el final del arrastre y reordena las categorías.
+   */
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -342,7 +476,11 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     }
   };
   // #end-event
+
   // #event handleDragCancel
+  /**
+   * Cancela el arrastre.
+   */
   const handleDragCancel = () => {
     setActiveId(null);
   };
@@ -351,14 +489,26 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #section return
   return (
     <div className={styles.categoriesContainer}>
-      {/* #section Botón crear categoría */}
-      <button
-        className="btn-pri btn-sm"
-        onClick={handleOpenCreateModal}
-        disabled={isLoading}
-      >
-        + Nueva Categoría
-      </button>
+      {/* #section Botones de acción */}
+      <div className={styles.actionButtons}>
+        <button
+          className="btn-pri btn-sm"
+          onClick={handleOpenCreateModal}
+          disabled={isLoading}
+        >
+          + Nueva Categoría
+        </button>
+
+        {clipboard.hasCopiedCategory && (
+          <button
+            className="btn-sec btn-sm"
+            onClick={handleOpenPasteCategoryModal}
+            disabled={isLoading || isPasting}
+          >
+            📂 Pegar Categoría
+          </button>
+        )}
+      </div>
       {/* #end-section */}
 
       {/* #section Loading state */}
@@ -387,9 +537,13 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
                   category={category}
                   onEdit={() => handleOpenEditModal(category, localCategories.indexOf(category))}
                   onDelete={() => handleDeleteCategory(category.id)}
+                  onCopy={() => handleCopyCategory(category)}
                 >
                   {/* Productos de esta categoría */}
-                  <ProductsSection categoryId={category.id} />
+                  <ProductsSection 
+                    categoryId={category.id}
+                    categoryName={category.name}
+                  />
                 </DraggableCategory>
               ))}
             </div>
@@ -427,6 +581,17 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
         />
       )}
       {/* #end-section */}
+
+      {/* #section Modal de pegar categoría */}
+      <PasteCategoryModal
+        isOpen={showPasteCategoryModal}
+        onClose={() => setShowPasteCategoryModal(false)}
+        onConfirm={handleConfirmPasteCategory}
+        category={clipboard.getCopiedCategory} // ✅ FIX: Sin paréntesis
+        targetBranchName={branchName}
+        isLoading={isPasting}
+      />
+      {/* #end-section */}
     </div>
   );
   // #end-section
@@ -438,7 +603,7 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
  * Sección de productos de una categoría.
  * Maneja el CRUD de productos y drag & drop.
  */
-function ProductsSection({ categoryId }: { categoryId: number }) {
+function ProductsSection({ categoryId, categoryName }: { categoryId: number; categoryName: string }) {
   // #hook useProducts
   const {
     products: productsFromStore,
@@ -447,8 +612,13 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
     createProduct,
     updateProduct,
     deleteProduct,
-    reorderProducts
+    reorderProducts,
+    duplicateProduct
   } = useProducts(categoryId);
+  // #end-hook
+
+  // #hook useClipboard
+  const clipboard = useClipboard();
   // #end-hook
 
   // #state local
@@ -463,6 +633,11 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   // #end-state
 
+  // #state - Modal de pegar producto
+  const [showPasteProductModal, setShowPasteProductModal] = useState(false);
+  const [isPasting, setIsPasting] = useState(false);
+  // #end-state
+
   // #effect - Load products on mount
   useEffect(() => {
     loadProducts();
@@ -471,17 +646,12 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
 
   // #effect - Sincronizar productos del store con el estado local
   useEffect(() => {
-    // productsFromStore ya viene con imágenes parseadas (ProductWithParsedImages)
-    // Solo necesitamos calcular el precio
-    const processed = productsFromStore.map(product => {
-      // calculateProductPrice espera ProductWithParsedImages, que es lo que tenemos
-      return calculateProductPrice(product);
-    });
+    const processed = productsFromStore.map(product => calculateProductPrice(product));
     setLocalProducts(processed);
   }, [productsFromStore]);
   // #end-effect
 
-  // #sensors
+  // #variable - Configuración de sensores para drag & drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -492,9 +662,12 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  // #end-sensors
+  // #end-variable
 
   // #function getActiveProduct
+  /**
+   * Obtiene el producto que se está arrastrando.
+   */
   const getActiveProduct = () => {
     if (!activeId) return null;
     return localProducts.find(p => p.id === activeId);
@@ -502,6 +675,9 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-function
 
   // #event handleOpenCreateModal
+  /**
+   * Abre el modal para crear un nuevo producto.
+   */
   const handleOpenCreateModal = () => {
     setEditingProduct(null);
     setShowProductModal(true);
@@ -509,6 +685,9 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-event
 
   // #event handleOpenEditModal
+  /**
+   * Abre el modal para editar un producto existente.
+   */
   const handleOpenEditModal = (product: ProductWithCalculatedPrice) => {
     setEditingProduct(product);
     setShowProductModal(true);
@@ -516,6 +695,10 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-event
 
   // #event handleSaveProduct
+  /**
+   * Guarda un producto (crear o editar).
+   * ✅ FIX: Firma correcta que coincide con ProductFormModal
+   */
   const handleSaveProduct = async (data: Omit<ProductFormData, 'categoryId'>, imageFiles: string[]) => {
     try {
       let createdOrUpdatedProduct;
@@ -531,7 +714,7 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
       // Si hay imágenes, subirlas
       if (imageFiles.length > 0 && createdOrUpdatedProduct) {
         try {
-          // Convertir base64 a File objects
+          // ✅ FIX: Convertir base64 strings a File objects
           const files = await Promise.all(
             imageFiles.map(async (base64, index) => {
               const response = await fetch(base64);
@@ -561,6 +744,9 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-event
 
   // #event handleDeleteProduct
+  /**
+   * Elimina un producto.
+   */
   const handleDeleteProduct = async (productId: number) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
@@ -573,13 +759,96 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   };
   // #end-event
 
+  // #event handleCopyProduct
+  /**
+   * Copia un producto al clipboard.
+   */
+  const handleCopyProduct = (product: ProductWithCalculatedPrice) => {
+    clipboard.copyProduct({
+      id: product.id,
+      categoryId: categoryId,
+      name: product.name,
+      description: product.description,
+      images: product.images.length > 0 ? JSON.stringify(product.images) : null,
+      basePrice: product.basePrice,
+      discount: product.discount,
+      hasStockControl: product.hasStockControl,
+      currentStock: product.currentStock,
+      stockAlertThreshold: product.stockAlertThreshold,
+      stockStopThreshold: product.stockStopThreshold,
+      isAvailable: product.isAvailable
+    });
+    
+    console.log('✅ Producto copiado al clipboard:', product.name);
+  };
+  // #end-event
+
+  // #event handleOpenPasteProductModal
+  /**
+   * Abre el modal de confirmación para pegar producto.
+   */
+  const handleOpenPasteProductModal = () => {
+    const copiedProduct = clipboard.getCopiedProduct; // ✅ FIX: Sin paréntesis
+    if (!copiedProduct) {
+      alert('No hay ningún producto copiado.');
+      return;
+    }
+
+    // Verificar que no se esté pegando en la misma categoría
+    if (copiedProduct.categoryId === categoryId) {
+      alert('No puedes pegar un producto en la misma categoría. Navega a otra categoría para pegarlo.');
+      return;
+    }
+
+    setShowPasteProductModal(true);
+  };
+  // #end-event
+
+  // #event handleConfirmPasteProduct
+  /**
+   * Confirma y ejecuta el pegado de producto.
+   */
+  const handleConfirmPasteProduct = async () => {
+    const copiedProduct = clipboard.getCopiedProduct; // ✅ FIX: Sin paréntesis
+    if (!copiedProduct) return;
+
+    setIsPasting(true);
+
+    try {
+      await duplicateProduct(copiedProduct.id, categoryId);
+      
+      // Limpiar clipboard después de pegar
+      clipboard.clear();
+      
+      // Cerrar modal
+      setShowPasteProductModal(false);
+      
+      // Recargar productos para mostrar el nuevo
+      await loadProducts(true);
+      
+      alert('✅ Producto duplicado exitosamente.');
+    } catch (error) {
+      console.error('Error duplicating product:', error);
+      alert('Error al duplicar el producto. Por favor intenta de nuevo.');
+    } finally {
+      setIsPasting(false);
+    }
+  };
+  // #end-event
+
   // #event handleDragStart
+  /**
+   * Maneja el inicio del arrastre.
+   */
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id);
   };
   // #end-event
 
   // #event handleDragEnd
+  /**
+   * Maneja el final del arrastre y reordena los productos.
+   */
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -611,12 +880,18 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-event
 
   // #event handleDragCancel
+  /**
+   * Cancela el arrastre.
+   */
   const handleDragCancel = () => {
     setActiveId(null);
   };
   // #end-event
 
   // #function handleProductClick - Abrir modal de detalle
+  /**
+   * Abre el modal de detalle del producto.
+   */
   const handleProductClick = (product: ProductWithCalculatedPrice) => {
     setSelectedProduct(product);
     setIsDetailModalOpen(true);
@@ -624,6 +899,9 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #end-function
 
   // #function handleCloseDetailModal - Cerrar modal de detalle
+  /**
+   * Cierra el modal de detalle del producto.
+   */
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setTimeout(() => {
@@ -635,14 +913,27 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
   // #section return
   return (
     <div className={styles.productsContainer}>
-      {/* Botón crear producto */}
-      <button
-        className="btn-pri btn-sm"
-        onClick={handleOpenCreateModal}
-        disabled={isLoading}
-      >
-        + Nuevo Producto
-      </button>
+      {/* #section Botones de acción */}
+      <div className={styles.actionButtons}>
+        <button
+          className="btn-pri btn-sm"
+          onClick={handleOpenCreateModal}
+          disabled={isLoading}
+        >
+          + Nuevo Producto
+        </button>
+
+        {clipboard.hasCopiedProduct && (
+          <button
+            className="btn-sec btn-sm"
+            onClick={handleOpenPasteProductModal}
+            disabled={isLoading || isPasting}
+          >
+            📂 Pegar Producto
+          </button>
+        )}
+      </div>
+      {/* #end-section */}
 
       {/* Loading state */}
       {isLoading && localProducts.length === 0 && (
@@ -677,6 +968,7 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
                   onEdit={() => handleOpenEditModal(product)}
                   onDelete={() => handleDeleteProduct(product.id)}
                   onClick={() => handleProductClick(product)}
+                  onCopy={() => handleCopyProduct(product)}
                 />
               ))}
             </div>
@@ -713,7 +1005,7 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
           stockAlertThreshold: editingProduct.stockAlertThreshold || undefined,
           stockStopThreshold: editingProduct.stockStopThreshold || undefined,
           isAvailable: editingProduct.isAvailable,
-          images: editingProduct.images // Ya es string[] (array)
+          images: editingProduct.images
         } : undefined}
         title={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
         submitText={editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
@@ -725,6 +1017,16 @@ function ProductsSection({ categoryId }: { categoryId: number }) {
       isOpen={isDetailModalOpen}
       onClose={handleCloseDetailModal}
       product={selectedProduct}
+    />
+
+    {/* Modal de pegar producto */}
+    <PasteProductModal
+      isOpen={showPasteProductModal}
+      onClose={() => setShowPasteProductModal(false)}
+      onConfirm={handleConfirmPasteProduct}
+      product={clipboard.getCopiedProduct} // ✅ FIX: Sin paréntesis
+      targetCategoryName={categoryName}
+      isLoading={isPasting}
     />
     </div>
   );
