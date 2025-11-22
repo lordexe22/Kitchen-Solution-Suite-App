@@ -40,6 +40,7 @@ import type { ProductWithCalculatedPrice } from '../../../store/Products.types';
 import type { ProductFormData } from '../../../store/Products.types';
 import { calculateProductPrice } from '../../../store/Products.types';
 import { uploadProductImages } from '../../../services/products/productsImages.service';
+import { uploadCategoryImage } from '../../../services/categories/categoryImage.service';
 // #end-section
 
 // #component ProductsPage
@@ -274,6 +275,12 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   };
   // #end-function
 
+  const base64ToFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+  };
+
   // #event handleOpenCreateModal
   const handleOpenCreateModal = () => {
     setEditingCategory(null);
@@ -291,12 +298,37 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
   // #event handleSaveCategory
   const handleSaveCategory = async (config: CategoryConfiguration) => {
     try {
-      const formData = configurationToFormData(config);
+      // Separar la imagen del resto de datos
+      const { imageUrl, ...categoryData } = configurationToFormData(config);
+      const isBase64Image = imageUrl?.startsWith('data:image/');
+      
+      let savedCategory;
       
       if (editingCategory) {
-        await updateCategory(editingCategory.category.id, formData);
+        // EDITAR: Actualizar primero sin imagen
+        savedCategory = await updateCategory(editingCategory.category.id, categoryData);
+        
+        // Si hay imagen base64, subirla
+        if (isBase64Image && imageUrl) {
+          const file = await base64ToFile(imageUrl, 'category-image.jpg');
+          const imageResult = await uploadCategoryImage(savedCategory.id, file);
+          // Actualizar con la URL de Cloudinary
+          savedCategory = await updateCategory(savedCategory.id, { imageUrl: imageResult.imageUrl });
+        }
       } else {
-        await createCategory(formData);
+        // CREAR: Crear primero sin imagen
+        savedCategory = await createCategory(categoryData);
+        
+        // Si hay imagen base64, subirla DESPUÉS
+        if (isBase64Image && imageUrl) {
+          const file = await base64ToFile(imageUrl, 'category-image.jpg');
+          const imageResult = await uploadCategoryImage(savedCategory.id, file);
+          // Actualizar la categoría con la URL de Cloudinary
+          savedCategory = await updateCategory(savedCategory.id, { imageUrl: imageResult.imageUrl });
+        } else if (imageUrl) {
+          // Si es URL normal (no base64), actualizarla
+          savedCategory = await updateCategory(savedCategory.id, { imageUrl });
+        }
       }
       
       setShowCategoryModal(false);
