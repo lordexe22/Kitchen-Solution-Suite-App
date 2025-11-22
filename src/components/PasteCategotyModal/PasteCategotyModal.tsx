@@ -1,7 +1,7 @@
 /* src/components/PasteCategoryModal/PasteCategoryModal.tsx */
 // #section imports
 import type { ClipboardCategory } from '../../store/Clipboard.types';
-import styles from './PasteCategoryModal.module.css';
+import styles from './PasteCategotyModal.module.css'
 // #end-section
 
 // #interface PasteCategoryModalProps
