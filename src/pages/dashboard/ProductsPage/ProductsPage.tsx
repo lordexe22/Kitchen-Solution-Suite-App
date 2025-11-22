@@ -194,39 +194,32 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     reorderCategories
   } = useCategories(branchId);
   // #end-hook
-
   // #state [localCategories, setLocalCategories] - Estado local para drag & drop optimista
   const [localCategories, setLocalCategories] = useState<CategoryWithParsedGradient[]>([]);
   // #end-state
-
   // #state [activeId, setActiveId] - ID del elemento que se está arrastrando
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   // #end-state
-
   // #state [showCategoryModal, setShowCategoryModal]
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   // #end-state
-
   // #state [editingCategory, setEditingCategory]
   const [editingCategory, setEditingCategory] = useState<{
     category: CategoryWithParsedGradient;
     index: number;
   } | null>(null);
   // #end-state
-
-  // #effect - Load categories on mount
+  // #event - Load categories on mount
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
-  // #end-effect
-
-  // #effect - Sincronizar categorías del store con el estado local
+  // #end-event
+  // #event - Sincronizar categorías del store con el estado local
   useEffect(() => {
     setLocalCategories(categoriesFromStore);
   }, [categoriesFromStore]);
-  // #end-effect
-
-  // #sensors - Configuración de sensores para drag & drop
+  // #end-event
+  // #variable - Configuración de sensores para drag & drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -237,15 +230,13 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  // #end-sensors
-
+  // #end-variable
   // #function getActiveCategory
   const getActiveCategory = () => {
     if (!activeId) return null;
     return localCategories.find(cat => cat.id === activeId);
   };
   // #end-function
-
   // #function categoryToConfiguration
   const categoryToConfiguration = (category: CategoryWithParsedGradient): CategoryConfiguration => {
     return {
@@ -259,7 +250,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     };
   };
   // #end-function
-
   // #function configurationToFormData
   const configurationToFormData = (config: CategoryConfiguration) => {
     return {
@@ -273,21 +263,18 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     };
   };
   // #end-function
-
   // #event handleOpenCreateModal
   const handleOpenCreateModal = () => {
     setEditingCategory(null);
     setShowCategoryModal(true);
   };
   // #end-event
-
   // #event handleOpenEditModal
   const handleOpenEditModal = (category: CategoryWithParsedGradient, index: number) => {
     setEditingCategory({ category, index });
     setShowCategoryModal(true);
   };
   // #end-event
-
   // #event handleSaveCategory
   const handleSaveCategory = async (config: CategoryConfiguration) => {
     try {
@@ -307,7 +294,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     }
   };
   // #end-event
-
   // #event handleDeleteCategory
   const handleDeleteCategory = async (categoryId: number) => {
     if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
@@ -320,13 +306,11 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     }
   };
   // #end-event
-
   // #event handleDragStart
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id);
   };
   // #end-event
-
   // #event handleDragEnd
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -358,7 +342,6 @@ function CategoriesContainer({ branchId }: { branchId: number }) {
     }
   };
   // #end-event
-
   // #event handleDragCancel
   const handleDragCancel = () => {
     setActiveId(null);

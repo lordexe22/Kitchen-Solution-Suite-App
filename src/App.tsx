@@ -10,6 +10,7 @@ import ProductsPage from "./pages/dashboard/ProductsPage/ProductsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SchedulesPage from "./pages/dashboard/SchedulePage/SchedulePage";
 import SocialsPage from "./pages/dashboard/SocialsPage/SocialsPage";
+import ToastContainer from "./components/Toast/ToastContainer";
 // #end-section
 // #component App
 function App() {
@@ -32,74 +33,77 @@ function App() {
   // #end-section
   // #section render pages
   return (
-    <Routes>
-      {/* #route - public -- <MainPage /> */}
-      <Route path="/" element={<MainPage />} />
-      {/* #end-route */}
-      {/* #route - /dashboard -- <WelcomePage /> */}
-      <Route 
-        path="/dashboard" 
-        element={
-          <ProtectedRoute>
-            <WelcomePage />
-          </ProtectedRoute>
-        } 
-      />
-      {/* #end-route */}
-      {/* #route - /dashboard/companies -- <CompaniesPage /> */}
-      <Route 
-        path="/dashboard/companies" 
-        element={
-          <ProtectedRoute>
-            <CompaniesPage />
-          </ProtectedRoute>
-        } 
-      />
-      {/* #end-route */}
-      {/* #route - /dashboard/employees -- <EmployeesPage /> */}
-      <Route 
-        path="/dashboard/employees" 
-        element={
-          <ProtectedRoute>
-            <EmployeesPage />
-          </ProtectedRoute>
-        } 
-      />
-      {/* #end-route */}
-      {/* #route - /dashboard/products -- <ProductsPage /> */}
-      <Route 
-        path="/dashboard/products" 
-        element={
-          <ProtectedRoute>
-            <ProductsPage />
-          </ProtectedRoute>
-        } 
-      />
-      {/* #end-route */}
-      {/* #route - /dashboard/schedules -- <SchedulesPage /> */}
-      <Route 
-        path="/dashboard/schedules" 
-        element={
-          <ProtectedRoute>
-            <SchedulesPage />
-          </ProtectedRoute>
-        } 
-      />
-      {/* #end-route       */}
-      {/* #route - /dashboard/socials -- <SocialsPage /> */}
+    <>
+      <ToastContainer />
+      <Routes>
+        {/* #route - public -- <MainPage /> */}
+        <Route path="/" element={<MainPage />} />
+        {/* #end-route */}
+        {/* #route - /dashboard -- <WelcomePage /> */}
         <Route 
-          path="/dashboard/socials" 
+          path="/dashboard" 
           element={
             <ProtectedRoute>
-              <SocialsPage />
+              <WelcomePage />
             </ProtectedRoute>
           } 
         />
-      {/* #end-route       */}
-      {/* #route - default       */}
-      <Route path="*" element={<Navigate to="/" />} />
-      {/* #end-route       */}
-    </Routes>
+        {/* #end-route */}
+        {/* #route - /dashboard/companies -- <CompaniesPage /> */}
+        <Route 
+          path="/dashboard/companies" 
+          element={
+            <ProtectedRoute>
+              <CompaniesPage />
+            </ProtectedRoute>
+          } 
+        />
+        {/* #end-route */}
+        {/* #route - /dashboard/employees -- <EmployeesPage /> */}
+        <Route 
+          path="/dashboard/employees" 
+          element={
+            <ProtectedRoute>
+              <EmployeesPage />
+            </ProtectedRoute>
+          } 
+        />
+        {/* #end-route */}
+        {/* #route - /dashboard/products -- <ProductsPage /> */}
+        <Route 
+          path="/dashboard/products" 
+          element={
+            <ProtectedRoute>
+              <ProductsPage />
+            </ProtectedRoute>
+          } 
+        />
+        {/* #end-route */}
+        {/* #route - /dashboard/schedules -- <SchedulesPage /> */}
+        <Route 
+          path="/dashboard/schedules" 
+          element={
+            <ProtectedRoute>
+              <SchedulesPage />
+            </ProtectedRoute>
+          } 
+        />
+        {/* #end-route       */}
+        {/* #route - /dashboard/socials -- <SocialsPage /> */}
+          <Route 
+            path="/dashboard/socials" 
+            element={
+              <ProtectedRoute>
+                <SocialsPage />
+              </ProtectedRoute>
+            } 
+          />
+        {/* #end-route       */}
+        {/* #route - default       */}
+        <Route path="*" element={<Navigate to="/" />} />
+        {/* #end-route       */}
+      </Routes>
+    </>
   );
   // #end-section
 }

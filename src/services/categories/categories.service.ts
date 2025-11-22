@@ -122,3 +122,30 @@ export const reorderCategories = async (
   await httpClient.patch('/categories/reorder', { updates });
 };
 // #end-function
+// #function duplicateCategory
+/**
+ * Duplica una categoría completa (incluye productos e imágenes).
+ * 
+ * @async
+ * @param {number} categoryId - ID de la categoría a duplicar
+ * @param {number} targetBranchId - ID de la sucursal destino
+ * @returns {Promise<{category: Category, productsCount: number}>} Categoría duplicada
+ * @throws {Error} Si la solicitud falla
+ * 
+ * @example
+ * const result = await duplicateCategory(1, 5);
+ */
+export const duplicateCategory = async (
+  categoryId: number,
+  targetBranchId: number
+): Promise<{ category: Category; productsCount: number; message: string }> => {
+  const response = await httpClient.post<{
+    category: Category;
+    productsCount: number;
+    message: string;
+  }>(`/categories/${categoryId}/duplicate`, {
+    targetBranchId
+  });
+  return response;
+};
+// #end-function

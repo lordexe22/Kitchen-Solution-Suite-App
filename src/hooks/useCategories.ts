@@ -8,6 +8,7 @@ import {
   updateCategory as updateCategoryService,
   deleteCategory as deleteCategoryService,
   reorderCategories as reorderCategoriesService,
+  duplicateCategory as duplicateCategoryService
 } from '../services/categories/categories.service';
 import type { CategoryFormData } from '../store/Categories.types';
 import { useProductsStore } from '../store/Products.store';
@@ -151,7 +152,7 @@ export const useCategories = (branchId: number) => {
     } finally {
       setIsLoading(false);
     }
-  }, [branchId, removeCategory]);
+  }, [branchId, removeCategory, clearProductsForCategory]);
   // #end-function
 
   // #function reorderCategories
@@ -195,6 +196,36 @@ export const useCategories = (branchId: number) => {
   }, [loadCategories]);
   // #end-function
 
+  // #function duplicateCategory
+  /**
+   * Duplica una categoría completa a otra sucursal.
+   * Incluye todos los productos de la categoría.
+   * 
+   * @param {number} categoryId - ID de la categoría a duplicar
+   * @param {number} targetBranchId - ID de la sucursal destino
+   */
+  const duplicateCategory = useCallback(async (
+    categoryId: number,
+    targetBranchId: number
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await duplicateCategoryService(categoryId, targetBranchId);
+      // No agregamos al store actual porque la categoría está en otra sucursal
+      // El usuario deberá navegar a esa sucursal para verla
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al duplicar categoría';
+      setError(errorMessage);
+      console.error('Error duplicating category:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  // #end-function
+
   return {
     categories,
     isLoading,
@@ -204,7 +235,8 @@ export const useCategories = (branchId: number) => {
     updateCategory,
     deleteCategory,
     reorderCategories,
-    refreshCategories
+    refreshCategories,
+    duplicateCategory
   };
 };
 // #end-hook

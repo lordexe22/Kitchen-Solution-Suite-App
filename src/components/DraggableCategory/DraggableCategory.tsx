@@ -14,6 +14,9 @@ interface DraggableCategoryProps {
   category: CategoryWithParsedGradient;
   onEdit: () => void;
   onDelete: () => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
+  canPaste?: boolean;
   children?: ReactNode; // Contenido expandible (productos)
 }
 // #end-interface
@@ -28,6 +31,9 @@ export default function DraggableCategory({
   category,
   onEdit,
   onDelete,
+  onCopy,
+  onPaste,
+  canPaste = false,
   children
 }: DraggableCategoryProps) {
   // #state [isExpanded, setIsExpanded]
@@ -136,6 +142,35 @@ export default function DraggableCategory({
 
           {/* Action Buttons */}
           <div className={styles.categoryActions}>
+            {onCopy && (
+              <button
+                className={styles.actionBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCopy();
+                }}
+                title="Copiar categoría"
+              >
+                📋
+              </button>
+            )}
+            {onPaste && (
+              <button
+                className={styles.actionBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPaste();
+                }}
+                disabled={!canPaste}
+                title={canPaste ? "Pegar categoría" : "No hay categoría copiada"}
+                style={{
+                  opacity: canPaste ? 1 : 0.5,
+                  cursor: canPaste ? 'pointer' : 'not-allowed'
+                }}
+              >
+                📂
+              </button>
+            )}
             <button
               className={styles.actionBtn}
               onClick={(e) => {

@@ -13,6 +13,9 @@ interface ProductCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onClick?: () => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
+  canPaste?: boolean;
 }
 // #end-interface
 
@@ -26,7 +29,10 @@ export default function ProductCard({
   product,
   onEdit,
   onDelete,
-  onClick
+  onClick,
+  onCopy,
+  onPaste,
+  canPaste = false
 }: ProductCardProps) {
   const {
     attributes,
@@ -161,6 +167,35 @@ export default function ProductCard({
 
         {/* Action Buttons */}
         <div className={styles.productActions}>
+          {onCopy && (
+            <button
+              className={styles.actionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopy();
+              }}
+              title="Copiar producto"
+            >
+              📋
+            </button>
+          )}
+          {onPaste && (
+            <button
+              className={styles.actionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPaste();
+              }}
+              disabled={!canPaste}
+              title={canPaste ? "Pegar producto" : "No hay producto copiado"}
+              style={{
+                opacity: canPaste ? 1 : 0.5,
+                cursor: canPaste ? 'pointer' : 'not-allowed'
+              }}
+            >
+              📂
+            </button>
+          )}
           <button
             className={styles.actionBtn}
             onClick={(e) => {

@@ -128,3 +128,29 @@ export const reorderProducts = async (
   await httpClient.patch('/products/reorder', { updates });
 };
 // #end-function
+// #function duplicateProduct
+/**
+ * Duplica un producto (incluye imágenes).
+ * 
+ * @async
+ * @param {number} productId - ID del producto a duplicar
+ * @param {number} targetCategoryId - ID de la categoría destino
+ * @returns {Promise<{product: Product}>} Producto duplicado
+ * @throws {Error} Si la solicitud falla
+ * 
+ * @example
+ * const result = await duplicateProduct(1, 5);
+ */
+export const duplicateProduct = async (
+  productId: number,
+  targetCategoryId: number
+): Promise<{ product: Product; message: string }> => {
+  const response = await httpClient.post<{
+    product: Product;
+    message: string;
+  }>(`/products/${productId}/duplicate`, {
+    targetCategoryId
+  });
+  return response;
+};
+// #end-function

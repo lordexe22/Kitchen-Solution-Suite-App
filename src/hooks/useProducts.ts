@@ -2,18 +2,19 @@
 // #section Imports
 import { useState, useCallback } from 'react';
 import { useProductsStore } from '../store/Products.store';
-import type { ProductFormData } from '../store/Products.types';
+import type { ProductFormData, ProductWithParsedImages } from '../store/Products.types';
 import {
   getCategoryProducts as getCategoryProductsService,
   createProduct as createProductService,
   updateProduct as updateProductService,
   deleteProduct as deleteProductService,
-  reorderProducts as reorderProductsService
+  reorderProducts as reorderProductsService,
+  duplicateProduct as duplicateProductService
 } from '../services/products/products.service';
 // #end-section
 
 // Referencia vacía única para evitar crear un `[]` nuevo en cada selector
-const EMPTY_PRODUCTS: any[] = [];
+const EMPTY_PRODUCTS: ProductWithParsedImages[] = [];
 
 // #hook useProducts
 /**
@@ -194,6 +195,39 @@ export const useProducts = (categoryId: number) => {
   }, [loadProducts]);
   // #end-function
 
+  // #function duplicateProduct
+  /**
+   * Duplica un producto a otra categoría.
+   * 
+   * @param {number} productId - ID del producto a duplicar
+   * @param {number} targetCategoryId - ID de la categoría destino
+   */
+  const duplicateProduct = useCallback(async (
+    productId: number,
+    targetCategoryId: number
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await duplicateProductService(productId, targetCategoryId);
+      
+      // Si el producto se duplicó en la misma categoría actual, agregarlo al store
+      if (targetCategoryId === categoryId) {
+        addProduct(result.product);
+      }
+      
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al duplicar producto';
+      setError(errorMessage);
+      console.error('Error duplicating product:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [categoryId, addProduct]);
+  // #end-function
+
   return {
     products,
     isLoading,
@@ -203,7 +237,8 @@ export const useProducts = (categoryId: number) => {
     updateProduct,
     deleteProduct,
     reorderProducts,
-    refreshProducts
+    refreshProducts,
+    duplicateProduct
   };
 };
 // #end-hook
