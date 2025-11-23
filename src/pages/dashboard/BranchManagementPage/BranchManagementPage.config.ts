@@ -21,6 +21,13 @@ export const SECTION_CONFIGS: Record<string, SectionConfig> = {
     icon: '🌐',
     path: '/dashboard/branches/socials',
   },
+  location: {
+    id: 'location',
+    title: '📍 Ubicación de Sucursales',
+    subtitle: 'Configura la dirección y coordenadas de cada sucursal.',
+    icon: '📍',
+    path: '/dashboard/branches/location',
+  },
   products: {
     id: 'products',
     title: '🍽️ Productos y Categorías',
