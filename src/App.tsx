@@ -6,10 +6,8 @@ import MainPage from "./pages/public/MainPage/MainPage";
 import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
 import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
 import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
-import ProductsPage from "./pages/dashboard/ProductsPage/ProductsPage";
+import BranchManagementPage from "./pages/dashboard/BranchManagementPage/BranchManagementPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import SchedulesPage from "./pages/dashboard/SchedulePage/SchedulePage";
-import SocialsPage from "./pages/dashboard/SocialsPage/SocialsPage";
 // #end-section
 // #component App
 function App() {
@@ -66,36 +64,16 @@ function App() {
         } 
       />
       {/* #end-route */}
-      {/* #route - /dashboard/products -- <ProductsPage /> */}
+      {/* #route - /dashboard/branches/:section? -- <BranchManagementPage /> [UNIFIED BRANCH MANAGEMENT] */}
       <Route 
-        path="/dashboard/products" 
+        path="/dashboard/branches/:section?" 
         element={
           <ProtectedRoute>
-            <ProductsPage />
+            <BranchManagementPage />
           </ProtectedRoute>
         } 
       />
       {/* #end-route */}
-      {/* #route - /dashboard/schedules -- <SchedulesPage /> */}
-      <Route 
-        path="/dashboard/schedules" 
-        element={
-          <ProtectedRoute>
-            <SchedulesPage />
-          </ProtectedRoute>
-        } 
-      />
-      {/* #end-route       */}
-      {/* #route - /dashboard/socials -- <SocialsPage /> */}
-        <Route 
-          path="/dashboard/socials" 
-          element={
-            <ProtectedRoute>
-              <SocialsPage />
-            </ProtectedRoute>
-          } 
-        />
-      {/* #end-route       */}
       {/* #route - default       */}
       <Route path="*" element={<Navigate to="/" />} />
       {/* #end-route       */}

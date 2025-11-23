@@ -1,8 +1,9 @@
 /* src/components/CompanyAccordion/CompanyAccordion.tsx */
 // #section imports
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Company } from '../../store/Companies.types';
+import { useBranchAccordion } from '../../hooks/BranchAccordion';
 import styles from './CompanyAccordion.module.css';
 // #end-section
 
@@ -38,14 +39,39 @@ const CompanyAccordion = ({ company, children, onEdit, onDelete, onToggle }: Com
   const [isExpanded, setIsExpanded] = useState(false);
   // #end-state
 
+  // Get accordion context if available (only works within BranchManagementPage)
+  let accordionContext: ReturnType<typeof useBranchAccordion> | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    accordionContext = useBranchAccordion();
+  } catch {
+    // Context not available (component used outside of BranchManagementPage)
+  }
+
+  // Sync expanded state with context if available
+  useEffect(() => {
+    if (accordionContext && company.id) {
+      setIsExpanded(accordionContext.isBranchOpen(company.id));
+    }
+  }, [accordionContext, company.id]);
+
   // #event handleToggle
   /**
    * Maneja el evento de expandir/colapsar el acordeón.
    * Cambia el estado interno y notifica al padre si existe callback.
+   * Si hay context disponible, también actualiza el contexto.
    */
   const handleToggle = () => {
     setIsExpanded(prev => {
       const newState = !prev;
+      // Update context if available
+      if (accordionContext && company.id) {
+        if (newState) {
+          accordionContext.openBranch(company.id);
+        } else {
+          accordionContext.closeBranch(company.id);
+        }
+      }
       // Notificar al padre después de cambiar estado
       if (onToggle) onToggle();
       return newState;

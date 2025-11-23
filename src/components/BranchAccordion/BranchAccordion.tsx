@@ -1,8 +1,9 @@
 /* src/components/BranchAccordion/BranchAccordion.tsx */
 // #section imports
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { BranchWithLocation } from '../../store/Branches.types';
+import { useBranchAccordion } from '../../hooks/BranchAccordion';
 import styles from './BranchAccordion.module.css';
 // #end-section
 
@@ -49,16 +50,41 @@ const BranchAccordion = ({
   const [isExpanded, setIsExpanded] = useState(false);
   // #end-state
 
+  // Get accordion context if available (only works within BranchManagementPage)
+  let accordionContext: ReturnType<typeof useBranchAccordion> | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    accordionContext = useBranchAccordion();
+  } catch {
+    // Context not available (component used outside of BranchManagementPage)
+  }
+
+  // Sync expanded state with context if available
+  useEffect(() => {
+    if (accordionContext && branch.id) {
+      setIsExpanded(accordionContext.isBranchOpen(branch.id));
+    }
+  }, [accordionContext, branch.id]);
+
   // #event handleToggle
   /**
    * Maneja el evento de expandir/colapsar el acordeón.
    * Solo funciona si el acordeón es expandible.
+   * Si hay context disponible, también actualiza el contexto.
    */
   const handleToggle = () => {
     if (!isExpandable) return;
     
     setIsExpanded(prev => {
       const newState = !prev;
+      // Update context if available
+      if (accordionContext && branch.id) {
+        if (newState) {
+          accordionContext.openBranch(branch.id);
+        } else {
+          accordionContext.closeBranch(branch.id);
+        }
+      }
       // Notificar al padre después de cambiar estado
       if (onToggle) onToggle();
       return newState;

@@ -1,6 +1,6 @@
-/* src/pages/dashboard/SchedulesPage/SchedulesPage.module.css */
+/* src/pages/dashboard/BranchManagementPage/BranchManagementPage.module.css */
 
-/* #style .container */
+/* #style .container - Layout principal */
 .container {
   width: 100vw;
   height: 100vh;
@@ -10,7 +10,7 @@
 }
 /* #end-style */
 
-/* #style .content */
+/* #style .content - Contenedor de navbar y main */
 .content {
   display: flex;
   flex: 1;
@@ -18,7 +18,7 @@
 }
 /* #end-style */
 
-/* #style .main */
+/* #style .main - Área principal con scroll */
 .main {
   flex: 1;
   padding: 2rem;
@@ -27,7 +27,7 @@
 }
 /* #end-style */
 
-/* #style .header */
+/* #style .header - Encabezado de la página */
 .header {
   margin-bottom: 2rem;
 }
@@ -46,7 +46,7 @@
 }
 /* #end-style */
 
-/* #style .error */
+/* #style .error - Estado de error */
 .error {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
@@ -79,7 +79,7 @@
 }
 /* #end-style */
 
-/* #style .loading */
+/* #style .loading - Estado de carga */
 .loading {
   text-align: center;
   padding: 3rem;
@@ -88,7 +88,7 @@
 }
 /* #end-style */
 
-/* #style .accordionList */
+/* #style .accordionList - Lista de compañías */
 .accordionList {
   display: flex;
   flex-direction: column;
@@ -96,7 +96,7 @@
 }
 /* #end-style */
 
-/* #style .branchesSection */
+/* #style .branchesSection - Sección de sucursales */
 .branchesSection {
   display: flex;
   flex-direction: column;
@@ -104,7 +104,7 @@
 }
 /* #end-style */
 
-/* #style .branchesHeader */
+/* #style .branchesHeader - Encabezado de sucursales */
 .branchesHeader {
   display: flex;
   justify-content: space-between;
@@ -113,7 +113,7 @@
 }
 /* #end-style */
 
-/* #style .sectionTitle */
+/* #style .sectionTitle - Título de sección */
 .sectionTitle {
   font-size: 1.1rem;
   font-weight: 600;
@@ -122,7 +122,7 @@
 }
 /* #end-style */
 
-/* #style .emptyMessage */
+/* #style .emptyMessage - Mensaje vacío */
 .emptyMessage {
   text-align: center;
   padding: 2rem;
@@ -131,10 +131,54 @@
 }
 /* #end-style */
 
-/* #style .branchList */
+/* #style .branchList - Lista de sucursales */
 .branchList {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+/* #end-style */
+
+/* #style .categoriesContainer - Contenedor de categorías */
+.categoriesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+/* #end-style */
+
+/* #style .categoriesList - Lista de categorías */
+.categoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* #end-style */
+
+/* #style .productsContainer - Contenedor de productos */
+.productsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+/* #end-style */
+
+/* #style .productsList - Lista de productos */
+.productsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* #end-style */
+
+/* #style .emptyProducts - Mensaje de productos vacío */
+.emptyProducts {
+  text-align: center;
+  padding: 1.5rem;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.875rem;
 }
 /* #end-style */

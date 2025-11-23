@@ -27,18 +27,18 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'products',
     label: 'Productos',
     icon: '📦',
-    path: '/dashboard/products',
+    path: '/dashboard/branches/products',
   },
   {
     id: 'schedules',
     label: 'Horarios',
     icon: '🕐',
-    path: '/dashboard/schedules',
+    path: '/dashboard/branches/schedules',
   },
   {
     id: 'socials',
     label: 'Redes Sociales',
     icon: '🌐',
-    path: '/dashboard/socials',
+    path: '/dashboard/branches/socials',
   },
 ];
