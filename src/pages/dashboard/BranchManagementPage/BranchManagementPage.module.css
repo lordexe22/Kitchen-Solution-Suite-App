@@ -96,7 +96,20 @@
 }
 /* #end-style */
 
-/* #style .branchesSection - Sección de sucursales */
+/* #style .companiesView - Vista de compañías */
+.companiesView {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+/* #end-style */
+
+/* #style .headerActions - Acciones en encabezado */
+.headerActions {
+  display: flex;
+  gap: 0.75rem;
+}
+/* #end-style */
 .branchesSection {
   display: flex;
   flex-direction: column;

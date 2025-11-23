@@ -35,6 +35,13 @@ export const SECTION_CONFIGS: Record<string, SectionConfig> = {
     icon: '📦',
     path: '/dashboard/branches/products',
   },
+  companies: {
+    id: 'companies',
+    title: '🏢 Compañías',
+    subtitle: 'Gestiona tus compañías: crear, editar y eliminar.',
+    icon: '🏢',
+    path: '/dashboard/branches/companies',
+  },
 };
 
 /**

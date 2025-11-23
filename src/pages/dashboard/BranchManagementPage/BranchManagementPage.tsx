@@ -5,6 +5,9 @@ import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
 import CompanyAccordion from '../../../components/CompanyAccordion/CompanyAccordion';
+import CompanyList from '../../../components/CompanyList/CompanyList';
+import CompanyFormModal from '../../../components/CompanyFormModal/CompanyFormModal';
+import type { Company, CompanyFormData } from '../../../store/Companies.types';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useSelectedSection } from './useSelectedSection';
 import { BranchAccordionProvider } from '../../../hooks/BranchAccordion';
@@ -18,12 +21,14 @@ import styles from './BranchManagementPage.module.css';
 
 // #component BranchManagementPage
 /**
- * Página unificada para gestión de sucursales.
+ * Página unificada para gestión de sucursales y compañías.
  * Muestra compañías y sucursales con contenido dinámico según la sección seleccionada.
  * Las secciones disponibles son:
- * - schedules: Gestión de horarios
- * - socials: Gestión de redes sociales
- * - products: Gestión de productos y categorías
+ * - companies: Gestión de compañías (crear, editar, eliminar)
+ * - schedules: Gestión de horarios por sucursal
+ * - socials: Gestión de redes sociales por sucursal
+ * - products: Gestión de productos y categorías por sucursal
+ * - location: Gestión de ubicaciones por sucursal
  */
 const BranchManagementPage = () => {
   // #variable appLogoUrl
@@ -36,6 +41,11 @@ const BranchManagementPage = () => {
     isLoading: isLoadingCompanies,
     error: companiesError,
     loadCompanies,
+    createCompany,
+    updateCompany,
+    deleteCompany,
+    checkNameAvailability,
+    uploadLogo,
   } = useCompanies();
   // #end-hook
 
@@ -59,6 +69,11 @@ const BranchManagementPage = () => {
     companyId: number;
     socials: BranchSocial[];
   } | null>(null);
+  // #end-state
+
+  // #state Company modal + editing
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined);
   // #end-state
 
   // #effect - Load companies on mount
@@ -148,15 +163,33 @@ const BranchManagementPage = () => {
               <EmptyState
                 title="No hay compañías"
                 description="Crea tu primera compañía para comenzar a gestionar tu negocio"
-                actionButtonText="Ir a Compañías"
-                onActionClick={() => (window.location.href = '/dashboard/companies')}
+                actionButtonText={activeSection === 'companies' ? 'Crear Compañía' : 'Ir a Compañías'}
+                onActionClick={() => {
+                  if (activeSection === 'companies') setShowCompanyModal(true);
+                  else window.location.href = '/dashboard/companies';
+                }}
                 icon="🏢"
               />
             )}
             {/* #end-section */}
 
-            {/* #section Companies list with dynamic section content */}
-            {companies.length > 0 && (
+            {/* #section Companies view - Full companies management */}
+            {companies.length > 0 && activeSection === 'companies' && (
+              <div className={styles.companiesView}>
+                <div className={styles.headerActions}>
+                  <button className="btn-pri btn-md" onClick={() => { setEditingCompany(undefined); setShowCompanyModal(true); }}>
+                    + Nueva Compañía
+                  </button>
+                </div>
+                <CompanyList
+                  companies={companies}
+                  onEditCompany={(c) => { setEditingCompany(c); setShowCompanyModal(true); }}
+                  onDeleteCompany={(id) => deleteCompany(id)}
+                />
+              </div>
+            )}
+
+            {companies.length > 0 && activeSection !== 'companies' && (
               <div className={styles.accordionList}>
                 {companies.map((company) => (
                   <CompanyAccordion key={company.id} company={company}>
@@ -164,6 +197,28 @@ const BranchManagementPage = () => {
                   </CompanyAccordion>
                 ))}
               </div>
+            )}
+            {/* #end-section */}
+
+            {/* #section CompanyFormModal */}
+            {showCompanyModal && (
+              <CompanyFormModal
+                company={editingCompany}
+                onClose={() => { setShowCompanyModal(false); setEditingCompany(undefined); }}
+                onSubmit={async (data: CompanyFormData) => {
+                  try {
+                    if (editingCompany) await updateCompany(editingCompany.id, data);
+                    else await createCompany(data);
+                    setShowCompanyModal(false);
+                    setEditingCompany(undefined);
+                  } catch (err) {
+                    console.error('Error creating/updating company', err);
+                    throw err;
+                  }
+                }}
+                onUploadLogo={uploadLogo}
+                onCheckNameAvailability={checkNameAvailability}
+              />
             )}
             {/* #end-section */}
           </main>

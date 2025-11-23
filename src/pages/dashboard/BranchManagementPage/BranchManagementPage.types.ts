@@ -3,7 +3,7 @@
 /**
  * Tipos de sección disponibles en la página de gestión de sucursales
  */
-export type SectionType = 'schedules' | 'socials' | 'products' | 'location';
+export type SectionType = 'schedules' | 'socials' | 'products' | 'location' | 'companies';
 
 /**
  * Props base que todas las secciones deben recibir
