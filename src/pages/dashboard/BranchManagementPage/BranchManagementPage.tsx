@@ -11,6 +11,7 @@ import { BranchAccordionProvider } from '../../../hooks/BranchAccordion';
 import BranchSchedulesSection from './sections/BranchSchedulesSection';
 import BranchSocialsSection from './sections/BranchSocialsSection';
 import BranchProductsSection from './sections/BranchProductsSection';
+import BranchLocationSection from './sections/BranchLocationSection';
 import type { BranchSchedule } from '../../../store/Branches.types';
 import type { BranchSocial } from '../../../store/Branches.types';
 import styles from './BranchManagementPage.module.css';
@@ -90,6 +91,8 @@ const BranchManagementPage = () => {
             onCopyConfig={setCopiedSocialsConfig}
           />
         );
+      case 'location':
+        return <BranchLocationSection {...commonProps} />;
       case 'products':
         return <BranchProductsSection {...commonProps} />;
       default:

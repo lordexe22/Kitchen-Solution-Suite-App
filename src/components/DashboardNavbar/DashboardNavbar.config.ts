@@ -30,6 +30,12 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/dashboard/branches/products',
   },
   {
+    id: 'location',
+    label: 'Ubicación',
+    icon: '📍',
+    path: '/dashboard/branches/location',
+  },
+  {
     id: 'schedules',
     label: 'Horarios',
     icon: '🕐',
