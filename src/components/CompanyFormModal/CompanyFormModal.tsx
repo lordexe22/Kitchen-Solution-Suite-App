@@ -14,10 +14,10 @@ interface CompanyFormModalProps {
   company?: Company;
   /** Callback para cerrar el modal */
   onClose: () => void;
-  /** Callback para crear o actualizar */
-  onSubmit: (data: CompanyFormData) => Promise<void>;
+  /** Callback para crear o actualizar - retorna la compañía guardada */
+  onSubmit: (data: CompanyFormData) => Promise<Company>;
   /** Callback para subir logo */
-  onUploadLogo?: (companyId: number, file: File) => Promise<Company>; // ← CAMBIAR Promise<void> a Promise<Company>
+  onUploadLogo?: (companyId: number, file: File) => Promise<Company>;
   /** Función para verificar disponibilidad del nombre */
   onCheckNameAvailability?: (name: string) => Promise<boolean>;
 }
@@ -143,13 +143,13 @@ const CompanyFormModal = ({
     setIsLoading(true);
     try {
       // 1. Crear o actualizar la compañía
-      await onSubmit(data);
+      const savedCompany = await onSubmit(data);
 
       // 2. Si se seleccionó un archivo Y existe onUploadLogo, subir el logo
-      if (selectedFile && onUploadLogo && company?.id) {
+      if (selectedFile && onUploadLogo && savedCompany?.id) {
         setIsUploadingLogo(true);
         try {
-          await onUploadLogo(company.id, selectedFile);
+          await onUploadLogo(savedCompany.id, selectedFile);
         } catch (error) {
           console.error('Error uploading logo:', error);
           alert('La compañía se guardó pero hubo un error al subir el logo');

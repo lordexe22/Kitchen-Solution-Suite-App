@@ -13,9 +13,9 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'companies',
-    label: 'Compañías',
+    label: 'Mis Compañías',
     icon: '🏢',
-    path: '/dashboard/companies',
+    path: '/dashboard/branches/companies',
   },
   {
     id: 'employees',

@@ -30,6 +30,14 @@
 /* #style .header - Encabezado de la página */
 .header {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.headerContent {
+  flex: 1;
 }
 
 .title {
@@ -43,6 +51,12 @@
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 /* #end-style */
 

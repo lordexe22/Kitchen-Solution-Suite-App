@@ -37,8 +37,8 @@ export const SECTION_CONFIGS: Record<string, SectionConfig> = {
   },
   companies: {
     id: 'companies',
-    title: '🏢 Compañías',
-    subtitle: 'Gestiona tus compañías: crear, editar y eliminar.',
+    title: '🏢 Mis Compañías',
+    subtitle: 'Lista las sucursales existentes para editarlas o eliminarlas rápidamente.',
     icon: '🏢',
     path: '/dashboard/branches/companies',
   },
