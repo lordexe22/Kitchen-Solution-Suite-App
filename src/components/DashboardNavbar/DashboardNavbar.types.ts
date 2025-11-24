@@ -10,6 +10,8 @@ export interface NavItem {
   label: string;
   /** Ícono del item (emoji o string) */
   icon: string;
-  /** Ruta a la que navega */
-  path: string;
+  /** Ruta a la que navega (opcional si el item tiene `children`) */
+  path?: string;
+  /** Sub-items para mostrar en un submenú/acordeón */
+  children?: NavItem[];
 }

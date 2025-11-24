@@ -1,0 +1,16 @@
+.toolsPage {
+  padding: 20px;
+}
+
+.toolsList {
+  margin-top: 12px;
+}
+
+.toolsList a {
+  color: var(--primary, #0066cc);
+  text-decoration: none;
+}
+
+.toolsList a:hover {
+  text-decoration: underline;
+}

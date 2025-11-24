@@ -63,3 +63,27 @@
   flex: 1;
 }
 /* #end-style */
+
+/* Submenu / children */
+.nav-children {
+  display: flex;
+  flex-direction: column;
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.nav-item-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0.125rem 0;
+  border-radius: 0.4rem;
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.nav-item-child:hover {
+  background-color: #eef2ff;
+}

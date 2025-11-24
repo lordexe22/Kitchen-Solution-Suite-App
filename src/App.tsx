@@ -7,6 +7,9 @@ import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
 import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
 import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
 import BranchManagementPage from "./pages/dashboard/BranchManagementPage/BranchManagementPage";
+import ToolsPage from "./pages/dashboard/Tools/ToolsPage";
+import QRCreatorPage from "./pages/dashboard/Tools/QRCreatorPage";
+import DashboardShell from './components/DashboardShell/DashboardShell';
 import ProtectedRoute from "./components/ProtectedRoute";
 // #end-section
 // #component App
@@ -72,6 +75,28 @@ function App() {
             <BranchManagementPage />
           </ProtectedRoute>
         } 
+      />
+      {/* #route - /dashboard/tools -- tools list */}
+      <Route
+        path="/dashboard/tools"
+        element={
+          <ProtectedRoute>
+            <DashboardShell>
+              <ToolsPage />
+            </DashboardShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* #route - /dashboard/tools/qr -- QR Creator */}
+      <Route
+        path="/dashboard/tools/qr"
+        element={
+          <ProtectedRoute>
+            <DashboardShell>
+              <QRCreatorPage />
+            </DashboardShell>
+          </ProtectedRoute>
+        }
       />
       {/* #end-route */}
       {/* #route - default       */}

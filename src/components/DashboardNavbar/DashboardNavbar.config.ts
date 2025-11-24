@@ -47,4 +47,18 @@ export const NAV_ITEMS: NavItem[] = [
     icon: '🌐',
     path: '/dashboard/branches/socials',
   },
+  {
+    id: 'tools',
+    label: 'Herramientas',
+    icon: '🔧',
+    // children will be rendered as an accordion submenu in the navbar
+    children: [
+      {
+        id: 'tools_qr',
+        label: 'QR Creator',
+        icon: '🔲',
+        path: '/dashboard/tools/qr'
+      }
+    ]
+  },
 ];
