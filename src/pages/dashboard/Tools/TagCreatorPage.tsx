@@ -13,8 +13,8 @@ import styles from './TagCreatorPage.module.css';
  * 
  * Características:
  * - Botón para abrir modal de creación
- * - Lista de tags guardados con preview visual
- * - Opción de eliminar tags
+ * - Sección de tags del sistema (inmutables)
+ * - Sección de tags personalizados (editables/eliminables)
  */
 export default function TagCreatorPage() {
   // #state showModal
@@ -22,7 +22,7 @@ export default function TagCreatorPage() {
   // #end-state
   
   // #state tags from store
-  const { tags, addTag, removeTag } = useTagsStore();
+  const { systemTags, userTags, addUserTag, removeUserTag, isSystemTag } = useTagsStore();
   // #end-state
   
   // #function handleTagCreated
@@ -31,7 +31,7 @@ export default function TagCreatorPage() {
    * Guarda el tag en el store y cierra el modal.
    */
   const handleTagCreated = (config: TagConfiguration) => {
-    addTag(config);
+    addUserTag(config);
     setShowModal(false);
   };
   // #end-function
@@ -42,9 +42,15 @@ export default function TagCreatorPage() {
    * Pide confirmación antes de eliminar.
    */
   const handleDeleteTag = (tagName: string) => {
+    // Verificar que no sea un system tag
+    if (isSystemTag(tagName)) {
+      alert('No se pueden eliminar las etiquetas del sistema');
+      return;
+    }
+    
     const confirmed = window.confirm(`¿Eliminar la etiqueta "${tagName}"?`);
     if (confirmed) {
-      removeTag(tagName);
+      removeUserTag(tagName);
     }
   };
   // #end-function
@@ -90,22 +96,24 @@ export default function TagCreatorPage() {
         </button>
       </div>
       {/* #end-section */}
-      
-      {/* #section Tags List */}
+      {/* #section User Tags */}
       <div className={styles.tagsSection}>
         <h3 className={styles.sectionTitle}>
-          Etiquetas Guardadas ({tags.length})
+          ✏️ Mis Etiquetas Personalizadas ({userTags.length})
         </h3>
+        <p className={styles.sectionSubtitle}>
+          Etiquetas creadas por ti
+        </p>
         
-        {tags.length === 0 ? (
+        {userTags.length === 0 ? (
           <div className={styles.emptyState}>
             <p className={styles.emptyText}>
-              No hay etiquetas guardadas. Crea una nueva para comenzar.
+              No has creado etiquetas personalizadas. ¡Crea una nueva para comenzar!
             </p>
           </div>
         ) : (
           <div className={styles.tagsList}>
-            {tags.map((tag) => (
+            {userTags.map((tag) => (
               <div key={tag.name} className={styles.tagItem}>
                 <div style={getTagStyles(tag)} className={styles.tagPreview}>
                   {tag.icon && (
@@ -126,7 +134,32 @@ export default function TagCreatorPage() {
         )}
       </div>
       {/* #end-section */}
+      {/* #section System Tags */}
+      <div className={styles.tagsSection}>
+        <h3 className={styles.sectionTitle}>
+          🏷️ Etiquetas del Sistema ({systemTags.length})
+        </h3>
+        <p className={styles.sectionSubtitle}>
+          Etiquetas predeterminadas siempre disponibles
+        </p>
+        
+        <div className={styles.tagsList}>
+          {systemTags.map((tag) => (
+            <div key={tag.name} className={styles.tagItem}>
+              <div style={getTagStyles(tag)} className={styles.tagPreview}>
+                {tag.icon && (
+                  <span className={styles.tagIcon}>{tag.icon}</span>
+                )}
+                <span className={styles.tagName}>{tag.name}</span>
+              </div>
+              <span className={styles.systemBadge}>Sistema</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* #end-section */}
       
+
       {/* #section Modal */}
       <TagCreatorModal
         isOpen={showModal}
