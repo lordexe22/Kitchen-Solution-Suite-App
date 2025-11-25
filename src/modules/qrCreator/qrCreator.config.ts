@@ -1,7 +1,8 @@
-// Copied and adapted minimal config for QR Creator
+// src/modules/qrCreator/qrCreator.config.ts
+
 import QRCodeStyling from 'qr-code-styling'
 import type { Options, DownloadOptions } from 'qr-code-styling';
-import type { EnabledConfigOptions } from './qrCreator.d'
+import type { EnabledConfigOptions } from './qrCreator.d';
 
 export const enabledConfigOptions: EnabledConfigOptions = {
   basicOptions: true,
@@ -10,28 +11,72 @@ export const enabledConfigOptions: EnabledConfigOptions = {
   cornersDotOptions: true,
   backgroundOptions: true,
   imageOptions: true,
-  qrOptions: true
+  qrOptions: false // ⚠️ DESHABILITADO
 }
 
 export const defaultConfigOptions: Options = {
-  type: 'svg',
-  shape: 'square',
+  type: 'svg', // 'canvas' | 'svg'
+  shape: 'square', // 'square' | 'circle'
   width: 250,
   height: 250,
   margin: 10,
-  data: '',
-  dotsOptions:{ type: 'square', color: 'black' },
-  cornersSquareOptions: { type: 'square', color: 'black' },
-  cornersDotOptions: { type: 'square', color: 'black' },
-  backgroundOptions:{ color: 'white' },
+  data: '', // empty input
+  dotsOptions:{
+    type: 'square',
+    color: 'black',
+    gradient: undefined,
+    roundSize: undefined
+  },
+  cornersSquareOptions: {
+    type: 'square',
+    color: 'black',
+    gradient: undefined
+  },
+  cornersDotOptions: {
+    type: 'square',
+    color: 'black',
+    gradient: undefined
+  },
+  backgroundOptions:{
+    color: 'white',
+    gradient: undefined,
+    round: undefined
+  },
   image: undefined,
-  imageOptions: { imageSize: 1, margin: 0 },
-  qrOptions:{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'M' }
+  imageOptions: {
+    saveAsBlob: undefined,
+    hideBackgroundDots: undefined,
+    imageSize: 1,
+    margin: 0,
+    crossOrigin: undefined, // 'anonymous' | 'use-credentials' | undefined
+  },
+  qrOptions:{
+    typeNumber: 0,
+    mode: 'Byte', 
+    errorCorrectionLevel: 'M', 
+  },
+}
+
+export const defaultCustomConfigOptions = {
+  colorStyle: 'single'
 }
 
 export const defaultDownloadOptions: DownloadOptions = {
   name: 'qr-code',
-  extension: 'png'
+  extension: 'png', // "svg" | "png" | "jpeg" | "webp"
 }
 
-export const qrCode = new QRCodeStyling(defaultConfigOptions as any)
+/**
+ * Factory function para crear una nueva instancia de QRCodeStyling.
+ * Esto permite tener instancias locales por componente en lugar de una global.
+ * 
+ * @returns Nueva instancia de QRCodeStyling
+ */
+export const createQRCodeInstance = () => {
+  return new QRCodeStyling(defaultConfigOptions);
+}
+
+/** #info
+ * 
+ * 1 - Si en defaultConfigOptions, se hace type = 'canvas', entonces el codigo QR generado va a parpadear cada vez que se modifique un input (como cuando de deslizan los sliders)
+*/

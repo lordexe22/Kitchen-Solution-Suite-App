@@ -4,8 +4,8 @@
 }
 .header {
   width: 100%;
-  background: transparent;
-  border: none;
+  background-color: #00000010;
+  border-bottom: thin solid #00000080;
   display: flex;
   justify-content: space-between;
   align-items: center;
