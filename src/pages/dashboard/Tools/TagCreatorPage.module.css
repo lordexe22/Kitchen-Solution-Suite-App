@@ -85,10 +85,6 @@
   border-color: #d1d5db;
 }
 
-.tagPreview {
-  /* Estilos se aplican inline desde getTagStyles() */
-}
-
 .tagIcon {
   font-size: 1em;
   line-height: 1;
