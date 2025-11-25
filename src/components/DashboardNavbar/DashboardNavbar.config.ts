@@ -58,6 +58,12 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'QR Creator',
         icon: '🔲',
         path: '/dashboard/tools/qr'
+      },
+      {
+        id: 'tools_tags',
+        label: 'Tag Creator',
+        icon: '🏷️',
+        path: '/dashboard/tools/tags'
       }
     ]
   },

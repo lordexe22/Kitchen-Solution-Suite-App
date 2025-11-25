@@ -11,6 +11,7 @@ import ToolsPage from "./pages/dashboard/Tools/ToolsPage";
 import QRCreatorPage from "./pages/dashboard/Tools/QRCreatorPage";
 import DashboardShell from './components/DashboardShell/DashboardShell';
 import ProtectedRoute from "./components/ProtectedRoute";
+import TagCreatorPage from "./pages/dashboard/Tools/TagCreatorPage";
 // #end-section
 // #component App
 function App() {
@@ -76,6 +77,7 @@ function App() {
           </ProtectedRoute>
         } 
       />
+      {/* #end-route */}
       {/* #route - /dashboard/tools -- tools list */}
       <Route
         path="/dashboard/tools"
@@ -87,6 +89,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+      {/* #end-route */}
       {/* #route - /dashboard/tools/qr -- QR Creator */}
       <Route
         path="/dashboard/tools/qr"
@@ -94,6 +97,18 @@ function App() {
           <ProtectedRoute>
             <DashboardShell>
               <QRCreatorPage />
+            </DashboardShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* #end-route */}
+      {/* #route - /dashboard/tools/tags -- Tag Creator */}
+      <Route
+        path="/dashboard/tools/tags"
+        element={
+          <ProtectedRoute>
+            <DashboardShell>
+              <TagCreatorPage />
             </DashboardShell>
           </ProtectedRoute>
         }

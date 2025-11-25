@@ -9,6 +9,7 @@ export default function ToolsPage() {
       <p>Selecciona una herramienta:</p>
       <ul>
         <li><Link to="/dashboard/tools/qr">QR Creator</Link></li>
+        <li><Link to="/dashboard/tools/tags">Tag Creator</Link></li>
       </ul>
     </div>
   );
