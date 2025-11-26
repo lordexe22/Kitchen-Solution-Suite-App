@@ -14,7 +14,7 @@ import { calculateProductPrice } from '../../../../store/Products.types';
 import { useBranches } from '../../../../hooks/useBranches';
 import { useCategories } from '../../../../hooks/useCategories';
 import { useProducts } from '../../../../hooks/useProducts';
-import { uploadProductImages } from '../../../../services/products/productsImages.service';
+import { uploadProductImages, deleteProductImage } from '../../../../services/products/productsImages.service';
 import { uploadCategoryImage } from '../../../../services/categories/categoryImage.service';
 import type { BranchSectionProps } from '../BranchManagementPage.types';
 import {
@@ -358,31 +358,80 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
     setShowProductModal(true);
   };
 
-  const handleSaveProduct = async (data: Omit<ProductFormData, 'categoryId'>, imageFiles: string[]) => {
+  // ==========================================
+  // FUNCIÓN MODIFICADA: handleSaveProduct
+  // ==========================================
+  const handleSaveProduct = async (data: Omit<ProductFormData, 'categoryId'>, currentImages: string[]) => {
     try {
       let createdOrUpdatedProduct;
 
       if (editingProduct) {
+        // === MODO EDICIÓN ===
+        
+        // 1. Obtener imágenes originales del producto
+        const originalImages = editingProduct.images || [];
+        
+        // 2. Separar imágenes: eliminadas, nuevas
+        const deletedImages = originalImages.filter(img => !currentImages.includes(img));
+        const newImagesBase64 = currentImages.filter(img => img.startsWith('data:'));
+        
+        // 3. Actualizar los datos del producto (sin tocar imágenes aún)
         createdOrUpdatedProduct = await updateProduct(editingProduct.id, data);
+        
+        // 4. Eliminar imágenes que fueron quitadas
+        if (deletedImages.length > 0) {
+          console.log(`Eliminando ${deletedImages.length} imagen(es)...`);
+          for (const imageUrl of deletedImages) {
+            try {
+              await deleteProductImage(editingProduct.id, imageUrl);
+            } catch (error) {
+              console.error(`Error eliminando imagen ${imageUrl}:`, error);
+            }
+          }
+        }
+        
+        // 5. Subir imágenes nuevas (solo las base64)
+        if (newImagesBase64.length > 0) {
+          console.log(`Subiendo ${newImagesBase64.length} imagen(es) nueva(s)...`);
+          try {
+            const files = await Promise.all(
+              newImagesBase64.map(async (base64, index) => {
+                const response = await fetch(base64);
+                const blob = await response.blob();
+                return new File([blob], `image-${Date.now()}-${index}.jpg`, { type: blob.type });
+              })
+            );
+            
+            await uploadProductImages(editingProduct.id, files);
+          } catch (imageError) {
+            console.error('Error subiendo imágenes nuevas:', imageError);
+            alert('Producto actualizado, pero hubo un error al subir las imágenes nuevas');
+          }
+        }
+        
+        // 6. Recargar productos
+        await loadProducts(true);
+        
       } else {
+        // === MODO CREACIÓN ===
         createdOrUpdatedProduct = await createProduct(data);
-      }
 
-      if (imageFiles.length > 0 && createdOrUpdatedProduct) {
-        try {
-          const files = await Promise.all(
-            imageFiles.map(async (base64, index) => {
-              const response = await fetch(base64);
-              const blob = await response.blob();
-              return new File([blob], `image-${index}.jpg`, { type: blob.type });
-            })
-          );
+        if (currentImages.length > 0) {
+          try {
+            const files = await Promise.all(
+              currentImages.map(async (base64, index) => {
+                const response = await fetch(base64);
+                const blob = await response.blob();
+                return new File([blob], `image-${index}.jpg`, { type: blob.type });
+              })
+            );
 
-          await uploadProductImages(createdOrUpdatedProduct.id, files);
-          await loadProducts(true);
-        } catch (imageError) {
-          console.error('Error uploading images:', imageError);
-          alert('Producto creado, pero hubo un error al subir las imágenes');
+            await uploadProductImages(createdOrUpdatedProduct.id, files);
+            await loadProducts(true);
+          } catch (imageError) {
+            console.error('Error uploading images:', imageError);
+            alert('Producto creado, pero hubo un error al subir las imágenes');
+          }
         }
       }
 
@@ -393,6 +442,9 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
       throw error;
     }
   };
+  // ==========================================
+  // FIN DE FUNCIÓN MODIFICADA
+  // ==========================================
 
   const handleDeleteProduct = async (productId: number) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
@@ -409,6 +461,9 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
     setActiveId(event.active.id);
   };
 
+  // ==========================================
+  // FUNCIÓN CORREGIDA CON DEBUG: handleDragEnd
+  // ==========================================
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -418,8 +473,26 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
       return;
     }
 
-    const oldIndex = products.findIndex((p) => p.id === active.id);
-    const newIndex = products.findIndex((p) => p.id === over.id);
+    console.log('🔍 Debug Drag & Drop:');
+    console.log('  active.id:', active.id, typeof active.id);
+    console.log('  over.id:', over.id, typeof over.id);
+    console.log('  products:', products.map(p => ({ id: p.id, name: p.name })));
+
+    // Convertir IDs a números si vienen como strings
+    const activeId = typeof active.id === 'number' ? active.id : Number(active.id);
+    const overId = typeof over.id === 'number' ? over.id : Number(over.id);
+
+    const oldIndex = products.findIndex((p) => p.id === activeId);
+    const newIndex = products.findIndex((p) => p.id === overId);
+
+    console.log('  oldIndex:', oldIndex);
+    console.log('  newIndex:', newIndex);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      console.error('❌ No se encontraron los productos en los índices');
+      alert('Error: no se pudo encontrar el producto para reordenar');
+      return;
+    }
 
     const reordered = arrayMove(products, oldIndex, newIndex);
     setProducts(reordered);
@@ -429,14 +502,29 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
       sortOrder: index + 1,
     }));
 
+    console.log('  updates a enviar:', updates);
+
+    // Validar que todos los IDs son números válidos
+    const invalidIds = updates.filter(u => !u.id || typeof u.id !== 'number' || isNaN(u.id));
+    if (invalidIds.length > 0) {
+      console.error('❌ IDs inválidos detectados:', invalidIds);
+      alert('Error: algunos productos tienen IDs inválidos');
+      loadProducts(true);
+      return;
+    }
+
     try {
       await reorderProducts(updates);
+      console.log('✅ Productos reordenados exitosamente');
     } catch (error) {
       console.error('Error reordering products:', error);
       alert('Error al reordenar. Se revertirán los cambios.');
       loadProducts(true);
     }
   };
+  // ==========================================
+  // FIN DE FUNCIÓN CORREGIDA
+  // ==========================================
 
   const handleDragCancel = () => {
     setActiveId(null);

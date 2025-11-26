@@ -66,5 +66,5 @@ export const deleteProduct = async (id: number): Promise<void> => {
 export const reorderProducts = async (
   updates: Array<{ id: number; sortOrder: number }>
 ): Promise<void> => {
-  await httpClient.put('/products/reorder', { updates });
+  await httpClient.patch('/products/reorder', { updates });
 };

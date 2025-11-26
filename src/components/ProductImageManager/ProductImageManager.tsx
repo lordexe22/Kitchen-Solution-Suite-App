@@ -27,6 +27,9 @@ interface SortableImageProps {
 // #component SortableImage
 /**
  * Imagen individual con capacidad de drag & drop.
+ * 
+ * IMPORTANTE: Los listeners del drag solo se aplican al área de la imagen,
+ * NO al botón de eliminar, para que el botón funcione correctamente.
  */
 function SortableImage({ id, imageUrl, index, onRemove }: SortableImageProps) {
   const {
@@ -49,22 +52,29 @@ function SortableImage({ id, imageUrl, index, onRemove }: SortableImageProps) {
       ref={setNodeRef}
       style={style}
       className={`${styles.imageItem} ${isDragging ? styles.dragging : ''}`}
-      {...attributes}
-      {...listeners}
     >
-      <img src={imageUrl} alt={`Producto ${index + 1}`} className={styles.image} />
-      
-      {/* Badge de orden */}
-      <div className={styles.orderBadge}>
-        {index === 0 ? 'Principal' : index + 1}
+      {/* Área arrastrable: SOLO la imagen tiene los listeners */}
+      <div 
+        className={styles.dragHandle}
+        {...attributes}
+        {...listeners}
+      >
+        <img src={imageUrl} alt={`Producto ${index + 1}`} className={styles.image} />
+        
+        {/* Badge de orden */}
+        <div className={styles.orderBadge}>
+          {index === 0 ? 'Principal' : index + 1}
+        </div>
       </div>
 
-      {/* Botón eliminar */}
+      {/* Botón eliminar - FUERA del área arrastrable */}
       <button
         type="button"
         className={styles.removeButton}
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
+          console.log(`🗑️ Eliminando imagen ${index}`);
           onRemove();
         }}
       >
@@ -133,6 +143,7 @@ export default function ProductImageManager({
         })
       );
 
+      console.log(`📷 Agregando ${newImageUrls.length} imagen(es) nuevas`);
       onImagesChange([...images, ...newImageUrls]);
     } catch (error) {
       console.error('Error loading images:', error);
@@ -148,7 +159,9 @@ export default function ProductImageManager({
 
   // #event handleRemoveImage
   const handleRemoveImage = (index: number) => {
+    console.log(`🗑️ Eliminando imagen en índice ${index}`);
     const newImages = images.filter((_, i) => i !== index);
+    console.log(`✅ Imágenes restantes: ${newImages.length}`);
     onImagesChange(newImages);
   };
   // #end-event
@@ -162,6 +175,7 @@ export default function ProductImageManager({
     const oldIndex = images.findIndex((_, i) => `image-${i}` === active.id);
     const newIndex = images.findIndex((_, i) => `image-${i}` === over.id);
 
+    console.log(`🔄 Reordenando imagen de ${oldIndex} a ${newIndex}`);
     const reordered = arrayMove(images, oldIndex, newIndex);
     onImagesChange(reordered);
   };
