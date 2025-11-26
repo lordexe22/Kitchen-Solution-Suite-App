@@ -598,6 +598,7 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
                   stockStopThreshold: editingProduct.stockStopThreshold || undefined,
                   isAvailable: editingProduct.isAvailable,
                   images: editingProduct.images,
+                  tags: editingProduct.tags || undefined,
                 }
               : undefined
           }
