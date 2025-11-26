@@ -89,7 +89,6 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
     set((state) => {
       const newMap = new Map(state.productsByCategory);
       
-      // Buscar el producto en todas las categorías
       for (const [categoryId, products] of newMap.entries()) {
         const index = products.findIndex(p => p.id === id);
         
@@ -97,28 +96,62 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
           const updatedProducts = [...products];
           const currentProduct = updatedProducts[index];
           
-          // Crear un producto temporal con los updates aplicados
-          const tempProduct: Product = {
-            ...currentProduct,
-            ...updates,
-            // Forzar que images sea string | null para Product
-            images: updates.images !== undefined ? updates.images : (currentProduct.images as unknown as string | null)
-          } as Product;
-          
-          // Parsear si se actualizaron imágenes
-          if (updates.images !== undefined) {
-            updatedProducts[index] = parseProductImages(tempProduct);
+          // Si se actualiza images o tags, necesitamos re-parsear todo el producto
+          if (updates.images !== undefined || updates.tags !== undefined) {
+            let imagesValue: string | null = null;
+            if (updates.images !== undefined) {
+              imagesValue = typeof updates.images === 'string' ? updates.images : null;
+            } else if (currentProduct.images.length > 0) {
+              imagesValue = JSON.stringify(currentProduct.images);
+            }
+            
+            let tagsValue: string | null = null;
+            if (updates.tags !== undefined) {
+              tagsValue = typeof updates.tags === 'string' ? updates.tags : null;
+            } else if (currentProduct.tags && currentProduct.tags.length > 0) {
+              tagsValue = JSON.stringify(currentProduct.tags);
+            }
+            
+            const productToParse: Product = {
+              id: currentProduct.id,
+              categoryId: currentProduct.categoryId,
+              name: updates.name ?? currentProduct.name,
+              description: updates.description ?? currentProduct.description,
+              images: imagesValue,
+              tags: tagsValue,
+              basePrice: updates.basePrice?.toString() ?? currentProduct.basePrice,
+              discount: updates.discount?.toString() ?? currentProduct.discount,
+              hasStockControl: updates.hasStockControl ?? currentProduct.hasStockControl,
+              currentStock: updates.currentStock ?? currentProduct.currentStock,
+              stockAlertThreshold: updates.stockAlertThreshold ?? currentProduct.stockAlertThreshold,
+              stockStopThreshold: updates.stockStopThreshold ?? currentProduct.stockStopThreshold,
+              isAvailable: updates.isAvailable ?? currentProduct.isAvailable,
+              sortOrder: updates.sortOrder ?? currentProduct.sortOrder,
+              createdAt: currentProduct.createdAt,
+              updatedAt: currentProduct.updatedAt
+            };
+            updatedProducts[index] = parseProductImages(productToParse);
           } else {
-            // Mantener las imágenes parseadas existentes
+            // Actualizar campos preservando explícitamente images y tags parseados
             updatedProducts[index] = {
               ...currentProduct,
-              ...updates,
-              images: currentProduct.images, // Ya está parseado
-              mainImage: currentProduct.mainImage
+              name: updates.name ?? currentProduct.name,
+              description: updates.description ?? currentProduct.description,
+              basePrice: updates.basePrice?.toString() ?? currentProduct.basePrice,
+              discount: updates.discount?.toString() ?? currentProduct.discount,
+              hasStockControl: updates.hasStockControl ?? currentProduct.hasStockControl,
+              currentStock: updates.currentStock ?? currentProduct.currentStock,
+              stockAlertThreshold: updates.stockAlertThreshold ?? currentProduct.stockAlertThreshold,
+              stockStopThreshold: updates.stockStopThreshold ?? currentProduct.stockStopThreshold,
+              isAvailable: updates.isAvailable ?? currentProduct.isAvailable,
+              sortOrder: updates.sortOrder ?? currentProduct.sortOrder,
+              // Preservar explícitamente los campos parseados
+              images: currentProduct.images,
+              mainImage: currentProduct.mainImage,
+              tags: currentProduct.tags
             };
           }
           
-          // Reordenar si se actualizó sortOrder
           const finalProducts = updates.sortOrder !== undefined
             ? updatedProducts.sort((a, b) => a.sortOrder - b.sortOrder)
             : updatedProducts;
@@ -132,60 +165,84 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
     });
   },
 
-// Setter: Actualizar múltiples productos (para reordenar)
+  // Setter: Actualizar múltiples productos (para reordenar)
   updateMultipleProducts: (updates: Array<{ id: number; updates: Partial<Product> }>) => {
     set((state) => {
       const newMap = new Map(state.productsByCategory);
       
-      // Agrupar updates por categoryId
-      const updatesByCategory = new Map<number, Array<{ id: number; updates: Partial<Product> }>>();
-      
-      // Buscar categoryId de cada producto
-      for (const update of updates) {
-        for (const [categoryId, products] of newMap.entries()) {
-          if (products.some(p => p.id === update.id)) {
-            if (!updatesByCategory.has(categoryId)) {
-              updatesByCategory.set(categoryId, []);
-            }
-            updatesByCategory.get(categoryId)!.push(update);
-            break;
-          }
-        }
-      }
-      
-      // Aplicar updates por categoría
-      for (const [categoryId, categoryUpdates] of updatesByCategory.entries()) {
-        const products = newMap.get(categoryId) || [];
+      for (const [categoryId, products] of newMap.entries()) {
+        let hasChanges = false;
         const updatedProducts = products.map(product => {
-          const update = categoryUpdates.find(u => u.id === product.id);
+          const update = updates.find(u => u.id === product.id);
           if (!update) return product;
           
-          // Si se actualiza images, necesitamos parsear
-          if (update.updates.images !== undefined) {
-            const tempProduct: Product = {
-              ...product,
-              ...update.updates,
-              images: update.updates.images as string | null
-            } as Product;
-            return parseProductImages(tempProduct);
+          hasChanges = true;
+          
+          // Si actualiza images o tags, re-parsear
+          if (update.updates.images !== undefined || update.updates.tags !== undefined) {
+            let imagesValue: string | null = null;
+            if (update.updates.images !== undefined) {
+              imagesValue = typeof update.updates.images === 'string' ? update.updates.images : null;
+            } else if (product.images.length > 0) {
+              imagesValue = JSON.stringify(product.images);
+            }
+            
+            let tagsValue: string | null = null;
+            if (update.updates.tags !== undefined) {
+              tagsValue = typeof update.updates.tags === 'string' ? update.updates.tags : null;
+            } else if (product.tags && product.tags.length > 0) {
+              tagsValue = JSON.stringify(product.tags);
+            }
+            
+            const productToParse: Product = {
+              id: product.id,
+              categoryId: product.categoryId,
+              name: update.updates.name ?? product.name,
+              description: update.updates.description ?? product.description,
+              images: imagesValue,
+              tags: tagsValue,
+              basePrice: update.updates.basePrice?.toString() ?? product.basePrice,
+              discount: update.updates.discount?.toString() ?? product.discount,
+              hasStockControl: update.updates.hasStockControl ?? product.hasStockControl,
+              currentStock: update.updates.currentStock ?? product.currentStock,
+              stockAlertThreshold: update.updates.stockAlertThreshold ?? product.stockAlertThreshold,
+              stockStopThreshold: update.updates.stockStopThreshold ?? product.stockStopThreshold,
+              isAvailable: update.updates.isAvailable ?? product.isAvailable,
+              sortOrder: update.updates.sortOrder ?? product.sortOrder,
+              createdAt: product.createdAt,
+              updatedAt: product.updatedAt
+            };
+            return parseProductImages(productToParse);
           }
           
-          // Si no hay actualización de images, mantener parseadas
+          // Actualizar campos preservando explícitamente images y tags parseados
           return {
             ...product,
-            ...update.updates,
-            images: product.images, // Ya está parseado
-            mainImage: product.mainImage
+            name: update.updates.name ?? product.name,
+            description: update.updates.description ?? product.description,
+            basePrice: update.updates.basePrice?.toString() ?? product.basePrice,
+            discount: update.updates.discount?.toString() ?? product.discount,
+            hasStockControl: update.updates.hasStockControl ?? product.hasStockControl,
+            currentStock: update.updates.currentStock ?? product.currentStock,
+            stockAlertThreshold: update.updates.stockAlertThreshold ?? product.stockAlertThreshold,
+            stockStopThreshold: update.updates.stockStopThreshold ?? product.stockStopThreshold,
+            isAvailable: update.updates.isAvailable ?? product.isAvailable,
+            sortOrder: update.updates.sortOrder ?? product.sortOrder,
+            // Preservar explícitamente los campos parseados
+            images: product.images,
+            mainImage: product.mainImage,
+            tags: product.tags
           };
         });
         
-        // Reordenar si algún update incluyó sortOrder
-        const hasOrderUpdate = categoryUpdates.some(u => u.updates.sortOrder !== undefined);
-        const finalProducts = hasOrderUpdate
-          ? updatedProducts.sort((a, b) => a.sortOrder - b.sortOrder)
-          : updatedProducts;
-        
-        newMap.set(categoryId, finalProducts);
+        if (hasChanges) {
+          const hasOrderUpdate = updates.some(u => u.updates.sortOrder !== undefined);
+          const finalProducts = hasOrderUpdate
+            ? updatedProducts.sort((a, b) => a.sortOrder - b.sortOrder)
+            : updatedProducts;
+          
+          newMap.set(categoryId, finalProducts);
+        }
       }
       
       return { productsByCategory: newMap };

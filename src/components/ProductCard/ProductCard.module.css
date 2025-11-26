@@ -1,6 +1,5 @@
 /* src/components/ProductCard/ProductCard.module.css */
 
-/* #style .productCard - Card de producto (layout horizontal) */
 .productCard {
   background: white;
   border-radius: 0.75rem;
@@ -29,9 +28,7 @@
   opacity: 0.6;
   background-color: #f9fafb;
 }
-/* #end-style */
 
-/* #style .dragHandle - Handle para drag & drop */
 .dragHandle {
   display: flex;
   align-items: center;
@@ -55,9 +52,7 @@
   font-size: 1rem;
   line-height: 1;
 }
-/* #end-style */
 
-/* #style .productContent - Contenido del producto (horizontal) */
 .productContent {
   display: flex;
   gap: 1rem;
@@ -65,9 +60,7 @@
   align-items: center;
   min-width: 0;
 }
-/* #end-style */
 
-/* #style .productImage - Imagen del producto */
 .productImage {
   width: 100px;
   height: 100px;
@@ -89,9 +82,7 @@
   flex-shrink: 0;
   border: 2px solid #e5e7eb;
 }
-/* #end-style */
 
-/* #style .productInfo - Información del producto (layout horizontal) */
 .productInfo {
   flex: 1;
   display: flex;
@@ -119,9 +110,20 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-/* #end-style */
 
-/* #style .priceSection - Sección de precios (horizontal) */
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
 .priceSection {
   display: flex;
   align-items: center;
@@ -150,9 +152,7 @@
   font-size: 0.75rem;
   font-weight: 700;
 }
-/* #end-style */
 
-/* #style .stockSection - Sección de stock */
 .stockSection {
   display: flex;
   gap: 0.5rem;
@@ -170,88 +170,58 @@
 }
 
 .stockOk {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #dcfce7;
+  color: #059669;
 }
 
 .stockLow {
   background-color: #fef3c7;
-  color: #92400e;
+  color: #d97706;
 }
 
 .stockCritical {
   background-color: #fee2e2;
-  color: #991b1b;
+  color: #dc2626;
 }
-/* #end-style */
 
-/* #style .unavailableBadge - Badge de no disponible */
 .unavailableBadge {
   display: inline-block;
   padding: 0.25rem 0.625rem;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #f3f4f6;
+  color: #6b7280;
   border-radius: 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
-  margin-top: 0.25rem;
 }
-/* #end-style */
 
-/* #style .productActions - Botones de acción (verticales a la derecha) */
 .productActions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  padding-left: 1rem;
-}
-
-.productCard:hover .productActions {
-  opacity: 1;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .actionBtn {
-  background-color: rgba(255, 255, 255, 0.9);
+  background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  padding: 0.5rem 0.625rem;
-  font-size: 1rem;
+  border-radius: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  font-size: 1.125rem;
   transition: all 0.2s ease;
 }
 
 .actionBtn:hover {
-  background-color: #f3f4f6;
+  background-color: #f9fafb;
+  border-color: #d1d5db;
   transform: scale(1.05);
 }
-/* #end-style */
 
-/* #style Responsive */
-@media (max-width: 768px) {
-  .productContent {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .productImage,
-  .productImagePlaceholder {
-    width: 100%;
-    height: 150px;
-  }
-
-  .productActions {
-    opacity: 1;
-    flex-direction: row;
-    width: 100%;
-    padding-left: 0;
-    padding-top: 0.75rem;
-    border-top: 1px solid #e5e7eb;
-  }
-
-  .actionBtn {
-    flex: 1;
-  }
+.actionBtn:active {
+  transform: scale(0.95);
 }
-/* #end-style */

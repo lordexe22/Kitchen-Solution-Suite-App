@@ -10,10 +10,11 @@ import {
   deleteProduct as deleteProductService,
   reorderProducts as reorderProductsService
 } from '../services/products/products.service';
+import type { ProductWithParsedImages } from '../store/Products.types';
 // #end-section
 
 // Referencia vacía única para evitar crear un `[]` nuevo en cada selector
-const EMPTY_PRODUCTS: any[] = [];
+const EMPTY_PRODUCTS: ProductWithParsedImages[] = [];
 
 // #hook useProducts
 /**

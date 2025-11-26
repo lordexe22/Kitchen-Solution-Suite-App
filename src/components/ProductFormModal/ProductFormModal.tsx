@@ -1,29 +1,23 @@
 /* src/components/ProductFormModal/ProductFormModal.tsx */
-// #section imports
 import { useState, useEffect } from 'react';
 import type { ProductFormData } from '../../store/Products.types';
+import type { TagConfiguration } from '../../modules/tagCreator';
 import styles from './ProductFormModal.module.css';
 import ProductImageManager from '../ProductImageManager/ProductImageManager';
-// #end-section
+import { TagSelector } from '../TagSelector/TagSelector';
 
-// #interface ProductFormModalProps
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: Omit<ProductFormData, 'categoryId'>, images: string[]) => Promise<void>;
   initialData?: Partial<Omit<ProductFormData, 'categoryId'>> & { 
-    images?: string[] | string; // Aceptar tanto array como string
+    images?: string[] | string;
+    tags?: TagConfiguration[] | string;
   };
   title?: string;
   submitText?: string;
 }
-// #end-interface
 
-// #component ProductFormModal
-/**
- * Modal para crear/editar productos.
- * Incluye campos para nombre, descripción, precio, descuento y stock.
- */
 export default function ProductFormModal({
   isOpen,
   onClose,
@@ -32,7 +26,6 @@ export default function ProductFormModal({
   title = 'Nuevo Producto',
   submitText = 'Crear Producto'
 }: ProductFormModalProps) {
-  // #state form data
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState('');
@@ -43,14 +36,10 @@ export default function ProductFormModal({
   const [stockStopThreshold, setStockStopThreshold] = useState('');
   const [isAvailable, setIsAvailable] = useState(true);
   const [images, setImages] = useState<string[]>([]);
-  // #end-state
-
-  // #state ui
+  const [tags, setTags] = useState<TagConfiguration[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // #end-state
 
-  // #effect - Cargar datos iniciales
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || '');
@@ -63,19 +52,14 @@ export default function ProductFormModal({
       setStockStopThreshold(initialData.stockStopThreshold?.toString() || '');
       setIsAvailable(initialData.isAvailable ?? true);
       
-      // Cargar imágenes si existen
       if (initialData.images) {
         try {
           let parsedImages: string[] = [];
-          
           if (typeof initialData.images === 'string') {
-            // Si viene como string JSON, parsearlo
             parsedImages = JSON.parse(initialData.images);
           } else if (Array.isArray(initialData.images)) {
-            // Si ya es array, usarlo directamente
             parsedImages = initialData.images;
           }
-          
           setImages(parsedImages);
         } catch (error) {
           console.error('Error parsing images:', error);
@@ -84,11 +68,26 @@ export default function ProductFormModal({
       } else {
         setImages([]);
       }
+      
+      if (initialData.tags) {
+        try {
+          let parsedTags: TagConfiguration[] = [];
+          if (typeof initialData.tags === 'string') {
+            parsedTags = JSON.parse(initialData.tags);
+          } else if (Array.isArray(initialData.tags)) {
+            parsedTags = initialData.tags;
+          }
+          setTags(parsedTags);
+        } catch (error) {
+          console.error('Error parsing tags:', error);
+          setTags([]);
+        }
+      } else {
+        setTags([]);
+      }
     }
   }, [initialData]);
-  // #end-effect
 
-  // #function resetForm
   const resetForm = () => {
     setName('');
     setDescription('');
@@ -100,23 +99,19 @@ export default function ProductFormModal({
     setStockStopThreshold('');
     setIsAvailable(true);
     setImages([]);
+    setTags([]);
     setError(null);
   };
-  // #end-function
 
-  // #function handleClose
   const handleClose = () => {
     resetForm();
     onClose();
   };
-  // #end-function
 
-  // #function handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Validaciones
     if (!name.trim()) {
       setError('El nombre es requerido');
       return;
@@ -139,7 +134,6 @@ export default function ProductFormModal({
       }
     }
 
-    // Preparar datos
     const formData: Omit<ProductFormData, 'categoryId'> = {
       name: name.trim(),
       description: description.trim() || undefined,
@@ -149,12 +143,13 @@ export default function ProductFormModal({
       currentStock: hasStockControl && currentStock ? parseInt(currentStock) : undefined,
       stockAlertThreshold: stockAlertThreshold ? parseInt(stockAlertThreshold) : undefined,
       stockStopThreshold: stockStopThreshold ? parseInt(stockStopThreshold) : undefined,
-      isAvailable
+      isAvailable,
+      tags: tags.length > 0 ? tags : undefined
     };
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData, images); // <-- PASAR IMÁGENES
+      await onSubmit(formData, images);
       handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar producto');
@@ -162,35 +157,22 @@ export default function ProductFormModal({
       setIsSubmitting(false);
     }
   };
-  // #end-function
 
   if (!isOpen) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={handleClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>{title}</h2>
-          <button
-            className={styles.closeButton}
-            onClick={handleClose}
-            type="button"
-          >
+          <button className={styles.closeButton} onClick={handleClose} type="button">
             ✕
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Error */}
-          {error && (
-            <div className={styles.error}>
-              ❌ {error}
-            </div>
-          )}
+          {error && <div className={styles.error}>❌ {error}</div>}
 
-          {/* Nombre */}
           <div className={styles.formGroup}>
             <label className={styles.label}>
               Nombre del producto <span className={styles.required}>*</span>
@@ -206,30 +188,25 @@ export default function ProductFormModal({
             />
           </div>
 
-          {/* Descripción */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Descripción</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className={styles.textarea}
-              placeholder="Describe el producto (opcional)"
-              rows={3}
+              placeholder="Descripción opcional del producto"
               maxLength={1000}
             />
           </div>
 
-          <ProductImageManager
-            images={images}
-            onImagesChange={setImages}
-            maxImages={6}
-          />
+          <ProductImageManager images={images} onImagesChange={setImages} />
 
-          {/* Precio y Descuento */}
+          <TagSelector selectedTags={tags} onChange={setTags} label="Etiquetas del producto" />
+
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
               <label className={styles.label}>
-                Precio Base ($) <span className={styles.required}>*</span>
+                Precio Base <span className={styles.required}>*</span>
               </label>
               <input
                 type="number"
@@ -251,14 +228,13 @@ export default function ProductFormModal({
                 onChange={(e) => setDiscount(e.target.value)}
                 className={styles.input}
                 placeholder="0"
-                step="1"
+                step="0.01"
                 min="0"
                 max="100"
               />
             </div>
           </div>
 
-          {/* Control de Stock */}
           <div className={styles.formGroup}>
             <label className={styles.checkboxLabel}>
               <input
@@ -267,11 +243,10 @@ export default function ProductFormModal({
                 onChange={(e) => setHasStockControl(e.target.checked)}
                 className={styles.checkbox}
               />
-              <span>Controlar stock de este producto</span>
+              Habilitar control de stock
             </label>
           </div>
 
-          {/* Campos de Stock (si está activado) */}
           {hasStockControl && (
             <>
               <div className={styles.formRow}>
@@ -291,26 +266,21 @@ export default function ProductFormModal({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    Umbral de Alerta
-                    <span className={styles.helpText}> (notificar)</span>
-                  </label>
+                  <label className={styles.label}>Umbral de Alerta</label>
                   <input
                     type="number"
                     value={stockAlertThreshold}
                     onChange={(e) => setStockAlertThreshold(e.target.value)}
                     className={styles.input}
-                    placeholder="5"
+                    placeholder="10"
                     min="0"
                   />
+                  <span className={styles.helpText}>Stock mínimo antes de alertar</span>
                 </div>
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Umbral de Parada
-                  <span className={styles.helpText}> (deshabilitar automáticamente)</span>
-                </label>
+                <label className={styles.label}>Umbral de Parada</label>
                 <input
                   type="number"
                   value={stockStopThreshold}
@@ -319,14 +289,11 @@ export default function ProductFormModal({
                   placeholder="0"
                   min="0"
                 />
-                <p className={styles.helpText}>
-                  El producto se deshabilitará automáticamente cuando el stock llegue a este valor
-                </p>
+                <span className={styles.helpText}>Stock mínimo para dejar de vender</span>
               </div>
             </>
           )}
 
-          {/* Disponibilidad */}
           <div className={styles.formGroup}>
             <label className={styles.checkboxLabel}>
               <input
@@ -335,25 +302,15 @@ export default function ProductFormModal({
                 onChange={(e) => setIsAvailable(e.target.checked)}
                 className={styles.checkbox}
               />
-              <span>Producto disponible para la venta</span>
+              Producto disponible para la venta
             </label>
           </div>
 
-          {/* Buttons */}
           <div className={styles.formActions}>
-            <button
-              type="button"
-              onClick={handleClose}
-              className="btn-sec btn-md"
-              disabled={isSubmitting}
-            >
+            <button type="button" onClick={handleClose} className="btn-sec btn-md" disabled={isSubmitting}>
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="btn-pri btn-md"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn-pri btn-md" disabled={isSubmitting}>
               {isSubmitting ? 'Guardando...' : submitText}
             </button>
           </div>
@@ -362,4 +319,3 @@ export default function ProductFormModal({
     </div>
   );
 }
-// #end-component

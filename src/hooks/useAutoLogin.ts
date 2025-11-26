@@ -3,13 +3,24 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { autoLoginByToken } from '../services/authentication/authentication';
 import { useUserDataStore } from '../store/UserData.store';
+import { useTagsStore } from '../store/Tags.store';
+
+interface UserResponse {
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    imageUrl: string | null;
+    type: string;
+    state: string;
+  };
+}
 
 export const useAutoLogin = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ Selectores de Zustand: retornan funciones estables
   const setFirstName = useUserDataStore(state => state.setFirstName);
   const setLastName = useUserDataStore(state => state.setLastName);
   const setEmail = useUserDataStore(state => state.setEmail);
@@ -17,13 +28,14 @@ export const useAutoLogin = () => {
   const setType = useUserDataStore(state => state.setType);
   const setState = useUserDataStore(state => state.setState);
   const setIsAuthenticated = useUserDataStore(state => state.setIsAuthenticated);
+  const loadUserTags = useTagsStore(state => state.loadUserTags);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         console.log('🔍 Verificando autenticación automática...');
 
-        const response = await autoLoginByToken();
+        const response = await autoLoginByToken() as UserResponse;
 
         setFirstName(response.user.firstName);
         setLastName(response.user.lastName);
@@ -35,7 +47,10 @@ export const useAutoLogin = () => {
 
         console.log('✅ Auto-login exitoso');
 
-        // ✅ NUEVA LÓGICA: Redirigir SOLO si está en la página principal
+        console.log('🏷️ Cargando etiquetas personalizadas...');
+        await loadUserTags();
+        console.log('✅ Etiquetas cargadas');
+
         if (location.pathname === '/') {
           console.log('🔄 Redirigiendo al dashboard...');
           navigate('/dashboard', { replace: true });
@@ -57,6 +72,7 @@ export const useAutoLogin = () => {
     setType,
     setState,
     setIsAuthenticated,
+    loadUserTags,
     navigate,
     location,
   ]);

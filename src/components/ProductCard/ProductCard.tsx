@@ -1,27 +1,17 @@
 /* src/components/ProductCard/ProductCard.tsx */
-// #section imports
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { ProductWithCalculatedPrice, Product } from '../../store/Products.types';
 import { getStockStatus } from '../../store/Products.types';
 import styles from './ProductCard.module.css';
-// #end-section
 
-// #interface ProductCardProps
 interface ProductCardProps {
   product: ProductWithCalculatedPrice;
   onEdit: () => void;
   onDelete: () => void;
   onClick?: () => void;
 }
-// #end-interface
 
-// #component ProductCard
-/**
- * Card de producto con capacidad de drag & drop.
- * Muestra imagen, nombre, descripción, precio y estado de stock.
- * Estilo inspirado en apps de delivery (Uber Eats, Rappi, etc).
- */
 export default function ProductCard({
   product,
   onEdit,
@@ -48,14 +38,12 @@ export default function ProductCard({
     zIndex: isDragging ? 999 : 'auto',
   };
 
-  // #const stockStatus
-  // Crear un objeto Product temporal para getStockStatus (necesita images como string)
   const productForStockCheck: Product = {
     ...product,
-    images: product.images.length > 0 ? JSON.stringify(product.images) : null
+    images: product.images.length > 0 ? JSON.stringify(product.images) : null,
+    tags: product.tags ? JSON.stringify(product.tags) : null
   };
   const stockStatus = getStockStatus(productForStockCheck);
-  // #end-const
 
   return (
     <div
@@ -72,7 +60,6 @@ export default function ProductCard({
         }
       } : undefined}
     >
-      {/* Drag Handle */}
       <div
         className={styles.dragHandle}
         {...attributes}
@@ -81,9 +68,7 @@ export default function ProductCard({
         <span className={styles.dragIcon}>⋮⋮</span>
       </div>
 
-      {/* Product Content */}
       <div className={styles.productContent}>
-        {/* Product Image */}
         {product.mainImage ? (
           <img
             src={product.mainImage}
@@ -99,7 +84,6 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Product Info */}
         <div className={styles.productInfo}>
           <h5 className={styles.productName}>{product.name}</h5>
           
@@ -109,7 +93,29 @@ export default function ProductCard({
             </p>
           )}
 
-          {/* Price Section */}
+          {product.tags && product.tags.length > 0 && (
+            <div className={styles.tagsContainer}>
+              {product.tags.map((tag) => (
+                <span
+                  key={tag.name}
+                  className={styles.tag}
+                  style={{
+                    backgroundColor: tag.backgroundColor,
+                    color: tag.textColor,
+                    border: tag.hasBorder ? `2px solid ${tag.textColor}` : 'none',
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: 500
+                  }}
+                >
+                  {tag.icon && <span style={{ marginRight: '0.25rem' }}>{tag.icon}</span>}
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className={styles.priceSection}>
             {product.hasDiscount ? (
               <>
@@ -130,7 +136,6 @@ export default function ProductCard({
             )}
           </div>
 
-          {/* Stock Section */}
           {product.hasStockControl && (
             <div className={styles.stockSection}>
               {stockStatus === 'ok' && (
@@ -151,7 +156,6 @@ export default function ProductCard({
             </div>
           )}
 
-          {/* Unavailable Badge */}
           {!product.isAvailable && (
             <span className={styles.unavailableBadge}>
               No disponible
@@ -159,7 +163,6 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Action Buttons */}
         <div className={styles.productActions}>
           <button
             className={styles.actionBtn}
@@ -186,4 +189,3 @@ export default function ProductCard({
     </div>
   );
 }
-// #end-component

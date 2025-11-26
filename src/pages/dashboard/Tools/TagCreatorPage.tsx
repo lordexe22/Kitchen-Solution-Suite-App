@@ -1,6 +1,6 @@
 /* src/pages/dashboard/Tools/TagCreatorPage.tsx */
 // #section imports
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TagCreatorModal } from '../../../modules/tagCreator';
 import type { TagConfiguration } from '../../../modules/tagCreator';
 import { useTagsStore } from '../../../store/Tags.store';
@@ -15,24 +15,52 @@ import styles from './TagCreatorPage.module.css';
  * - Botón para abrir modal de creación
  * - Sección de tags del sistema (inmutables)
  * - Sección de tags personalizados (editables/eliminables)
+ * - Sincronización con backend
  */
 export default function TagCreatorPage() {
-  // #state showModal
+  // #section state
   const [showModal, setShowModal] = useState(false);
-  // #end-state
+  const [isDeleting, setIsDeleting] = useState(false);
+  // #end-section
   
-  // #state tags from store
-  const { systemTags, userTags, addUserTag, removeUserTag, isSystemTag } = useTagsStore();
-  // #end-state
+  // #section store
+  const { 
+    systemTags, 
+    userTags, 
+    addUserTag, 
+    removeUserTag, 
+    isSystemTag,
+    loadUserTags,
+    isLoaded 
+  } = useTagsStore();
+  // #end-section
+  
+  // #section effects
+  // Cargar etiquetas al montar el componente
+  useEffect(() => {
+    if (!isLoaded) {
+      loadUserTags();
+    }
+  }, [isLoaded, loadUserTags]);
+  // #end-section
   
   // #function handleTagCreated
   /**
    * Maneja la creación de un nuevo tag.
-   * Guarda el tag en el store y cierra el modal.
+   * Guarda el tag en DB y actualiza el store.
    */
-  const handleTagCreated = (config: TagConfiguration) => {
-    addUserTag(config);
-    setShowModal(false);
+  const handleTagCreated = async (config: TagConfiguration) => {
+    try {
+      await addUserTag(config);
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error creando etiqueta:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('Error al crear la etiqueta');
+      }
+    }
   };
   // #end-function
   
@@ -41,16 +69,33 @@ export default function TagCreatorPage() {
    * Maneja la eliminación de un tag.
    * Pide confirmación antes de eliminar.
    */
-  const handleDeleteTag = (tagName: string) => {
+  const handleDeleteTag = async (tagId: number, tagName: string) => {
     // Verificar que no sea un system tag
     if (isSystemTag(tagName)) {
       alert('No se pueden eliminar las etiquetas del sistema');
       return;
     }
     
-    const confirmed = window.confirm(`¿Eliminar la etiqueta "${tagName}"?`);
+    const confirmed = window.confirm(
+      `¿Eliminar la etiqueta "${tagName}"?\n\n` +
+      `Nota: Esta etiqueta se eliminará de la lista global, pero los productos ` +
+      `que ya la tienen asignada mantendrán una copia de la misma.`
+    );
+    
     if (confirmed) {
-      removeUserTag(tagName);
+      setIsDeleting(true);
+      try {
+        await removeUserTag(tagId, tagName);
+      } catch (error) {
+        console.error('Error eliminando etiqueta:', error);
+        if (error instanceof Error) {
+          alert(error.message);
+        } else {
+          alert('Error al eliminar la etiqueta');
+        }
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
   // #end-function
@@ -96,13 +141,14 @@ export default function TagCreatorPage() {
         </button>
       </div>
       {/* #end-section */}
+      
       {/* #section User Tags */}
       <div className={styles.tagsSection}>
         <h3 className={styles.sectionTitle}>
           ✏️ Mis Etiquetas Personalizadas ({userTags.length})
         </h3>
         <p className={styles.sectionSubtitle}>
-          Etiquetas creadas por ti
+          Etiquetas creadas por ti (sincronizadas con la base de datos)
         </p>
         
         {userTags.length === 0 ? (
@@ -114,7 +160,7 @@ export default function TagCreatorPage() {
         ) : (
           <div className={styles.tagsList}>
             {userTags.map((tag) => (
-              <div key={tag.name} className={styles.tagItem}>
+              <div key={tag.id} className={styles.tagItem}>
                 <div style={getTagStyles(tag)} className={styles.tagPreview}>
                   {tag.icon && (
                     <span className={styles.tagIcon}>{tag.icon}</span>
@@ -123,8 +169,9 @@ export default function TagCreatorPage() {
                 </div>
                 <button
                   className={styles.deleteBtn}
-                  onClick={() => handleDeleteTag(tag.name)}
+                  onClick={() => handleDeleteTag(tag.id, tag.name)}
                   title="Eliminar etiqueta"
+                  disabled={isDeleting}
                 >
                   ✕
                 </button>
@@ -134,6 +181,7 @@ export default function TagCreatorPage() {
         )}
       </div>
       {/* #end-section */}
+      
       {/* #section System Tags */}
       <div className={styles.tagsSection}>
         <h3 className={styles.sectionTitle}>
@@ -159,7 +207,6 @@ export default function TagCreatorPage() {
       </div>
       {/* #end-section */}
       
-
       {/* #section Modal */}
       <TagCreatorModal
         isOpen={showModal}

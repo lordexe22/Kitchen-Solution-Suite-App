@@ -3,6 +3,8 @@
 import { create } from 'zustand';
 import type { TagConfiguration } from '../modules/tagCreator';
 import { SYSTEM_TAGS } from './Tags.config';
+import { getUserTags, createUserTag, deleteUserTag } from '../services/userTags/userTags.service';
+import type { UserTagWithId } from '../services/userTags/userTags.service';
 // #end-section
 
 // #interface TagsStore
@@ -10,37 +12,42 @@ import { SYSTEM_TAGS } from './Tags.config';
  * Store de Tags usando Zustand.
  * Gestiona dos tipos de tags:
  * - System Tags: Predeterminados, siempre disponibles, inmutables
- * - User Tags: Creados por el usuario, se pueden modificar/eliminar
+ * - User Tags: Creados por el usuario, se pueden modificar/eliminar, sincronizados con DB
  */
 interface TagsStore {
   // Estado
   systemTags: TagConfiguration[];
-  userTags: TagConfiguration[];
+  userTags: UserTagWithId[];
+  isLoaded: boolean;
+  isLoading: boolean;
   
   // Getters
   getAllTags: () => TagConfiguration[];
-  getUserTagByName: (name: string) => TagConfiguration | undefined;
+  getUserTagByName: (name: string) => UserTagWithId | undefined;
   hasUserTag: (name: string) => boolean;
   isSystemTag: (name: string) => boolean;
   
-  // Setters (solo para userTags)
-  addUserTag: (tag: TagConfiguration) => void;
-  removeUserTag: (name: string) => void;
+  // Setters (sincronizados con DB)
+  loadUserTags: () => Promise<void>;
+  addUserTag: (tag: TagConfiguration) => Promise<void>;
+  removeUserTag: (tagId: number, tagName: string) => Promise<void>;
   clearUserTags: () => void;
 }
 // #end-interface
 
-// #store useTagsStore
+// #function useTagsStore
 /**
  * Hook del store de Tags.
  * 
  * @example
- * const { systemTags, userTags, addUserTag } = useTagsStore();
+ * const { systemTags, userTags, addUserTag, loadUserTags } = useTagsStore();
  */
 export const useTagsStore = create<TagsStore>((set, get) => ({
   // Estado inicial
   systemTags: SYSTEM_TAGS,
   userTags: [],
+  isLoaded: false,
+  isLoading: false,
   
   // Getter: Obtener todos los tags (system + user)
   getAllTags: () => {
@@ -62,35 +69,86 @@ export const useTagsStore = create<TagsStore>((set, get) => ({
     return get().systemTags.some((tag) => tag.name === name);
   },
   
-  // Setter: Agregar un user tag
-  addUserTag: (tag) => set((state) => {
+  // Setter: Cargar etiquetas desde DB
+  loadUserTags: async () => {
+    const state = get();
+    
+    // Si ya están cargadas o cargando, no hacer nada
+    if (state.isLoaded || state.isLoading) {
+      return;
+    }
+    
+    set({ isLoading: true });
+    
+    try {
+      const tagsFromDB = await getUserTags();
+      
+      set({ 
+        userTags: tagsFromDB,
+        isLoaded: true,
+        isLoading: false 
+      });
+    } catch (error) {
+      console.error('Error cargando etiquetas del usuario:', error);
+      set({ isLoading: false });
+    }
+  },
+  
+  // Setter: Agregar un user tag (sincronizado con DB)
+  addUserTag: async (tag) => {
+    const state = get();
+    
     // Verificar si el nombre ya existe en system tags
     if (state.systemTags.some((t) => t.name === tag.name)) {
       console.warn(`⚠️ No se puede crear un tag con el nombre "${tag.name}" porque ya existe como tag del sistema`);
-      return state;
+      throw new Error(`El nombre "${tag.name}" ya existe como etiqueta del sistema`);
     }
     
     // Verificar si el nombre ya existe en user tags
     if (state.userTags.some((t) => t.name === tag.name)) {
       console.warn(`⚠️ Ya existe un tag personalizado con el nombre "${tag.name}"`);
-      return state;
+      throw new Error(`Ya existe una etiqueta con el nombre "${tag.name}"`);
     }
     
-    return { userTags: [...state.userTags, tag] };
-  }),
+    try {
+      // Guardar en DB y obtener con ID
+      const newTag = await createUserTag(tag);
+      
+      // Agregar al store local
+      set((state) => ({
+        userTags: [...state.userTags, newTag]
+      }));
+    } catch (error) {
+      console.error('Error creando etiqueta:', error);
+      throw error;
+    }
+  },
   
-  // Setter: Eliminar un user tag por nombre
-  removeUserTag: (name) => set((state) => {
+  // Setter: Eliminar un user tag por ID (sincronizado con DB)
+  removeUserTag: async (tagId, tagName) => {
+    const state = get();
+    
     // Verificar que no sea un system tag
-    if (state.systemTags.some((t) => t.name === name)) {
-      console.warn(`⚠️ No se puede eliminar "${name}" porque es un tag del sistema`);
-      return state;
+    if (state.systemTags.some((t) => t.name === tagName)) {
+      console.warn(`⚠️ No se puede eliminar "${tagName}" porque es un tag del sistema`);
+      throw new Error(`"${tagName}" es una etiqueta del sistema y no se puede eliminar`);
     }
     
-    return { userTags: state.userTags.filter((tag) => tag.name !== name) };
-  }),
+    try {
+      // Eliminar de DB
+      await deleteUserTag(tagId);
+      
+      // Eliminar del store local
+      set((state) => ({
+        userTags: state.userTags.filter((tag) => tag.id !== tagId)
+      }));
+    } catch (error) {
+      console.error('Error eliminando etiqueta:', error);
+      throw error;
+    }
+  },
   
-  // Setter: Limpiar todos los user tags
-  clearUserTags: () => set({ userTags: [] })
+  // Setter: Limpiar todos los user tags (solo local)
+  clearUserTags: () => set({ userTags: [], isLoaded: false })
 }));
-// #end-store
+// #end-function
