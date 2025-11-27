@@ -3,6 +3,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAutoLogin } from "./hooks/useAutoLogin";
 import MainPage from "./pages/public/MainPage/MainPage";
+import MenuPage from "./pages/public/MenuPage/MenuPage";
+import ProductDetailPage from "./pages/public/ProductDetailPage/ProductDetailPage";
 import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
 import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
 import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
@@ -13,9 +15,11 @@ import DashboardShell from './components/DashboardShell/DashboardShell';
 import ProtectedRoute from "./components/ProtectedRoute";
 import TagCreatorPage from "./pages/dashboard/Tools/TagCreatorPage";
 // #end-section
+
 // #component App
 function App() {
   const { isCheckingAuth } = useAutoLogin();
+  
   // #section render load window while is loading user
   if (isCheckingAuth) {
     return (
@@ -32,12 +36,28 @@ function App() {
     );
   }
   // #end-section
+  
   // #section render pages
   return (
     <Routes>
       {/* #route - public -- <MainPage /> */}
       <Route path="/" element={<MainPage />} />
       {/* #end-route */}
+      
+      {/* #route - /branch/:branchId/table/:tableNumber -- <MenuPage /> [RUTA PÚBLICA DEL MENÚ] */}
+      <Route 
+        path="/branch/:branchId/table/:tableNumber" 
+        element={<MenuPage />} 
+      />
+      {/* #end-route */}
+      
+      {/* #route - /branch/:branchId/table/:tableNumber/product/:productId -- <ProductDetailPage /> [RUTA PÚBLICA DE DETALLE] */}
+      <Route 
+        path="/branch/:branchId/table/:tableNumber/product/:productId" 
+        element={<ProductDetailPage />} 
+      />
+      {/* #end-route */}
+      
       {/* #route - /dashboard -- <WelcomePage /> */}
       <Route 
         path="/dashboard" 
@@ -48,6 +68,7 @@ function App() {
         } 
       />
       {/* #end-route */}
+      
       {/* #route - /dashboard/companies -- <CompaniesPage /> */}
       <Route 
         path="/dashboard/companies" 
@@ -58,6 +79,7 @@ function App() {
         } 
       />
       {/* #end-route */}
+      
       {/* #route - /dashboard/employees -- <EmployeesPage /> */}
       <Route 
         path="/dashboard/employees" 
@@ -68,6 +90,7 @@ function App() {
         } 
       />
       {/* #end-route */}
+      
       {/* #route - /dashboard/branches/:section? -- <BranchManagementPage /> [UNIFIED BRANCH MANAGEMENT] */}
       <Route 
         path="/dashboard/branches/:section?" 
@@ -78,6 +101,7 @@ function App() {
         } 
       />
       {/* #end-route */}
+      
       {/* #route - /dashboard/tools -- tools list */}
       <Route
         path="/dashboard/tools"
@@ -90,6 +114,7 @@ function App() {
         }
       />
       {/* #end-route */}
+      
       {/* #route - /dashboard/tools/qr -- QR Creator */}
       <Route
         path="/dashboard/tools/qr"
@@ -102,6 +127,7 @@ function App() {
         }
       />
       {/* #end-route */}
+      
       {/* #route - /dashboard/tools/tags -- Tag Creator */}
       <Route
         path="/dashboard/tools/tags"
@@ -114,9 +140,10 @@ function App() {
         }
       />
       {/* #end-route */}
-      {/* #route - default       */}
+      
+      {/* #route - default */}
       <Route path="*" element={<Navigate to="/" />} />
-      {/* #end-route       */}
+      {/* #end-route */}
     </Routes>
   );
   // #end-section
