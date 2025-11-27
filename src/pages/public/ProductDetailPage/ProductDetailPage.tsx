@@ -73,7 +73,7 @@ export default function ProductDetailPage() {
    * Vuelve a la página del menú.
    */
   const handleBack = () => {
-    navigate(`/menu/${branchId}/${tableNumber}`);
+    navigate(`/branch/${branchId}/table/${tableNumber}`);
   };
   // #end-function
 

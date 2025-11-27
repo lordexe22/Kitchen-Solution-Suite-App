@@ -78,7 +78,7 @@ export default function MenuPage() {
    * Navega al detalle del producto.
    */
   const handleProductClick = (productId: number) => {
-    navigate(`/menu/${branchId}/${tableNumber}/product/${productId}`);
+    navigate(`/branch/${branchId}/table/${tableNumber}/product/${productId}`);
   };
   // #end-function
 
