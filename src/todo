@@ -1,3 +1,4 @@
+DONE
 ✅  - En la pagina de redes sociales falta poner un boton de redireccionamiento cuando no existen sucursales creadas
 ✅ - La sección compañia no muestra el logo
 ✅ - El logo en las secciones redes sociales y horarios es muy grande (especificar tamaño máximo)
@@ -6,11 +7,7 @@
 ✅ - Crear un store para las categorias
 ✅ - Guardar las categorias creadas en la base de datos
 ✅ - Agregar caracteristica para que los banners de las categorias cambien de posicion y recuerden el orden en que se deben mostrar
-1 - Crear un modulo para la creacion de productos
-2 - Permitir copiar productos y aplicarlos a otras categorias
-3 - Permitir copiar banners y todo su contenido para pegarlos en otras sucursales
-4 - Permitir importar y exportar productos por medio de una tabla de excel
-5 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
+✅ - Crear un modulo para la creacion de productos
 
 
 
@@ -19,4 +16,13 @@ FIXES
 ✅ - Los productos no se estan guardando en la abse de datos, al reiniciar, los productos creados desaparecen
 ✅ - No se actualiza la vista de la categoria cuando se agrega un nuevo producto. Se actualiza solo cuando se abre y se cierra el banner de la categoria
 ✅ - Al darle click a un producto me gustaria ver una vista ampliada del mismo donde se puedan ver todos los detalles relevantes para la venta, como por ejemplo las demas imagenes, etiquetas, etc.
-1 - La vista de los productos no es en formatos CARD, mas bien es en formato BANNER, similar al formato que tiene actualmente la categoria
+
+TODO
+🕒 - Crear la sección para gestionar empleados
+🕒 - Test para comprobar funcionalidades basicas de la app y del server
+🕒 - Permitir copiar productos y aplicarlos a otras categorias
+🕒 - Mejorar los estilos
+🕒 - Permitir copiar banners y todo su contenido para pegarlos en otras sucursales
+🕒 - Permitir importar y exportar productos por medio de una tabla de excel
+🕒 - Seria buena idea crear una sucursal por defecto al crear una marca (solo con la primera sucursal) (pensar)
+🕒 - Refactor violento

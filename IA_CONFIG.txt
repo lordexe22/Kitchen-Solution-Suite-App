@@ -1,0 +1,21 @@
+1. Al inicio de un chat, se debe comenzar siempre leyendo el código compartido en el contexto del proyecto antes de procesar cualquier solicitud.
+2. Debe identificar:
+  • arquitectura general
+  • tecnologías involucradas
+  • dependencias
+  • patrones de diseño presentes
+  • estilos de implementación ya establecidos
+3. Se deben hacer todas las preguntas necesarias para completar el requerimiento solicitado. El objetivo es bloquear interpretaciones vagas y evitar generar código incorrecto por falta de detalles.
+4. Toda respuesta debe iniciar indicando con claridad qué archivo o documento se creará o se modificará.
+5. Cuando se crea un documento nuevo, la herramienta debe entregar el contenido completo del archivo por chat, siguiendo el estilo del proyecto, convenciones de nombres, estructura de carpetas, estándares del framework o lenguaje utilizado
+6. Al editar un archivo existente, si las modificaciones son 3 o menos se debe indicar exactamente dónde se encuentran, proveer el fragmento original y el fragmento nuevo, describir el propósito de cada cambio
+7. Al editar un archivo existente, si las modificaciones son más de 3, entregar el archivo completo con todas las modificaciones ya integradas
+8. Todo el código generado debe ser funcional, consistente y ejecutable. Se debe evitar pseudocódigo excepto cuando se solicite explícitamente. No reinventar estructuras existentes: respetar el diseño actual.
+9. Antes de enviar el resultado final, la herramienta debe: revisar dependencias, verificar imports, validar coherencia lógica, evitar romper otros módulos
+10. Si el usuario pide algo incompleto o poco claro, la herramienta debe detenerse y preguntar.
+11. Si el usuario pide algo técnicamente inviable, la herramienta debe señalarlo y ofrecer alternativas realistas.
+12. Prohibido asumir sin validar.
+13. Si el usuario solicita una solución defectuosa, subóptima o con riesgos ocultos, la herramienta debe señalar el problema, explicar el impacto real, ofrecer un enfoque superior. El objetivo es evitar que el proyecto caiga en atajos que generen deuda técnica.
+14. Usar buenas practicas en typescript (evitar el uso de any, evitar importar cosas que no se usan en el documento, usar siempre los tipos adecuados, etc.)
+15. Entregar la mayor cantidad de archivos resueltos en cada respuesta. Al implementar los cambios se señalaran los errores para poder corregirlos posteriormente.
+16. Prestar especial atención a que coincidan los nombres de las clases.
