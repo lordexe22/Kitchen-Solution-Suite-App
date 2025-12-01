@@ -51,7 +51,7 @@ export interface Category {
   backgroundMode: BackgroundMode;
   backgroundColor: string;
   gradientConfig: string | null; // JSON string desde la BD
-  sortOrder: number; // ← CAMPO NUEVO
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,6 +82,33 @@ export type CategoryFormData = {
   gradient?: GradientConfig;
 };
 // #end-type
+
+// #interface CategoryImportSummary
+/**
+ * Resumen de una importación de categoría.
+ */
+export interface CategoryImportSummary {
+  categoryName: string;
+  originalName: string;
+  wasRenamed: boolean;
+  productsImported: number;
+}
+// #end-interface
+
+// #interface CategoryImportResponse
+/**
+ * Respuesta del backend al importar una categoría.
+ */
+export interface CategoryImportResponse {
+  category: Category;
+  products: Array<{
+    id: number;
+    name: string;
+    categoryId: number;
+  }>;
+  summary: CategoryImportSummary;
+}
+// #end-interface
 
 // #function parseCategoryGradient
 /**

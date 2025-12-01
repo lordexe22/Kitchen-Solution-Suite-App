@@ -6,11 +6,9 @@ import type {
   PublicProductDetail
  } from "./menu.types";
 // #end-section
-
 // #const BASE_URL
 const BASE_URL = 'http://localhost:4000';
 // #end-const
-
 // #function getBranchMenu
 /**
  * Obtiene el menú completo de una sucursal (categorías + productos).
@@ -38,7 +36,6 @@ export const getBranchMenu = async (branchId: number): Promise<PublicBranchMenu>
   return result.data;
 };
 // #end-function
-
 // #function getBranchInfo
 /**
  * Obtiene información de la sucursal (compañía, horarios, redes sociales).
@@ -66,7 +63,6 @@ export const getBranchInfo = async (branchId: number): Promise<PublicBranchInfo>
   return result.data;
 };
 // #end-function
-
 // #function getProductDetail
 /**
  * Obtiene el detalle completo de un producto.

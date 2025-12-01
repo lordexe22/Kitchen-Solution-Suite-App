@@ -6,6 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { CategoryWithParsedGradient } from '../../store/Categories.types';
 import { generateBackgroundCSS } from '../../modules/categoryCreator/categoryCreator.utils';
 import type { CategoryConfiguration } from '../../modules/categoryCreator/categoryCreator.types';
+import { exportCategory } from '../../services/categories/categories.service';
 import styles from './DraggableCategory.module.css';
 // #end-section
 
@@ -32,6 +33,10 @@ export default function DraggableCategory({
 }: DraggableCategoryProps) {
   // #state [isExpanded, setIsExpanded]
   const [isExpanded, setIsExpanded] = useState(false);
+  // #end-state
+
+  // #state [isExporting, setIsExporting]
+  const [isExporting, setIsExporting] = useState(false);
   // #end-state
 
   // #const hasChildren
@@ -76,6 +81,29 @@ export default function DraggableCategory({
   const handleToggle = () => {
     if (hasChildren) {
       setIsExpanded(prev => !prev);
+    }
+  };
+  // #end-event
+
+  // #event handleExport
+  /**
+   * Exporta la categoría con sus productos a un archivo Excel.
+   */
+  const handleExport = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (isExporting) return;
+    
+    setIsExporting(true);
+    
+    try {
+      await exportCategory(category.id);
+      // El archivo se descarga automáticamente
+    } catch (error) {
+      console.error('Error exportando categoría:', error);
+      alert('Error al exportar la categoría. Por favor intenta de nuevo.');
+    } finally {
+      setIsExporting(false);
     }
   };
   // #end-event
@@ -136,6 +164,14 @@ export default function DraggableCategory({
 
           {/* Action Buttons */}
           <div className={styles.categoryActions}>
+            <button
+              className={styles.actionBtn}
+              onClick={handleExport}
+              title="Exportar a Excel"
+              disabled={isExporting}
+            >
+              {isExporting ? '⏳' : '📤'}
+            </button>
             <button
               className={styles.actionBtn}
               onClick={(e) => {
