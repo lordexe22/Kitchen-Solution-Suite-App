@@ -14,6 +14,7 @@ import QRCreatorPage from "./pages/dashboard/Tools/QRCreatorPage";
 import DashboardShell from './components/DashboardShell/DashboardShell';
 import ProtectedRoute from "./components/ProtectedRoute";
 import TagCreatorPage from "./pages/dashboard/Tools/TagCreatorPage";
+import { AccordionDemo } from "./components/_demos/AccordionDemo";
 // #end-section
 
 // #component App
@@ -142,6 +143,10 @@ function App() {
       {/* #end-route */}
       
       {/* #route - default */}
+      {/* #route - /demo/accordion -- demo pública del acordeón */}
+      <Route path="/demo/accordion" element={<AccordionDemo />} />
+      {/* #end-route */}
+
       <Route path="*" element={<Navigate to="/" />} />
       {/* #end-route */}
     </Routes>
