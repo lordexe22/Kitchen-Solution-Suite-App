@@ -1,5 +1,8 @@
 # Reglas de trabajo
 
+## Idioma
+Todas las respuestas deben ser en español
+
 ## Filosofia de la estructura del proyecto
 
 ### src/store 
