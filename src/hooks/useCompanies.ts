@@ -6,7 +6,8 @@ import {
   fetchUserCompanies,
   createCompany as createCompanyService,
   updateCompany as updateCompanyService,
-  deleteCompany as deleteCompanyService
+  deleteCompany as deleteCompanyService,
+  checkCompanyNameAvailability
 } from '../services/companies/companies.service';
 import type { CompanyFormData } from '../store/Companies.types';
 import { uploadCompanyLogo } from '../services/companies/companiyLogo.service';
@@ -126,6 +127,22 @@ export const useCompanies = () => {
   }, [execute, updateCompanyInStore]);
   // #end-function
 
+  // #function checkNameAvailability
+  /**
+   * Verifica si un nombre de compañía está disponible.
+   * 
+   * @param {string} name - Nombre a verificar
+   */
+  const checkNameAvailability = useCallback(async (name: string): Promise<boolean> => {
+    try {
+      return await checkCompanyNameAvailability(name);
+    } catch (err) {
+      console.error('Error checking name availability:', err);
+      return false;
+    }
+  }, []);
+  // #end-function
+
   return {
     companies,
     isLoading,
@@ -134,7 +151,8 @@ export const useCompanies = () => {
     createCompany,
     updateCompany,
     deleteCompany,
-    uploadLogo
+    uploadLogo,
+    checkNameAvailability
   };
 };
 // #end-hook

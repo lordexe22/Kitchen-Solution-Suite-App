@@ -212,13 +212,32 @@ export default function ProductDetailModal({
             </p>
           )}
 
-          {/* Tags/Etiquetas (placeholder - para implementación futura) */}
-          {/* TODO: Integrar con sistema de tags cuando esté disponible */}
-          <div className={styles.tagsContainer}>
-            {/* Ejemplo de tags - reemplazar con datos reales */}
-            {/* <span className={styles.tag}>🌱 Vegano</span> */}
-            {/* <span className={styles.tag}>🚫 Sin Gluten</span> */}
-          </div>
+          {/* Tags/Etiquetas */}
+          {product.tags && product.tags.length > 0 && (
+            <div className={styles.tagsContainer}>
+              {product.tags.map((tag, index) => (
+                <span 
+                  key={index} 
+                  className={styles.tag} 
+                  style={{ 
+                    padding: '0.375rem 0.75rem',
+                    backgroundColor: tag.backgroundColor,
+                    color: tag.textColor,
+                    borderRadius: '0.375rem',
+                    border: tag.hasBorder ? `2px solid ${tag.textColor}` : 'none',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}
+                >
+                  {tag.icon && <span>{tag.icon}</span>}
+                  <span>{tag.name}</span>
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Información de stock (solo si tiene control de stock) */}
           {product.hasStockControl && product.currentStock !== null && (

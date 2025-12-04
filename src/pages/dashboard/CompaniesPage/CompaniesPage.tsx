@@ -64,11 +64,14 @@ const CompaniesPage = () => {
   // #function handleSubmit
   const handleSubmit = async (data: CompanyFormData) => {
     if (editingCompany) {
-      await updateCompany(editingCompany.id, data);
+      const result = await updateCompany(editingCompany.id, data);
+      handleCloseModal();
+      return result;
     } else {
-      await createCompany(data);
+      const result = await createCompany(data);
+      handleCloseModal();
+      return result;
     }
-    handleCloseModal();
   };
   // #end-function
   // #function handleDelete

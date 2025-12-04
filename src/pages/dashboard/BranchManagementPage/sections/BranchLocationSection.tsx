@@ -21,7 +21,18 @@ const BranchLocationSection = ({ companyId, onError = () => {} }: BranchSectionP
   useEffect(() => {
     // Initialize map from branches
     const map = new Map<number, BranchLocationFormData | null>();
-    branches.forEach((b) => map.set(b.id, b.location || null));
+    branches.forEach((b) => {
+      const location = b.location ? {
+        address: b.location.address,
+        city: b.location.city,
+        state: b.location.state,
+        country: b.location.country,
+        postalCode: b.location.postalCode || undefined,
+        latitude: b.location.latitude || undefined,
+        longitude: b.location.longitude || undefined,
+      } as BranchLocationFormData : null;
+      map.set(b.id, location);
+    });
     setBranchLocationsMap(map);
   }, [branches]);
 
@@ -31,8 +42,17 @@ const BranchLocationSection = ({ companyId, onError = () => {} }: BranchSectionP
 
     try {
       const loc = await saveLocation(branchId, data);
-      // update local map
-      setBranchLocationsMap((prev) => new Map(prev).set(branchId, loc));
+      // update local map - transform BranchLocation to BranchLocationFormData
+      const formData: BranchLocationFormData = {
+        address: loc.address,
+        city: loc.city,
+        state: loc.state,
+        country: loc.country,
+        postalCode: loc.postalCode || undefined,
+        latitude: loc.latitude || undefined,
+        longitude: loc.longitude || undefined,
+      };
+      setBranchLocationsMap((prev) => new Map(prev).set(branchId, formData));
       updateBranchInStore(branchId, { location: loc });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al guardar ubicación';

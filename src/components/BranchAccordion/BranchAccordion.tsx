@@ -14,6 +14,9 @@ interface BranchAccordionProps {
   children?: ReactNode;
   expandable?: boolean;
   onEdit?: () => void;
+  onEditLocation?: () => void;
+  onEditName?: () => void;
+  onEditSocials?: () => void;
   onDelete?: () => void;
   onToggle?: () => void;
 }

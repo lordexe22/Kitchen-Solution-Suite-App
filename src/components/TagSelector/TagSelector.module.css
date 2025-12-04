@@ -95,8 +95,23 @@
   background-color: #eff6ff;
 }
 
+.tagPreview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .checkbox {
   cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  min-width: 1rem;
+  min-height: 1rem;
+  accent-color: #3b82f6;
 }
 
 .tagPreview {

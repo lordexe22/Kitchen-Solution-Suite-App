@@ -3,9 +3,11 @@
 import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
 import type { Company, CompanyFormData } from '../../store/Companies.types';
+import { useCompaniesStore } from '../../store/Companies.store';
 import styles from './CompanyFormModal.module.css';
 import '/src/styles/modal.css';
 import '/src/styles/button.css';
+import { deleteCompanyLogo } from '../../services/companies/companiyLogo.service';
 // #end-section
 
 // #interface CompanyFormModalProps
@@ -32,6 +34,7 @@ const CompanyFormModal = ({
   onCheckNameAvailability
 }: CompanyFormModalProps) => {
   const isEditing = !!company;
+  const updateCompanyInStore = useCompaniesStore((state) => state.updateCompany);
   
   const {
     register,
@@ -53,6 +56,7 @@ const CompanyFormModal = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(company?.logoUrl || null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoRemoved, setLogoRemoved] = useState(false);
 
   const watchedName = watch('name');
 
@@ -136,7 +140,8 @@ const CompanyFormModal = ({
   // Limpiar archivo seleccionado
   const handleClearFile = () => {
     setSelectedFile(null);
-    setPreviewUrl(company?.logoUrl || null);
+    setPreviewUrl(null);
+    setLogoRemoved(true);
   };
 
   const handleFormSubmit = handleSubmit(async (data) => {
@@ -155,6 +160,18 @@ const CompanyFormModal = ({
           alert('La compañía se guardó pero hubo un error al subir el logo');
         } finally {
           setIsUploadingLogo(false);
+        }
+      }
+
+      // 3. Si se removió el logo, eliminar del backend
+      if (logoRemoved && savedCompany?.id) {
+        try {
+          await deleteCompanyLogo(savedCompany.id);
+          // Actualizar el store para reflejar cambios inmediatamente
+          updateCompanyInStore(savedCompany.id, { logoUrl: null });
+        } catch (error) {
+          console.error('Error removing logo:', error);
+          // No mostrar alerta en este caso, el logo ya se removió en la UI
         }
       }
 
@@ -252,16 +269,14 @@ const CompanyFormModal = ({
                 {previewUrl && (
                   <div className={styles.logoPreview}>
                     <img src={previewUrl} alt="Preview logo" />
-                    {selectedFile && (
-                      <button
-                        type="button"
-                        onClick={handleClearFile}
-                        className={styles.removeButton}
-                        disabled={isLoading || isUploadingLogo}
-                      >
-                        ✕ Quitar
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={handleClearFile}
+                      className={styles.removeButton}
+                      disabled={isLoading || isUploadingLogo}
+                    >
+                      ✕ Quitar
+                    </button>
                   </div>
                 )}
 

@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useProductsStore } from '../store/Products.store';
 import { useAsyncOperation } from './useAsyncOperation';
-import type { ProductFormData } from '../store/Products.types';
+import type { ProductFormData, Product } from '../store/Products.types';
 import {
   getCategoryProducts as getCategoryProductsService,
   createProduct as createProductService,
@@ -81,7 +81,7 @@ export const useProducts = (categoryId: number) => {
    * @param {Omit<ProductFormData, 'categoryId'>} data - Datos del producto (sin categoryId)
    */
   const createProduct = useCallback(async (data: Omit<ProductFormData, 'categoryId'>) => {
-    const result = await execute<ProductWithParsedImages>(
+    const result = await execute<Product>(
       async () => {
         const newProduct = await createProductService({
           ...data,
@@ -105,7 +105,7 @@ export const useProducts = (categoryId: number) => {
    * @param {Partial<ProductFormData>} updates - Datos a actualizar
    */
   const updateProduct = useCallback(async (id: number, updates: Partial<ProductFormData>) => {
-    const result = await execute<ProductWithParsedImages>(
+    const result = await execute<Product>(
       async () => {
         const updatedProduct = await updateProductService(id, updates);
         updateProductInStore(id, updatedProduct);

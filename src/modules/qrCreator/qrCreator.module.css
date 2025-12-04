@@ -86,7 +86,7 @@
   align-items: center;
 }
 
-label input[type="checkbox"] {
+.qr-options :global(label input[type="checkbox"]) {
   transform: scale(4); 
   margin: 0 5px;
 }
