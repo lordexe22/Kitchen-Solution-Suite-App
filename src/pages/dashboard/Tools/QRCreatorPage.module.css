@@ -1,5 +1,5 @@
 /* src/pages/dashboard/Tools/QRCreatorPage.module.css */
-
+/* #style .container */
 .container {
   padding: 20px;
   max-width: 100%;
@@ -7,13 +7,16 @@
   display: flex;
   flex-direction: column;
 }
-
+/* #end-style */
+/* #style .title */
 .title {
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: bold;
 }
 
+/* #end-style */
+/* #style .urlControls */
 .urlControls {
   display: flex;
   gap: 15px;
@@ -25,6 +28,8 @@
   flex-wrap: wrap;
 }
 
+/* #end-style */
+/* #style .controlGroup */
 .controlGroup {
   display: flex;
   flex-direction: column;
@@ -33,12 +38,16 @@
   min-width: 200px;
 }
 
+/* #end-style */
+/* #style .label */
 .label {
   font-weight: 600;
   font-size: 14px;
   color: #333;
 }
 
+/* #end-style */
+/* #style .select, .input */
 .select,
 .input {
   padding: 8px 12px;
@@ -52,6 +61,8 @@
   cursor: not-allowed;
 }
 
+/* #end-style */
+/* #style .generateButton */
 .generateButton {
   padding: 10px 20px;
   color: white;
@@ -63,16 +74,16 @@
   height: fit-content;
   background-color: #007bff;
 }
-
 .generateButton:hover:not(:disabled) {
   background-color: #0056b3;
 }
-
 .generateButton:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
 }
 
+/* #end-style */
+/* #style .urlPreview */
 .urlPreview {
   padding: 15px;
   border-left: 4px solid #007bff;
@@ -85,6 +96,8 @@
   background-color: #f8f9fa;
 }
 
+/* #end-style */
+/* #style .urlCode */
 .urlCode {
   padding: 5px 10px;
   border-radius: 4px;
@@ -94,11 +107,11 @@
   word-break: break-all;
   background-color: #f0f0f0;
 }
-
+/* #end-style */
+/* #style .qrCreatorWrapper */
 .qrCreatorWrapper {
-  margin-top: 20px;
   height: 100%;
   display: flex;
-  max-height: calc(100vh - 350px);
   overflow: hidden;
 }
+/* #end-style */

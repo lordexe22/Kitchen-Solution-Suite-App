@@ -1,5 +1,5 @@
 // src/modules/qrCreator/qrCreator.tsx
-
+// #section Imports
 import { useEffect } from 'react'
 import style from './qrCreator.module.css'
 import { Accordion } from '../../modules/accordion/Accordion'
@@ -20,6 +20,7 @@ import type {
 } from 'qr-code-styling'
 import type { ColorType } from './qrCreator.d'
 import { enabledConfigOptions } from './qrCreator.config'
+// #end-section
 
 /**
  * Props del componente QRCreator.
@@ -31,15 +32,13 @@ interface QRCreatorProps {
 }
 
 const QRCreator = ({ data: externalData }: QRCreatorProps) => {
-  // Permitir múltiples acordeones abiertos simultáneamente (sin estado global de apertura)
+  /* Permitir múltiples acordeones abiertos simultáneamente (sin estado global de apertura) */
   // #hook useQRInstance
   const { qrCode } = useQRInstance();
   // #end-hook
-  
   // #hook useQRContainerRef
   const { qrContainerRef } = useQRContainerRef({ qrCode });
   // #end-hook
-  
   // #hook useBasicOptions
   const {
     data, setData,
@@ -48,7 +47,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     margin, setMargin
   } = useBasicOptions({ qrContainerRef, qrCode });
   // #end-hook
-  
   // #hook useDotsOptions
   const {
     dotType, setDotType,
@@ -59,7 +57,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     gradientRotation, setGradientRotation
   } = useDotsOptions({ qrContainerRef, qrCode });
   // #end-hook
-  
   // #hook useCornersSquareOptions
   const {
     CSType, setCSType, 
@@ -70,7 +67,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     CSGradientRotation, setCSGradientRotation
   } = useCornersSquareOptions({ qrContainerRef, qrCode })
   // #end-hook
-  
   // #hook useCornersDotOptions
   const {
     CDType, setCDType,
@@ -81,7 +77,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     CDGradientRotation, setCDGradientRotation
   } = useCornersDotOptions({ qrContainerRef, qrCode })
   // #end-hook
-  
   // #hook useBackgroundOptions
   const {
     BGColorType, setBGColorType,
@@ -91,7 +86,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     BGGradientRotation, setBGGradientRotation
   } = useBackgroundOptions({ qrContainerRef, qrCode })
   // #end-hook
-  
   // #hook useImageOptions
   const {
     qrImage, setQRImage,
@@ -100,18 +94,16 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     imageMargin, setImageMargin
   } = useImageOptions({ qrContainerRef, qrCode })
   // #end-hook
-  
   // #hook useQRCodeDownload
   const { downloadQR } = useQRCodeDownload({ qrCode });
   // #end-hook
-
-  // #effect - Sincronizar data externa con el estado interno
+  // #event - Sincronizar data externa con el estado interno
   useEffect(() => {
     if (externalData !== undefined && externalData !== data) {
       setData(externalData);
     }
   }, [externalData, data, setData]);
-  // #end-effect
+  // #end-event
 
   // #section return
   return(
