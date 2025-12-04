@@ -10,6 +10,8 @@
   display: flex;
   min-height: 500px;
   height: 100%;
+  flex: 1; /* Occupy available space within page wrapper */
+  overflow: hidden;
 }
 
 .qr-creator-container .qr-options{
@@ -17,6 +19,7 @@
   border: thin solid black;
   height: 100%;
   padding: 8px;
+  overflow-y: auto;
   
   /* Scrollbar sutil/invisible */
   scrollbar-width: thin;
@@ -49,7 +52,6 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  background-color: #b0b0ff;
 }
 
 .qr-options .section-container{

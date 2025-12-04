@@ -1,6 +1,6 @@
 // src/modules/qrCreator/qrCreator.tsx
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import style from './qrCreator.module.css'
 import { Accordion } from '../../modules/accordion/Accordion'
 import { 
@@ -31,8 +31,7 @@ interface QRCreatorProps {
 }
 
 const QRCreator = ({ data: externalData }: QRCreatorProps) => {
-  // Controlar que solo un acordeón esté abierto a la vez
-  const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
+  // Permitir múltiples acordeones abiertos simultáneamente (sin estado global de apertura)
   // #hook useQRInstance
   const { qrCode } = useQRInstance();
   // #end-hook
@@ -125,8 +124,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           <Accordion
             id="qr-basic-options"
             header={{ title: 'Basic options', indicator: { position: 'end', rotationDegrees: 90 } }}
-            isExpanded={openAccordionId === 'qr-basic-options'}
-            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-basic-options' : null)}
             keepContentMounted
             transitionDurationMs={150}
           >
@@ -179,8 +176,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           <Accordion
             id="qr-dots-options"
             header={{ title: 'Dots options', indicator: { position: 'end', rotationDegrees: 90 } }}
-            isExpanded={openAccordionId === 'qr-dots-options'}
-            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-dots-options' : null)}
             keepContentMounted
             transitionDurationMs={150}
           >
@@ -298,8 +293,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           <Accordion
             id="qr-corners-square-options"
             header={{ title: 'Corners Square Options', indicator: { position: 'end', rotationDegrees: 90 } }}
-            isExpanded={openAccordionId === 'qr-corners-square-options'}
-            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-corners-square-options' : null)}
             keepContentMounted
             transitionDurationMs={150}
           >
@@ -415,8 +408,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           <Accordion
             id="qr-corners-dot-options"
             header={{ title: 'Corners Dot Options', indicator: { position: 'end', rotationDegrees: 90 } }}
-            isExpanded={openAccordionId === 'qr-corners-dot-options'}
-            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-corners-dot-options' : null)}
             keepContentMounted
             transitionDurationMs={150}
           >
@@ -531,8 +522,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           <Accordion
             id="qr-background-options"
             header={{ title: 'Background Options', indicator: { position: 'end', rotationDegrees: 90 } }}
-            isExpanded={openAccordionId === 'qr-background-options'}
-            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-background-options' : null)}
             keepContentMounted
             transitionDurationMs={150}
           >
@@ -634,8 +623,6 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           <Accordion
             id="qr-image-options"
             header={{ title: 'Image Options', indicator: { position: 'end', rotationDegrees: 90 } }}
-            isExpanded={openAccordionId === 'qr-image-options'}
-            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-image-options' : null)}
             keepContentMounted
             transitionDurationMs={150}
           >
