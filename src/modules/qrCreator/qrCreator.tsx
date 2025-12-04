@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import style from './qrCreator.module.css'
-import Collapsible from '../../components/Collapsible/Collapsible'
+import { Accordion } from '../../modules/accordion'
 import { 
   useQRInstance,
   useQRContainerRef, 
@@ -119,7 +119,7 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
       <div className={style['qr-options']}>
         {/* #section basic-options */}
         {enabledConfigOptions.basicOptions &&
-          <Collapsible title='Basic options'>
+          <Accordion id="qr-basic" header={{ title: 'Basic options' }} defaultExpanded keepContentMounted>
             <div className={style['section-container']}>
               {/* #section Width */}
               <span className={style['input-label']}>Width</span>
@@ -161,12 +161,12 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               </div>
               {/* #end-section */}
             </div>
-          </Collapsible>        
+          </Accordion>        
         }
         {/* #end-section */}
         {/* #section dots-options */}
         {enabledConfigOptions.dotsOptions &&
-          <Collapsible title='Dots options'>
+          <Accordion id="qr-dots" header={{ title: 'Dots options' }} defaultExpanded keepContentMounted>
             <div className={style['section-container']}>
               {/* #section dot-type */}
               <span className={style['input-label']}>Dot Type</span>
@@ -273,12 +273,12 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               }
               {/* #end-section */}
             </div>
-          </Collapsible>
+          </Accordion>
         }
         {/* #end-section */}
         {/* #section corners-square-options */}  
         {enabledConfigOptions.cornerSquareOptions &&
-          <Collapsible title="Corners Square Options">
+          <Accordion id="qr-corner-square" header={{ title: 'Corners Square Options' }} defaultExpanded keepContentMounted>
             <div className={style['section-container']}>
               {/* #section Corners Square Type */}
               <span className={style['input-label']}>Corners Square Type</span>
@@ -383,12 +383,12 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               }
               {/* #end-section */}
             </div>
-          </Collapsible>
+          </Accordion>
         }      
         {/* #end-section */}
         {/* #section corners-dot-options */}   
         {enabledConfigOptions.cornersDotOptions && 
-          <Collapsible title="Corners Dot Options">
+          <Accordion id="qr-corner-dot" header={{ title: 'Corners Dot Options' }} defaultExpanded keepContentMounted>
             <div className={style['section-container']}>
               {/* #section corners-dot-type */}
               <span className={style['input-label']}>Corners Dot Type</span>
@@ -492,12 +492,12 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               }
               {/* #end-section */}
             </div>
-          </Collapsible>
+          </Accordion>
         }      
         {/* #end-section */}
         {/* #section background-options */}
         {enabledConfigOptions.backgroundOptions &&
-          <Collapsible title="Background Options">
+          <Accordion id="qr-background" header={{ title: 'Background Options' }} defaultExpanded keepContentMounted>
             <div className={style['section-container']}>
               {/* #section background-color-type */}
               <span className={style['input-label']}>Color Type</span>
@@ -588,12 +588,12 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               }
               {/* #end-section */}
             </div>
-          </Collapsible>        
+          </Accordion>        
         }
         {/* #end-section */}
         {/* #section image-options */}
         {enabledConfigOptions.imageOptions && 
-          <Collapsible title="Image Options">
+          <Accordion id="qr-image" header={{ title: 'Image Options' }} defaultExpanded keepContentMounted>
             <div className={style['section-container']}>
               {/* #section upload-image */}
             <span className={style['input-label']}>Upload Image</span>
@@ -657,7 +657,7 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               </div>
               {/* #end-section */}
             </div>
-          </Collapsible>
+          </Accordion>
         }
         {/* #end-section */}
       </div>
