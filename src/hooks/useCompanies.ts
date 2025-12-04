@@ -1,16 +1,16 @@
 /* src/hooks/useCompanies.ts */
 // #section imports
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useCompaniesStore } from '../store/Companies.store';
 import {
   fetchUserCompanies,
   createCompany as createCompanyService,
   updateCompany as updateCompanyService,
-  deleteCompany as deleteCompanyService,
-  checkCompanyNameAvailability as checkNameService
+  deleteCompany as deleteCompanyService
 } from '../services/companies/companies.service';
 import type { CompanyFormData } from '../store/Companies.types';
 import { uploadCompanyLogo } from '../services/companies/companiyLogo.service';
+import { useAsyncOperation } from './useAsyncOperation';
 // #end-section
 // #hook useCompanies
 /**
@@ -29,32 +29,25 @@ export const useCompanies = () => {
     setCompanies,
     addCompany,
     updateCompany: updateCompanyInStore,
-    removeCompany,
-    clearCompanies
+    removeCompany
   } = useCompaniesStore();
 
-  // Estado local para loading y errores
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Hook para operaciones asíncronas
+  const { isLoading, error, execute } = useAsyncOperation();
 
   // #function loadCompanies
   /**
    * Carga todas las compañías del usuario desde el backend.
    */
   const loadCompanies = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const companies = await fetchUserCompanies();
-      setCompanies(companies);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar compañías';
-      setError(errorMessage);
-      console.error('Error loading companies:', err);
-    } finally {
-      setIsLoading(false);
+    const result = await execute(
+      async () => await fetchUserCompanies(),
+      'Error al cargar compañías'
+    );
+    if (result) {
+      setCompanies(result);
     }
-  }, [setCompanies]);
+  }, [execute, setCompanies]);
   // #end-function
 
   // #function createCompany
@@ -64,21 +57,16 @@ export const useCompanies = () => {
    * @param {CompanyFormData} data - Datos de la compañía
    */
   const createCompany = useCallback(async (data: CompanyFormData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newCompany = await createCompanyService(data);
-      addCompany(newCompany);
-      return newCompany;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear compañía';
-      setError(errorMessage);
-      console.error('Error creating company:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+    const result = await execute(
+      async () => await createCompanyService(data),
+      'Error al crear compañía'
+    );
+    if (result) {
+      addCompany(result);
+      return result;
     }
-  }, [addCompany]);
+    throw new Error('Failed to create company');
+  }, [execute, addCompany]);
   // #end-function
 
   // #function updateCompany
@@ -89,21 +77,16 @@ export const useCompanies = () => {
    * @param {Partial<CompanyFormData>} updates - Datos a actualizar
    */
   const updateCompany = useCallback(async (id: number, updates: Partial<CompanyFormData>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedCompany = await updateCompanyService(id, updates);
-      updateCompanyInStore(id, updatedCompany);
-      return updatedCompany;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar compañía';
-      setError(errorMessage);
-      console.error('Error updating company:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+    const result = await execute(
+      async () => await updateCompanyService(id, updates),
+      'Error al actualizar compañía'
+    );
+    if (result) {
+      updateCompanyInStore(id, result);
+      return result;
     }
-  }, [updateCompanyInStore]);
+    throw new Error('Failed to update company');
+  }, [execute, updateCompanyInStore]);
   // #end-function
 
   // #function deleteCompany
@@ -113,77 +96,44 @@ export const useCompanies = () => {
    * @param {number} id - ID de la compañía
    */
   const deleteCompany = useCallback(async (id: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteCompanyService(id);
+    const result = await execute(
+      async () => await deleteCompanyService(id),
+      'Error al eliminar compañía'
+    );
+    if (result !== null) {
       removeCompany(id);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar compañía';
-      setError(errorMessage);
-      console.error('Error deleting company:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
     }
-  }, [removeCompany]);
-  // #end-function
-
-  // #function checkNameAvailability
-  /**
-   * Verifica si un nombre de compañía está disponible.
-   * 
-   * @param {string} name - Nombre a verificar
-   * @returns {Promise<boolean>} true si está disponible
-   */
-  const checkNameAvailability = useCallback(async (name: string): Promise<boolean> => {
-    try {
-      return await checkNameService(name);
-    } catch (err) {
-      console.error('Error checking name availability:', err);
-      return false;
-    }
-  }, []);
+  }, [execute, removeCompany]);
   // #end-function
 
   // #function uploadLogo
-/**
+  /**
    * Sube el logo de una compañía.
    * 
    * @param companyId - ID de la compañía
    * @param file - Archivo de imagen
    */
   const uploadLogo = useCallback(async (companyId: number, file: File) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedCompany = await uploadCompanyLogo(companyId, file);
-      updateCompanyInStore(companyId, updatedCompany);
-      return updatedCompany;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al subir logo';
-      setError(errorMessage);
-      console.error('Error uploading logo:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+    const result = await execute(
+      async () => await uploadCompanyLogo(companyId, file),
+      'Error al subir logo'
+    );
+    if (result) {
+      updateCompanyInStore(companyId, result);
+      return result;
     }
-  }, [updateCompanyInStore]);
+    throw new Error('Failed to upload logo');
+  }, [execute, updateCompanyInStore]);
   // #end-function
 
   return {
-    // Estado
     companies,
     isLoading,
     error,
-    
-    // Funciones
     loadCompanies,
     createCompany,
     updateCompany,
     deleteCompany,
-    checkNameAvailability,
-    clearCompanies,
     uploadLogo
   };
 };

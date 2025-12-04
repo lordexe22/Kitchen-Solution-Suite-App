@@ -1,7 +1,8 @@
 /* src/hooks/useCategories.ts */
 // #section imports
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useCategoriesStore } from '../store/Categories.store';
+import { useAsyncOperation } from './useAsyncOperation';
 import {
   fetchBranchCategories,
   createCategory as createCategoryService,
@@ -9,7 +10,7 @@ import {
   deleteCategory as deleteCategoryService,
   reorderCategories as reorderCategoriesService,
 } from '../services/categories/categories.service';
-import type { CategoryFormData } from '../store/Categories.types';
+import type { CategoryFormData, Category } from '../store/Categories.types';
 import { useProductsStore } from '../store/Products.store';
 // #end-section
 
@@ -38,8 +39,8 @@ export const useCategories = (branchId: number) => {
   // Selector del store de productos para limpiar productos de una categoría cuando se elimina
   const clearProductsForCategory = useProductsStore(state => state.clearProductsForCategory);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Hook para operaciones asíncronas
+  const { isLoading, error, execute } = useAsyncOperation();
 
   // Obtener categorías del store
   const categories = getCategoriesForBranch(branchId);
@@ -56,21 +57,16 @@ export const useCategories = (branchId: number) => {
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.log(`🔄 Fetching categories de branchId ${branchId}...`);
-      const categories = await fetchBranchCategories(branchId);
-      setCategoriesForBranch(branchId, categories);
-      console.log(`✅ Categories cargadas y guardadas en store`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar categorías';
-      setError(errorMessage);
-      console.error('Error loading categories:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [branchId, hasCategoriesForBranch, setCategoriesForBranch]);
+    await execute<void>(
+      async () => {
+        console.log(`🔄 Fetching categories de branchId ${branchId}...`);
+        const categories = await fetchBranchCategories(branchId);
+        setCategoriesForBranch(branchId, categories);
+        console.log(`✅ Categories cargadas y guardadas en store`);
+      },
+      'Error al cargar categorías'
+    );
+  }, [execute, branchId, hasCategoriesForBranch, setCategoriesForBranch]);
   // #end-function
 
   // #function createCategory
@@ -80,24 +76,20 @@ export const useCategories = (branchId: number) => {
    * @param {Omit<CategoryFormData, 'branchId'>} data - Datos de la categoría (sin branchId)
    */
   const createCategory = useCallback(async (data: Omit<CategoryFormData, 'branchId'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newCategory = await createCategoryService({
-        ...data,
-        branchId
-      });
-      addCategory(newCategory);
-      return newCategory;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear categoría';
-      setError(errorMessage);
-      console.error('Error creating category:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [branchId, addCategory]);
+    const result = await execute<Category>(
+      async () => {
+        const newCategory = await createCategoryService({
+          ...data,
+          branchId
+        });
+        addCategory(newCategory);
+        return newCategory;
+      },
+      'Error al crear categoría'
+    );
+    if (!result) throw new Error('Error al crear categoría');
+    return result;
+  }, [execute, branchId, addCategory]);
   // #end-function
 
   // #function updateCategory
@@ -108,21 +100,17 @@ export const useCategories = (branchId: number) => {
    * @param {Partial<CategoryFormData>} updates - Datos a actualizar
    */
   const updateCategory = useCallback(async (id: number, updates: Partial<CategoryFormData>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedCategory = await updateCategoryService(id, updates);
-      updateCategoryInStore(id, updatedCategory);
-      return updatedCategory;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar categoría';
-      setError(errorMessage);
-      console.error('Error updating category:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateCategoryInStore]);
+    const result = await execute<Category>(
+      async () => {
+        const updatedCategory = await updateCategoryService(id, updates);
+        updateCategoryInStore(id, updatedCategory);
+        return updatedCategory;
+      },
+      'Error al actualizar categoría'
+    );
+    if (!result) throw new Error('Error al actualizar categoría');
+    return result;
+  }, [execute, updateCategoryInStore]);
   // #end-function
 
   // #function deleteCategory
@@ -132,26 +120,20 @@ export const useCategories = (branchId: number) => {
    * @param {number} id - ID de la categoría
    */
   const deleteCategory = useCallback(async (id: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteCategoryService(id);
-      removeCategory(id, branchId);
-      // Limpiar productos asociados (si los hay) para que la UI se actualice inmediatamente
-      try {
-        clearProductsForCategory(id);
-      } catch (err) {
-        console.warn('Warning clearing products for deleted category:', err);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar categoría';
-      setError(errorMessage);
-      console.error('Error deleting category:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [branchId, removeCategory]);
+    await execute<void>(
+      async () => {
+        await deleteCategoryService(id);
+        removeCategory(id, branchId);
+        // Limpiar productos asociados (si los hay) para que la UI se actualice inmediatamente
+        try {
+          clearProductsForCategory(id);
+        } catch (err) {
+          console.warn('Warning clearing products for deleted category:', err);
+        }
+      },
+      'Error al eliminar categoría'
+    );
+  }, [execute, branchId, removeCategory, clearProductsForCategory]);
   // #end-function
 
   // #function reorderCategories
@@ -162,28 +144,22 @@ export const useCategories = (branchId: number) => {
   const reorderCategories = useCallback(async (
     updates: Array<{ id: number; sortOrder: number }>
   ) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Enviar al backend
-      await reorderCategoriesService(updates);
-      
-      // Actualizar el store local con los nuevos sortOrder usando batch update
-      updateMultipleCategoriesInStore(
-        updates.map(({ id, sortOrder }) => ({
-          id,
-          updates: { sortOrder }
-        }))
-      );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al reordenar categorías';
-      setError(errorMessage);
-      console.error('Error reordering categories:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateMultipleCategoriesInStore]);
+    await execute<void>(
+      async () => {
+        // Enviar al backend
+        await reorderCategoriesService(updates);
+        
+        // Actualizar el store local con los nuevos sortOrder usando batch update
+        updateMultipleCategoriesInStore(
+          updates.map(({ id, sortOrder }) => ({
+            id,
+            updates: { sortOrder }
+          }))
+        );
+      },
+      'Error al reordenar categorías'
+    );
+  }, [execute, updateMultipleCategoriesInStore]);
   // #end-function
 
   // #function refreshCategories

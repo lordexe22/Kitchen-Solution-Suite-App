@@ -1,7 +1,8 @@
 /* src/hooks/useBranches.ts */
 // #section imports
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useBranchesStore } from '../store/Branches.store';
+import { useAsyncOperation } from './useAsyncOperation';
 import {
   fetchCompanyBranches,
   createBranch as createBranchService,
@@ -17,7 +18,7 @@ import {
   deleteBranchSocial as deleteBranchSocialService,
   applyBranchSocialsToAll as applyBranchSocialsToAllService
 } from '../services/branches/branchSocials.service';
-import type { BranchFormData, BranchLocationFormData, BranchSocialFormData } from '../store/Branches.types';
+import type { BranchFormData, BranchLocationFormData, BranchSocialFormData, BranchWithLocation } from '../store/Branches.types';
 import {
   fetchBranchSchedules,
   updateBranchScheduleBatch,
@@ -26,6 +27,7 @@ import {
 import type { BranchScheduleFormData } from '../store/Branches.types';
 import type { BranchSchedule } from '../store/Branches.types';
 import type { BranchSocial } from '../store/Branches.types';
+import type { BranchLocation } from '../store/Branches.types';
 // #end-section
 // #hook useBranches
 /**
@@ -48,8 +50,8 @@ export const useBranches = (companyId: number) => {
     removeBranch
   } = useBranchesStore();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Hook para operaciones asíncronas
+  const { isLoading, error, execute } = useAsyncOperation();
 
   // #function loadBranches
   /**
@@ -63,164 +65,119 @@ export const useBranches = (companyId: number) => {
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.log(`🔄 Fetching branches de companyId ${companyId}...`);
-      const branches = await fetchCompanyBranches(companyId);
-      setBranchesForCompany(companyId, branches);
+    console.log(`🔄 Fetching branches de companyId ${companyId}...`);
+    const result = await execute<BranchWithLocation[]>(
+      async () => await fetchCompanyBranches(companyId),
+      'Error al cargar sucursales'
+    );
+    if (result) {
+      setBranchesForCompany(companyId, result);
       console.log(`✅ Branches cargadas y guardadas en store`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar sucursales';
-      setError(errorMessage);
-      console.error('Error loading branches:', err);
-    } finally {
-      setIsLoading(false);
     }
-  }, [companyId, hasBranchesForCompany, setBranchesForCompany]);
+  }, [companyId, hasBranchesForCompany, execute, setBranchesForCompany]);
   // #end-function
   // #function createBranch
   /**
    * Crea una nueva sucursal.
    */
   const createBranch = useCallback(async (data: BranchFormData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newBranch = await createBranchService(data);
-      addBranch(newBranch);
-      return newBranch;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear sucursal';
-      setError(errorMessage);
-      console.error('Error creating branch:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+    const result = await execute<BranchWithLocation>(
+      async () => await createBranchService(data),
+      'Error al crear sucursal'
+    );
+    if (result) {
+      addBranch(result);
+      return result;
     }
-  }, [addBranch]);
+    throw new Error('Failed to create branch');
+  }, [execute, addBranch]);
   // #end-function
   // #function updateBranchName
   /**
    * Actualiza el nombre de una sucursal.
    */
   const updateBranchName = useCallback(async (branchId: number, name: string | null) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedBranch = await updateBranchService(branchId, name);
-      updateBranchInStore(branchId, updatedBranch);
-      return updatedBranch;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar sucursal';
-      setError(errorMessage);
-      console.error('Error updating branch:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+    const result = await execute<BranchWithLocation>(
+      async () => await updateBranchService(branchId, name),
+      'Error al actualizar sucursal'
+    );
+    if (result) {
+      updateBranchInStore(branchId, result);
+      return result;
     }
-  }, [updateBranchInStore]);
+    throw new Error('Failed to update branch');
+  }, [execute, updateBranchInStore]);
   // #end-function
   // #function deleteBranch
   /**
    * Elimina (soft delete) una sucursal.
    */
   const deleteBranch = useCallback(async (branchId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteBranchService(branchId);
+    const result = await execute(
+      async () => await deleteBranchService(branchId),
+      'Error al eliminar sucursal'
+    );
+    if (result !== null) {
       removeBranch(branchId, companyId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar sucursal';
-      setError(errorMessage);
-      console.error('Error deleting branch:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
     }
-  }, [removeBranch, companyId]);
+  }, [execute, removeBranch, companyId]);
   // #end-function
   // #function saveLocation
   /**
    * Guarda o actualiza la ubicación de una sucursal.
    */
   const saveLocation = useCallback(async (branchId: number, data: BranchLocationFormData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const location = await createOrUpdateBranchLocation(branchId, data);
-      updateBranchInStore(branchId, { location });
-      return location;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al guardar ubicación';
-      setError(errorMessage);
-      console.error('Error saving location:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateBranchInStore]);
+    const result = await execute<BranchLocation>(
+      async () => {
+        const location = await createOrUpdateBranchLocation(branchId, data);
+        updateBranchInStore(branchId, { location });
+        return location;
+      },
+      'Error al guardar ubicación'
+    );
+    if (!result) throw new Error('Error al guardar ubicación');
+    return result;
+  }, [execute, updateBranchInStore]);
   // #end-function
   // #function deleteLocation
   /**
    * Elimina la ubicación de una sucursal.
    */
   const deleteLocation = useCallback(async (branchId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteBranchLocationService(branchId);
-      updateBranchInStore(branchId, { location: null });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar ubicación';
-      setError(errorMessage);
-      console.error('Error deleting location:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateBranchInStore]);
+    await execute<void>(
+      async () => {
+        await deleteBranchLocationService(branchId);
+        updateBranchInStore(branchId, { location: null });
+      },
+      'Error al eliminar ubicación'
+    );
+  }, [execute, updateBranchInStore]);
   // #end-function
   // #function loadBranchSocials
   /**
    * Carga las redes sociales de una sucursal.
    */
   const loadBranchSocials = useCallback(async (branchId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const socials = await fetchBranchSocials(branchId);
-      return socials;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar redes sociales';
-      setError(errorMessage);
-      console.error('Error loading socials:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const result = await execute<BranchSocial[]>(
+      async () => await fetchBranchSocials(branchId),
+      'Error al cargar redes sociales'
+    );
+    if (!result) throw new Error('Error al cargar redes sociales');
+    return result;
+  }, [execute]);
   // #end-function
   // #function createSocial
   /**
    * Crea una nueva red social para una sucursal.
    */
   const createSocial = useCallback(async (branchId: number, data: BranchSocialFormData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newSocial = await createBranchSocialService(branchId, data);
-      return newSocial;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear red social';
-      setError(errorMessage);
-      console.error('Error creating social:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const result = await execute<BranchSocial>(
+      async () => await createBranchSocialService(branchId, data),
+      'Error al crear red social'
+    );
+    if (!result) throw new Error('Error al crear red social');
+    return result;
+  }, [execute]);
   // #end-function
   // #function updateSocial
   /**
@@ -231,117 +188,72 @@ export const useBranches = (companyId: number) => {
     socialId: number,
     data: BranchSocialFormData
   ) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedSocial = await updateBranchSocialService(branchId, socialId, data);
-      return updatedSocial;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar red social';
-      setError(errorMessage);
-      console.error('Error updating social:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const result = await execute<BranchSocial>(
+      async () => await updateBranchSocialService(branchId, socialId, data),
+      'Error al actualizar red social'
+    );
+    if (!result) throw new Error('Error al actualizar red social');
+    return result;
+  }, [execute]);
   // #end-function
   // #function deleteSocial
   /**
    * Elimina una red social.
    */
   const deleteSocial = useCallback(async (branchId: number, socialId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteBranchSocialService(branchId, socialId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar red social';
-      setError(errorMessage);
-      console.error('Error deleting social:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    await execute<void>(
+      async () => await deleteBranchSocialService(branchId, socialId),
+      'Error al eliminar red social'
+    );
+  }, [execute]);
   // #end-function
   // #function applySocialsToAllBranches
   /**
    * Aplica las redes sociales de una sucursal a todas las sucursales de la compañía.
    */
   const applySocialsToAllBranches = useCallback(async (sourceBranchId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await applyBranchSocialsToAllService(companyId, sourceBranchId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al aplicar redes sociales';
-      setError(errorMessage);
-      console.error('Error applying socials to all:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [companyId]);
+    await execute<void>(
+      async () => await applyBranchSocialsToAllService(companyId, sourceBranchId),
+      'Error al aplicar redes sociales'
+    );
+  }, [execute, companyId]);
   // #end-function
   // #function loadBranchSchedules
   /**
    * Carga los horarios de una sucursal.
    */
   const loadBranchSchedules = useCallback(async (branchId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const schedules = await fetchBranchSchedules(branchId);
-      return schedules;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar horarios';
-      setError(errorMessage);
-      console.error('Error loading schedules:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const result = await execute<BranchSchedule[]>(
+      async () => await fetchBranchSchedules(branchId),
+      'Error al cargar horarios'
+    );
+    if (!result) throw new Error('Error al cargar horarios');
+    return result;
+  }, [execute]);
   // #end-function
   // #function updateSchedules
   /**
    * Actualiza los horarios de una sucursal.
    */
   const updateSchedules = useCallback(async (branchId: number, schedules: BranchScheduleFormData[]) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedSchedules = await updateBranchScheduleBatch(branchId, { schedules });
-      return updatedSchedules;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar horarios';
-      setError(errorMessage);
-      console.error('Error updating schedules:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const result = await execute<BranchSchedule[]>(
+      async () => await updateBranchScheduleBatch(branchId, { schedules }),
+      'Error al actualizar horarios'
+    );
+    if (!result) throw new Error('Error al actualizar horarios');
+    return result;
+  }, [execute]);
   // #end-function
   // #function applySchedulesToAll
   /**
    * Aplica los horarios de una sucursal a todas las sucursales de la compañía.
    */
   const applySchedulesToAll = useCallback(async (sourceBranchId: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await applySchedulesToAllService(companyId, sourceBranchId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al aplicar horarios';
-      setError(errorMessage);
-      console.error('Error applying schedules to all:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [companyId]);
+    await execute<void>(
+      async () => await applySchedulesToAllService(companyId, sourceBranchId),
+      'Error al aplicar horarios'
+    );
+  }, [execute, companyId]);
   // #end-function
   // #function updateBranchSchedules
   /**

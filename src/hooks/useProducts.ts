@@ -1,7 +1,8 @@
 /* src/hooks/useProducts.ts */
 // #section Imports
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useProductsStore } from '../store/Products.store';
+import { useAsyncOperation } from './useAsyncOperation';
 import type { ProductFormData } from '../store/Products.types';
 import {
   getCategoryProducts as getCategoryProductsService,
@@ -35,8 +36,7 @@ const EMPTY_PRODUCTS: ProductWithParsedImages[] = [];
  */
 export const useProducts = (categoryId: number) => {
   // #state local
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { isLoading, error, execute } = useAsyncOperation();
   // #end-state
 
   // #state from store (suscribirse correctamente usando selectores)
@@ -64,19 +64,14 @@ export const useProducts = (categoryId: number) => {
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-    try {
-      const fetchedProducts = await getCategoryProductsService(categoryId);
-      setProducts(categoryId, fetchedProducts);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar productos';
-      setError(errorMessage);
-      console.error('Error loading products:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [categoryId, products.length, setProducts]);
+    await execute<void>(
+      async () => {
+        const fetchedProducts = await getCategoryProductsService(categoryId);
+        setProducts(categoryId, fetchedProducts);
+      },
+      'Error al cargar productos'
+    );
+  }, [execute, categoryId, products.length, setProducts]);
   // #end-function
 
   // #function createProduct
@@ -86,24 +81,20 @@ export const useProducts = (categoryId: number) => {
    * @param {Omit<ProductFormData, 'categoryId'>} data - Datos del producto (sin categoryId)
    */
   const createProduct = useCallback(async (data: Omit<ProductFormData, 'categoryId'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newProduct = await createProductService({
-        ...data,
-        categoryId
-      });
-      addProduct(newProduct);
-      return newProduct;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear producto';
-      setError(errorMessage);
-      console.error('Error creating product:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [categoryId, addProduct]);
+    const result = await execute<ProductWithParsedImages>(
+      async () => {
+        const newProduct = await createProductService({
+          ...data,
+          categoryId
+        });
+        addProduct(newProduct);
+        return newProduct;
+      },
+      'Error al crear producto'
+    );
+    if (!result) throw new Error('Error al crear producto');
+    return result;
+  }, [execute, categoryId, addProduct]);
   // #end-function
 
   // #function updateProduct
@@ -114,21 +105,17 @@ export const useProducts = (categoryId: number) => {
    * @param {Partial<ProductFormData>} updates - Datos a actualizar
    */
   const updateProduct = useCallback(async (id: number, updates: Partial<ProductFormData>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedProduct = await updateProductService(id, updates);
-      updateProductInStore(id, updatedProduct);
-      return updatedProduct;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar producto';
-      setError(errorMessage);
-      console.error('Error updating product:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateProductInStore]);
+    const result = await execute<ProductWithParsedImages>(
+      async () => {
+        const updatedProduct = await updateProductService(id, updates);
+        updateProductInStore(id, updatedProduct);
+        return updatedProduct;
+      },
+      'Error al actualizar producto'
+    );
+    if (!result) throw new Error('Error al actualizar producto');
+    return result;
+  }, [execute, updateProductInStore]);
   // #end-function
 
   // #function deleteProduct
@@ -138,20 +125,14 @@ export const useProducts = (categoryId: number) => {
    * @param {number} id - ID del producto
    */
   const deleteProduct = useCallback(async (id: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteProductService(id);
-      removeProduct(id, categoryId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar producto';
-      setError(errorMessage);
-      console.error('Error deleting product:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [categoryId, removeProduct]);
+    await execute<void>(
+      async () => {
+        await deleteProductService(id);
+        removeProduct(id, categoryId);
+      },
+      'Error al eliminar producto'
+    );
+  }, [execute, categoryId, removeProduct]);
   // #end-function
 
   // #function reorderProducts
@@ -162,28 +143,22 @@ export const useProducts = (categoryId: number) => {
   const reorderProducts = useCallback(async (
     updates: Array<{ id: number; sortOrder: number }>
   ) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Enviar al backend
-      await reorderProductsService(updates);
-      
-      // Actualizar el store local con los nuevos sortOrder usando batch update
-      updateMultipleProductsInStore(
-        updates.map(({ id, sortOrder }) => ({
-          id,
-          updates: { sortOrder }
-        }))
-      );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al reordenar productos';
-      setError(errorMessage);
-      console.error('Error reordering products:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateMultipleProductsInStore]);
+    await execute<void>(
+      async () => {
+        // Enviar al backend
+        await reorderProductsService(updates);
+        
+        // Actualizar el store local con los nuevos sortOrder usando batch update
+        updateMultipleProductsInStore(
+          updates.map(({ id, sortOrder }) => ({
+            id,
+            updates: { sortOrder }
+          }))
+        );
+      },
+      'Error al reordenar productos'
+    );
+  }, [execute, updateMultipleProductsInStore]);
   // #end-function
 
   // #function refreshProducts
