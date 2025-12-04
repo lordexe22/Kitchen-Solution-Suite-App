@@ -1,8 +1,8 @@
 // src/modules/qrCreator/qrCreator.tsx
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import style from './qrCreator.module.css'
-import { Accordion } from '../../modules/accordion'
+import { Accordion } from '../../modules/accordion/Accordion'
 import { 
   useQRInstance,
   useQRContainerRef, 
@@ -31,6 +31,8 @@ interface QRCreatorProps {
 }
 
 const QRCreator = ({ data: externalData }: QRCreatorProps) => {
+  // Controlar que solo un acordeón esté abierto a la vez
+  const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   // #hook useQRInstance
   const { qrCode } = useQRInstance();
   // #end-hook
@@ -117,9 +119,17 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
     <div className={style['qr-creator-container']}>
       {/* #section qr-options */}
       <div className={style['qr-options']}>
+        <div className={style['qr-options-scroll']}>
         {/* #section basic-options */}
         {enabledConfigOptions.basicOptions &&
-          <Accordion id="qr-basic" header={{ title: 'Basic options' }} defaultExpanded keepContentMounted>
+          <Accordion
+            id="qr-basic-options"
+            header={{ title: 'Basic options', indicator: { position: 'end', rotationDegrees: 90 } }}
+            isExpanded={openAccordionId === 'qr-basic-options'}
+            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-basic-options' : null)}
+            keepContentMounted
+            transitionDurationMs={150}
+          >
             <div className={style['section-container']}>
               {/* #section Width */}
               <span className={style['input-label']}>Width</span>
@@ -161,12 +171,19 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               </div>
               {/* #end-section */}
             </div>
-          </Accordion>        
+          </Accordion>
         }
         {/* #end-section */}
         {/* #section dots-options */}
         {enabledConfigOptions.dotsOptions &&
-          <Accordion id="qr-dots" header={{ title: 'Dots options' }} defaultExpanded keepContentMounted>
+          <Accordion
+            id="qr-dots-options"
+            header={{ title: 'Dots options', indicator: { position: 'end', rotationDegrees: 90 } }}
+            isExpanded={openAccordionId === 'qr-dots-options'}
+            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-dots-options' : null)}
+            keepContentMounted
+            transitionDurationMs={150}
+          >
             <div className={style['section-container']}>
               {/* #section dot-type */}
               <span className={style['input-label']}>Dot Type</span>
@@ -278,7 +295,14 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
         {/* #end-section */}
         {/* #section corners-square-options */}  
         {enabledConfigOptions.cornerSquareOptions &&
-          <Accordion id="qr-corner-square" header={{ title: 'Corners Square Options' }} defaultExpanded keepContentMounted>
+          <Accordion
+            id="qr-corners-square-options"
+            header={{ title: 'Corners Square Options', indicator: { position: 'end', rotationDegrees: 90 } }}
+            isExpanded={openAccordionId === 'qr-corners-square-options'}
+            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-corners-square-options' : null)}
+            keepContentMounted
+            transitionDurationMs={150}
+          >
             <div className={style['section-container']}>
               {/* #section Corners Square Type */}
               <span className={style['input-label']}>Corners Square Type</span>
@@ -388,7 +412,14 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
         {/* #end-section */}
         {/* #section corners-dot-options */}   
         {enabledConfigOptions.cornersDotOptions && 
-          <Accordion id="qr-corner-dot" header={{ title: 'Corners Dot Options' }} defaultExpanded keepContentMounted>
+          <Accordion
+            id="qr-corners-dot-options"
+            header={{ title: 'Corners Dot Options', indicator: { position: 'end', rotationDegrees: 90 } }}
+            isExpanded={openAccordionId === 'qr-corners-dot-options'}
+            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-corners-dot-options' : null)}
+            keepContentMounted
+            transitionDurationMs={150}
+          >
             <div className={style['section-container']}>
               {/* #section corners-dot-type */}
               <span className={style['input-label']}>Corners Dot Type</span>
@@ -497,7 +528,14 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
         {/* #end-section */}
         {/* #section background-options */}
         {enabledConfigOptions.backgroundOptions &&
-          <Accordion id="qr-background" header={{ title: 'Background Options' }} defaultExpanded keepContentMounted>
+          <Accordion
+            id="qr-background-options"
+            header={{ title: 'Background Options', indicator: { position: 'end', rotationDegrees: 90 } }}
+            isExpanded={openAccordionId === 'qr-background-options'}
+            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-background-options' : null)}
+            keepContentMounted
+            transitionDurationMs={150}
+          >
             <div className={style['section-container']}>
               {/* #section background-color-type */}
               <span className={style['input-label']}>Color Type</span>
@@ -588,12 +626,19 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
               }
               {/* #end-section */}
             </div>
-          </Accordion>        
+          </Accordion>
         }
         {/* #end-section */}
         {/* #section image-options */}
         {enabledConfigOptions.imageOptions && 
-          <Accordion id="qr-image" header={{ title: 'Image Options' }} defaultExpanded keepContentMounted>
+          <Accordion
+            id="qr-image-options"
+            header={{ title: 'Image Options', indicator: { position: 'end', rotationDegrees: 90 } }}
+            isExpanded={openAccordionId === 'qr-image-options'}
+            onToggle={(expanded) => setOpenAccordionId(expanded ? 'qr-image-options' : null)}
+            keepContentMounted
+            transitionDurationMs={150}
+          >
             <div className={style['section-container']}>
               {/* #section upload-image */}
             <span className={style['input-label']}>Upload Image</span>
@@ -660,6 +705,7 @@ const QRCreator = ({ data: externalData }: QRCreatorProps) => {
           </Accordion>
         }
         {/* #end-section */}
+        </div>
       </div>
       {/* #end-section */}
       {/* #section qr-render */}
