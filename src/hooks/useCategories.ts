@@ -53,16 +53,13 @@ export const useCategories = (branchId: number) => {
   const loadCategories = useCallback(async (forceRefresh = false) => {
     // ✅ CACHE: Verificar si ya están en el store
     if (!forceRefresh && hasCategoriesForBranch(branchId)) {
-      console.log(`✅ Categories de branchId ${branchId} ya están en cache`);
       return;
     }
 
     await execute<void>(
       async () => {
-        console.log(`🔄 Fetching categories de branchId ${branchId}...`);
         const categories = await fetchBranchCategories(branchId);
         setCategoriesForBranch(branchId, categories);
-        console.log(`✅ Categories cargadas y guardadas en store`);
       },
       'Error al cargar categorías'
     );

@@ -169,11 +169,8 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
     setIsLoading(true); // ← AGREGAR
 
     try {
-      console.log('Attempting to register with form...');
       const userPayload = buildUserPayload(data);
       const response = await registerUser(userPayload);
-
-      console.log('✅ Registration successful:', response);
       
       // Actualizar el store con los datos del usuario
       useUserDataStore.getState().setFirstName(response.user.firstName);
@@ -184,13 +181,9 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
-      console.log('✅ Store actualizado');
-      
       navigate('/dashboard');
       onCloseModal();
     } catch (error) {
-      console.error('Registration with form failed:', error);
-      
       // Detectar si es error de servidor/red
       const errorType = detectServerErrorType(error);
       
@@ -224,13 +217,11 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
 
     // Si el usuario canceló, no hacer nada
     if (!googleUser) {
-      console.log('User cancelled Google authentication');
       return;
     }
 
     // Validar que Google retornó los datos mínimos necesarios
     if (!googleUser.sub || !googleUser.email || !googleUser.given_name || !googleUser.family_name) {
-      console.error('Invalid Google user data:', googleUser);
       setError('email', {
         type: 'oauth',
         message: 'Invalid data received from Google. Please try again or use email registration.'
@@ -238,19 +229,11 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       return;
     }
 
-    // Validar que el email esté verificado por Google (advertencia, no bloqueo)
-    if (!googleUser.email_verified) {
-      console.warn('Google email not verified:', googleUser.email);
-    }
-
     setIsLoading(true); // ← AGREGAR
 
     try {
-      console.log('Attempting to register with Google...');
       const userPayload = buildUserPayload(undefined, googleUser);
       const response = await registerUser(userPayload);
-      
-      console.log('✅ Registration successful:', response);
       
       // Actualizar el store con los datos del usuario
       useUserDataStore.getState().setFirstName(response.user.firstName);
@@ -261,13 +244,9 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
-      console.log('✅ Store actualizado');
-      
       navigate('/dashboard');
       onCloseModal();
     } catch (error) {
-      console.error('Registration with Google failed:', error);
-      
       // Detectar si es error de servidor/red
       const errorType = detectServerErrorType(error);
       

@@ -105,13 +105,11 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     setServerError(null);
 
     if (!googleUser) {
-      console.log('User cancelled Google authentication');
       return;
     }
 
     // Validar datos mínimos de Google
     if (!googleUser.sub || !googleUser.email) {
-      console.error('Invalid Google user data:', googleUser);
       setError('email', {
         type: 'oauth',
         message: 'Invalid data received from Google. Please try again.'
@@ -122,8 +120,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     setIsLoading(true);
 
     try {
-      console.log('🔍 Attempting login with Google...');
-      
       const loginData: UserLoginData = {
         platformName: 'google',
         email: googleUser.email,
@@ -131,8 +127,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       };
 
       const response = await loginUser(loginData);
-
-      console.log('✅ Login with Google successful:', response);
       
       // Actualizar el store con los datos del usuario
       useUserDataStore.getState().setFirstName(response.user.firstName);
@@ -150,8 +144,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       onCloseModal();
       
     } catch (error) {
-      console.error('❌ Login with Google failed:', error);
-      
       // Detectar si es error de servidor/red
       const errorType = detectServerErrorType(error);
       
@@ -185,8 +177,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     setIsLoading(true);
 
     try {
-      console.log('🔍 Attempting login with form...');
-      
       const loginData: UserLoginData = {
         platformName: 'local',
         email: data.email,
@@ -194,8 +184,6 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       };
 
       const response = await loginUser(loginData);
-
-      console.log('✅ Login with form successful:', response);
       
       // Actualizar el store con los datos del usuario
       useUserDataStore.getState().setFirstName(response.user.firstName);
@@ -206,15 +194,11 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
-      console.log('✅ Store actualizado');
-      
       navigate('/dashboard');
 
       onCloseModal();
       
     } catch (error) {
-      console.error('❌ Login with form failed:', error);
-      
       // Detectar si es error de servidor/red
       const errorType = detectServerErrorType(error);
       

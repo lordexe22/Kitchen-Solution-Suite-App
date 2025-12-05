@@ -74,7 +74,6 @@ function SortableImage({ id, imageUrl, index, onRemove }: SortableImageProps) {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          console.log(`🗑️ Eliminando imagen ${index}`);
           onRemove();
         }}
       >
@@ -143,7 +142,6 @@ export default function ProductImageManager({
         })
       );
 
-      console.log(`📷 Agregando ${newImageUrls.length} imagen(es) nuevas`);
       onImagesChange([...images, ...newImageUrls]);
     } catch (error) {
       console.error('Error loading images:', error);
@@ -159,9 +157,7 @@ export default function ProductImageManager({
 
   // #event handleRemoveImage
   const handleRemoveImage = (index: number) => {
-    console.log(`🗑️ Eliminando imagen en índice ${index}`);
     const newImages = images.filter((_, i) => i !== index);
-    console.log(`✅ Imágenes restantes: ${newImages.length}`);
     onImagesChange(newImages);
   };
   // #end-event
@@ -175,7 +171,6 @@ export default function ProductImageManager({
     const oldIndex = images.findIndex((_, i) => `image-${i}` === active.id);
     const newIndex = images.findIndex((_, i) => `image-${i}` === over.id);
 
-    console.log(`🔄 Reordenando imagen de ${oldIndex} a ${newIndex}`);
     const reordered = arrayMove(images, oldIndex, newIndex);
     onImagesChange(reordered);
   };

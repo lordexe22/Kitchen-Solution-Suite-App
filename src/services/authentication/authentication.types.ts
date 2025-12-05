@@ -62,3 +62,19 @@ export type UserLoginData =
       platformToken: string;
     };
 // #end-type
+
+// #type UserResponse
+/**
+ * Respuesta del servidor al registrar o autenticar un usuario.
+ */
+export interface UserResponse {
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    imageUrl: string | null;
+    type: string;
+    state: string;
+  };
+}
+// #end-type

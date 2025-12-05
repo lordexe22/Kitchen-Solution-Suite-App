@@ -61,18 +61,15 @@ export const useBranches = (companyId: number) => {
   const loadBranches = useCallback(async (forceRefresh = false) => {
     // ✅ CACHE: Verificar si ya están en el store
     if (!forceRefresh && hasBranchesForCompany(companyId)) {
-      console.log(`✅ Branches de companyId ${companyId} ya están en cache`);
       return;
     }
 
-    console.log(`🔄 Fetching branches de companyId ${companyId}...`);
     const result = await execute<BranchWithLocation[]>(
       async () => await fetchCompanyBranches(companyId),
       'Error al cargar sucursales'
     );
     if (result) {
       setBranchesForCompany(companyId, result);
-      console.log(`✅ Branches cargadas y guardadas en store`);
     }
   }, [companyId, hasBranchesForCompany, execute, setBranchesForCompany]);
   // #end-function

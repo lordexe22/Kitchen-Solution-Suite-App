@@ -33,8 +33,6 @@ export const useAutoLogin = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('🔍 Verificando autenticación automática...');
-
         const response = await autoLoginByToken() as UserResponse;
 
         setFirstName(response.user.firstName);
@@ -45,19 +43,14 @@ export const useAutoLogin = () => {
         setState(response.user.state);
         setIsAuthenticated(true);
 
-        console.log('✅ Auto-login exitoso');
-
-        console.log('🏷️ Cargando etiquetas personalizadas...');
         await loadUserTags();
-        console.log('✅ Etiquetas cargadas');
 
         if (location.pathname === '/') {
-          console.log('🔄 Redirigiendo al dashboard...');
           navigate('/dashboard', { replace: true });
         }
 
       } catch (error) {
-        console.log('ℹ️ No hay sesión activa', error);
+        // No hay sesión activa
       } finally {
         setIsCheckingAuth(false);
       }

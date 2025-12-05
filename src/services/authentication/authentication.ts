@@ -1,6 +1,6 @@
 // src/services/authentication/authentication.ts
 // #section Imports
-import type { RegisterUserData, UserLoginData } from "./authentication.types";
+import type { RegisterUserData, UserLoginData, UserResponse } from "./authentication.types";
 import { httpClient } from '../../api/httpClient.instance';
 // #end-section
 // #function registerUser
@@ -10,10 +10,10 @@ import { httpClient } from '../../api/httpClient.instance';
  *
  * @async
  * @param {RegisterUserData} registerUserData - Datos del usuario a registrar.
- * @returns {Promise<{user: any}>} Datos del usuario registrado.
+ * @returns {Promise<UserResponse>} Datos del usuario registrado.
  * @throws {Error} Si la solicitud al backend falla.
  */
-export const registerUser = async (registerUserData: RegisterUserData) => {
+export const registerUser = async (registerUserData: RegisterUserData): Promise<UserResponse> => {
   return httpClient.post('/auth/register', registerUserData);
 };
 // #end-function
@@ -24,10 +24,10 @@ export const registerUser = async (registerUserData: RegisterUserData) => {
  *
  * @async
  * @param {UserLoginData} loginUserData - Datos del usuario para iniciar sesión.
- * @returns {Promise<{user: any}>} Datos del usuario autenticado.
+ * @returns {Promise<UserResponse>} Datos del usuario autenticado.
  * @throws {Error} Si las credenciales son inválidas o la solicitud falla.
  */
-export const loginUser = async (loginUserData: UserLoginData) => {
+export const loginUser = async (loginUserData: UserLoginData): Promise<UserResponse> => {
   return httpClient.post('/auth/login', loginUserData);
 };
 // #end-function
