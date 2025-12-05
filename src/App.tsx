@@ -1,20 +1,30 @@
 /* src/App.tsx */
 // #section Imports
 import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { useAutoLogin } from "./hooks/useAutoLogin";
+
+// #subsection Public pages - carga inmediata (críticas para SEO/UX)
 import MainPage from "./pages/public/MainPage/MainPage";
 import MenuPage from "./pages/public/MenuPage/MenuPage";
 import ProductDetailPage from "./pages/public/ProductDetailPage/ProductDetailPage";
-import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
-import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
-import EmployeesPage from "./pages/dashboard/EmployeesPage/EmployeesPage";
-import BranchManagementPage from "./pages/dashboard/BranchManagementPage/BranchManagementPage";
-import ToolsPage from "./pages/dashboard/Tools/ToolsPage";
-import QRCreatorPage from "./pages/dashboard/Tools/QRCreatorPage";
+// #end-subsection
+
+// #subsection Protected components - carga inmediata
 import DashboardShell from './components/DashboardShell/DashboardShell';
 import ProtectedRoute from "./components/ProtectedRoute";
-import TagCreatorPage from "./pages/dashboard/Tools/TagCreatorPage";
-import { AccordionDemo } from "./components/_demos/AccordionDemo";
+// #end-subsection
+
+// #subsection Dashboard pages - lazy loading
+const WelcomePage = lazy(() => import("./pages/dashboard/WelcomePage/WelcomePage"));
+const CompaniesPage = lazy(() => import("./pages/dashboard/CompaniesPage/CompaniesPage"));
+const EmployeesPage = lazy(() => import("./pages/dashboard/EmployeesPage/EmployeesPage"));
+const BranchManagementPage = lazy(() => import("./pages/dashboard/BranchManagementPage/BranchManagementPage"));
+const ToolsPage = lazy(() => import("./pages/dashboard/Tools/ToolsPage"));
+const QRCreatorPage = lazy(() => import("./pages/dashboard/Tools/QRCreatorPage"));
+const TagCreatorPage = lazy(() => import("./pages/dashboard/Tools/TagCreatorPage"));
+const AccordionDemo = lazy(() => import("./components/_demos/AccordionDemo").then(m => ({ default: m.AccordionDemo })));
+// #end-subsection
 // #end-section
 
 // #component App
@@ -64,7 +74,9 @@ function App() {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <WelcomePage />
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Cargando...</div>}>
+              <WelcomePage />
+            </Suspense>
           </ProtectedRoute>
         } 
       />
@@ -75,7 +87,9 @@ function App() {
         path="/dashboard/companies" 
         element={
           <ProtectedRoute>
-            <CompaniesPage />
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Cargando...</div>}>
+              <CompaniesPage />
+            </Suspense>
           </ProtectedRoute>
         } 
       />
@@ -86,7 +100,9 @@ function App() {
         path="/dashboard/employees" 
         element={
           <ProtectedRoute>
-            <EmployeesPage />
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Cargando...</div>}>
+              <EmployeesPage />
+            </Suspense>
           </ProtectedRoute>
         } 
       />
@@ -97,7 +113,9 @@ function App() {
         path="/dashboard/branches/:section?" 
         element={
           <ProtectedRoute>
-            <BranchManagementPage />
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Cargando...</div>}>
+              <BranchManagementPage />
+            </Suspense>
           </ProtectedRoute>
         } 
       />
@@ -109,7 +127,9 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardShell>
-              <ToolsPage />
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando herramientas...</div>}>
+                <ToolsPage />
+              </Suspense>
             </DashboardShell>
           </ProtectedRoute>
         }
@@ -122,7 +142,9 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardShell>
-              <QRCreatorPage />
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando generador QR...</div>}>
+                <QRCreatorPage />
+              </Suspense>
             </DashboardShell>
           </ProtectedRoute>
         }
@@ -135,7 +157,9 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardShell>
-              <TagCreatorPage />
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando creador de etiquetas...</div>}>
+                <TagCreatorPage />
+              </Suspense>
             </DashboardShell>
           </ProtectedRoute>
         }
@@ -144,7 +168,14 @@ function App() {
       
       {/* #route - default */}
       {/* #route - /demo/accordion -- demo pública del acordeón */}
-      <Route path="/demo/accordion" element={<AccordionDemo />} />
+      <Route 
+        path="/demo/accordion" 
+        element={
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Cargando demo...</div>}>
+            <AccordionDemo />
+          </Suspense>
+        } 
+      />
       {/* #end-route */}
 
       <Route path="*" element={<Navigate to="/" />} />

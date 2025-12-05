@@ -302,9 +302,8 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
 
     try {
       await reorderCategories(updates);
-      console.log('✅ Categorías reordenadas exitosamente');
     } catch (error) {
-      console.error('❌ Error reordering categories:', error);
+      console.error('Error reordering categories:', error);
       alert('Error al reordenar. Se revertirán los cambios.');
       loadCategories(true);
     }
