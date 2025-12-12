@@ -8,6 +8,7 @@ import { useAutoLogin } from "./hooks/useAutoLogin";
 import MainPage from "./pages/public/MainPage/MainPage";
 import MenuPage from "./pages/public/MenuPage/MenuPage";
 import ProductDetailPage from "./pages/public/ProductDetailPage/ProductDetailPage";
+import InvitationRegisterPage from "./pages/InvitationRegisterPage/InvitationRegisterPage";
 // #end-subsection
 
 // #subsection Protected components - carga inmediata
@@ -24,6 +25,7 @@ const ToolsPage = lazy(() => import("./pages/dashboard/Tools/ToolsPage"));
 const QRCreatorPage = lazy(() => import("./pages/dashboard/Tools/QRCreatorPage"));
 const TagCreatorPage = lazy(() => import("./pages/dashboard/Tools/TagCreatorPage"));
 const AccordionDemo = lazy(() => import("./components/_demos/AccordionDemo").then(m => ({ default: m.AccordionDemo })));
+const EmployeeDashboardPage = lazy(() => import("./pages/EmployeeDashboardPage/EmployeeDashboardPage"));
 // #end-subsection
 // #end-section
 
@@ -53,6 +55,23 @@ function App() {
     <Routes>
       {/* #route - public -- <MainPage /> */}
       <Route path="/" element={<MainPage />} />
+      {/* #end-route */}
+      
+      {/* #route - /register -- <InvitationRegisterPage /> [REGISTRO POR INVITACIÓN] */}
+      <Route path="/register" element={<InvitationRegisterPage />} />
+      {/* #end-route */}
+      
+      {/* #route - /employee/dashboard -- <EmployeeDashboardPage /> [DASHBOARD TEMPORAL DE EMPLEADO] */}
+      <Route 
+        path="/employee/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Cargando...</div>}>
+              <EmployeeDashboardPage />
+            </Suspense>
+          </ProtectedRoute>
+        } 
+      />
       {/* #end-route */}
       
       {/* #route - /branch/:branchId/table/:tableNumber -- <MenuPage /> [RUTA PÚBLICA DEL MENÚ] */}

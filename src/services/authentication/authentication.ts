@@ -17,6 +17,24 @@ export const registerUser = async (registerUserData: RegisterUserData): Promise<
   return httpClient.post('/auth/register', registerUserData);
 };
 // #end-function
+// #function registerUserWithInvitation
+/**
+ * Registra un nuevo usuario en el sistema usando un token de invitación.
+ * El usuario será creado como employee asignado a una sucursal.
+ *
+ * @async
+ * @param {RegisterUserData} registerUserData - Datos del usuario a registrar.
+ * @param {string} invitationToken - Token de invitación válido.
+ * @returns {Promise<UserResponse>} Datos del usuario registrado como employee.
+ * @throws {Error} Si la solicitud al backend falla o el token es inválido.
+ */
+export const registerUserWithInvitation = async (
+  registerUserData: RegisterUserData, 
+  invitationToken: string
+): Promise<UserResponse> => {
+  return httpClient.post(`/auth/register/invitation?token=${invitationToken}`, registerUserData);
+};
+// #end-function
 // #function loginUser
 /**
  * Inicia sesión de un usuario en el sistema.

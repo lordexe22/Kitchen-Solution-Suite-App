@@ -1,7 +1,7 @@
 // src/services/invitations/invitations.services.ts
 
 import { httpClient } from '../../api/httpClient.instance';
-import type { InvitationResponse } from '../../components/InvitationGenerator/InvitationGenerator.types';
+import type { InvitationResponse, InvitationValidationPayload } from './invitations.types';
 
 // #section API Types
 /**
@@ -72,10 +72,28 @@ export const getInvitationsByCompany = async (
  * @returns Promise con datos de la invitación si es válida
  * @throws Error si el token es inválido, expirado o ya usado
  */
-export const validateInvitationToken = async (token: string): Promise<InvitationResponse> => {
-  const response = await httpClient.get<InvitationResponse>(
-    `/invitations/validate?token=${token}`
-  );
-  return response;
+export const validateInvitationToken = async (token: string): Promise<InvitationValidationPayload> => {
+  const url = `/invitations/validate?token=${token}`;
+  console.log('[invitations.services] GET', url, '| token:', token.substring(0, 8) + '...');
+
+  try {
+    const response = await httpClient.get<InvitationValidationPayload>(url);
+    console.log('[invitations.services] ✓ respuesta validate', {
+      valid: response?.valid,
+      companyName: response?.companyName,
+      branchName: response?.branchName,
+      expiresAt: response?.expiresAt,
+      message: response?.message,
+      error: response?.error
+    });
+    return response;
+  } catch (error) {
+    const status = (error as { status?: number }).status;
+    console.error('[invitations.services] ✗ error validate', {
+      status,
+      message: (error as { message?: string }).message
+    });
+    throw error;
+  }
 };
 // #end-function

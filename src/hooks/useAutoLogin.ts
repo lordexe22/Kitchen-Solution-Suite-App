@@ -32,6 +32,17 @@ export const useAutoLogin = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      // Evitar auto-login en páginas públicas de invitación
+      const isInvitationContext = (
+        location.pathname.toLowerCase().includes('invitation') ||
+        location.search.toLowerCase().includes('invitation=')
+      );
+
+      if (isInvitationContext) {
+        setIsCheckingAuth(false);
+        return; // No intentar auto-login aquí para evitar ruido (401 esperado)
+      }
+
       try {
         const response = await autoLoginByToken() as UserResponse;
 

@@ -2,6 +2,7 @@
 
 // #section Imports
 import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './httpClient.types';
+import { AuthenticationError } from './httpClient.errors';
 // #end-section
 
 // #function createAuthInterceptor
@@ -93,6 +94,16 @@ export const createErrorLogInterceptor = (
   logger: (message: string) => void = console.error
 ): ErrorInterceptor => {
   return (error) => {
+    // Silenciar errores de autenticación (401) que son esperados en flujos públicos
+    const isAuth401 = (
+      error instanceof AuthenticationError ||
+      ('status' in error && typeof (error as { status: unknown }).status === 'number' && (error as { status: number }).status === 401)
+    );
+
+    if (isAuth401) {
+      return; // no loguear 401 para evitar ruido (p.ej., auto-login fallido sin sesión)
+    }
+
     logger(`❌ Error: ${error.message}`);
     throw error;
   };
