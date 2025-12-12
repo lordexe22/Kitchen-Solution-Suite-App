@@ -26,6 +26,7 @@ const AppHeader = (props: AppHeaderProps) => {
 
   // #state user (Zustand store)
   const user = useUserDataStore();
+  const userType = useUserDataStore(s => s.type);
   // #end-state
 
   // #state showRegisterModal, showLoginModal, showSettingsModal, isLoggingOut
@@ -139,24 +140,30 @@ const AppHeader = (props: AppHeaderProps) => {
                           {APP_HEADER_TEXTS.profileMenu}
                         </button>
                       </li>
-                      <li>
-                        <button
-                          onClick={() => handleItemClick(() => console.log('Mis compañías'))}
-                          className={styles['dropdown-item']}
-                        >
-                          <span className={styles['icon']}>🏢</span>
-                          Mis compañías
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          onClick={() => handleItemClick(() => setShowSettingsModal(true))}
-                          className={styles['dropdown-item']}
-                        >
-                          <span className={styles['icon']}>⚙️</span>
-                          {APP_HEADER_TEXTS.settingsMenu}
-                        </button>
-                      </li>
+                      {/* Mis compañías: solo para admin */}
+                      {userType === 'admin' && (
+                        <li>
+                          <button
+                            onClick={() => handleItemClick(() => console.log('Mis compañías'))}
+                            className={styles['dropdown-item']}
+                          >
+                            <span className={styles['icon']}>🏢</span>
+                            Mis compañías
+                          </button>
+                        </li>
+                      )}
+                      {/* Configuración: solo para admin */}
+                      {userType === 'admin' && (
+                        <li>
+                          <button
+                            onClick={() => handleItemClick(() => setShowSettingsModal(true))}
+                            className={styles['dropdown-item']}
+                          >
+                            <span className={styles['icon']}>⚙️</span>
+                            {APP_HEADER_TEXTS.settingsMenu}
+                          </button>
+                        </li>
+                      )}
                       <li className={styles['dropdown-divider']}></li>
                       <li>
                         <button

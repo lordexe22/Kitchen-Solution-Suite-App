@@ -154,8 +154,8 @@ const InvitationRegisterPage = () => {
       setIsAuthenticated(true);
       // #end-step
 
-      // #step 2 - Redirigir al dashboard de empleado
-      navigate('/employee/dashboard');
+      // #step 2 - Redirigir al dashboard normal (el navbar filtra por tipo)
+      navigate('/dashboard');
       // #end-step
     } catch (error: unknown) {
       console.error('[InvitationRegisterPage] Error al registrar:', error);

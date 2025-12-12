@@ -2,21 +2,39 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from './DashboardNavbar.config';
 import styles from './DashboardNavbar.module.css';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { NavItem } from './DashboardNavbar.types';
+import { useUserDataStore } from '../../store/UserData.store';
 
 /**
  * Componente de barra de navegación lateral del Dashboard
+ * 
+ * Lógica de visibilidad:
+ * - Admin: ve todos los items
+ * - Employee: no ve items del navbar (permisos se implementarán después)
  */
 const DashboardNavbar = () => {
   const location = useLocation();
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
+  const userType = useUserDataStore(s => s.type);
+
+  // #function filterNavItems - filtrar items según tipo de usuario
+  const visibleItems = useMemo(() => {
+    // Admin: acceso completo a todos los items
+    if (userType === 'admin') {
+      return NAV_ITEMS;
+    }
+    // Employee: solo ve Inicio (sin permisos adicionales aún)
+    // (cuando se implementen permisos, aquí se filtrará por permissions)
+    return NAV_ITEMS.filter(item => item.id === 'welcome');
+  }, [userType]);
+  // #end-function
 
   const toggle = (id: string) => setOpenIds((s) => ({ ...s, [id]: !s[id] }));
 
   return (
     <nav className={styles.navbar}>
-      {NAV_ITEMS.map((item: NavItem) => {
+      {visibleItems.map((item: NavItem) => {
         // Render parent items that have children as an accordion
         if (item.children && item.children.length > 0) {
           const children = item.children as NavItem[];
