@@ -3,6 +3,7 @@ import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import { InvitationGenerator } from '../../../components/InvitationGenerator';
 import type { InvitationResponse } from '../../../components/InvitationGenerator';
+import EmployeeListByCompany from '../../../components/EmployeeListByCompany';
 import styles from './EmployeesPage.module.css';
 
 // #component EmployeesPage - página de gestión de empleados
@@ -44,9 +45,12 @@ const EmployeesPage = () => {
           <InvitationGenerator onInvitationGenerated={handleInvitationGenerated} />
           {/* #end-section */}
 
-          {/* TODO: Agregar lista de invitaciones generadas */}
-          {/* TODO: Agregar lista de empleados con filtros */}
-          {/* TODO: Agregar editor de permisos de empleados */}
+          {/* #section Employee list */}
+          <section className={styles.employeeListSection}>
+            <h2 className={styles.sectionTitle}>Gestionar Empleados</h2>
+            <EmployeeListByCompany />
+          </section>
+          {/* #end-section */}
         </main>
       </div>
     </div>

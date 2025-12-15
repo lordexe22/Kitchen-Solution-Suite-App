@@ -24,6 +24,9 @@
   padding: 2rem;
   overflow-y: auto;
   background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 /* #end-style */
 
@@ -33,5 +36,22 @@
   font-weight: 700;
   color: #111827;
   margin: 0;
+}
+/* #end-style */
+
+/* #style .sectionTitle - Título de sección */
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+/* #end-style */
+
+/* #style .employeeListSection - Sección de lista de empleados */
+.employeeListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 /* #end-style */

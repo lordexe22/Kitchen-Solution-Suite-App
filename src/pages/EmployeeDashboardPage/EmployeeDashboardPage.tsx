@@ -1,5 +1,4 @@
 /* src/pages/EmployeeDashboardPage/EmployeeDashboardPage.tsx */
-
 // #section Imports
 import { useUserDataStore } from '../../store/UserData.store';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +6,6 @@ import { logoutUser } from '../../services/authentication/authentication';
 import styles from './EmployeeDashboardPage.module.css';
 import '/src/styles/button.css';
 // #end-section
-
 // #component EmployeeDashboardPage
 /**
  * Página temporal de dashboard para empleados.
