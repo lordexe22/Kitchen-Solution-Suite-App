@@ -1,5 +1,6 @@
 /* src\services\authentication\authentication.types.ts */
 /* src\services\authentication\authentication.types.ts */
+import type { EmployeePermissions } from '../../config/permissions.config';
 // #type RegisterUserData
 /**
  * Representa los datos necesarios para registrar un usuario.
@@ -69,11 +70,15 @@ export type UserLoginData =
  */
 export interface UserResponse {
   user: {
+    id: number;
     firstName: string;
     lastName: string;
     email: string;
     imageUrl: string | null;
     type: string;
+    branchId: number | null;
+    companyId: number | null;
+    permissions: EmployeePermissions | null;
     state: string;
   };
 }

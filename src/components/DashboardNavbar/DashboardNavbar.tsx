@@ -5,6 +5,14 @@ import styles from './DashboardNavbar.module.css';
 import { useState, useMemo } from 'react';
 import type { NavItem } from './DashboardNavbar.types';
 import { useUserDataStore } from '../../store/UserData.store';
+import { hasPermission } from '../../config/permissions.config';
+
+const EMPLOYEE_NAV_PERMISSIONS: Partial<Record<string, { module: 'products' | 'schedules' | 'socials'; }>> = {
+  products: { module: 'products' },
+  schedules: { module: 'schedules' },
+  socials: { module: 'socials' },
+};
+const EMPLOYEE_ALWAYS_VISIBLE = new Set(['welcome']);
 
 /**
  * Componente de barra de navegación lateral del Dashboard
@@ -17,6 +25,7 @@ const DashboardNavbar = () => {
   const location = useLocation();
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
   const userType = useUserDataStore(s => s.type);
+  const permissions = useUserDataStore(s => s.permissions);
 
   // #function filterNavItems - filtrar items según tipo de usuario
   const visibleItems = useMemo(() => {
@@ -24,10 +33,27 @@ const DashboardNavbar = () => {
     if (userType === 'admin') {
       return NAV_ITEMS;
     }
-    // Employee: solo ve Inicio (sin permisos adicionales aún)
-    // (cuando se implementen permisos, aquí se filtrará por permissions)
-    return NAV_ITEMS.filter(item => item.id === 'welcome');
-  }, [userType]);
+
+    if (userType === 'employee') {
+      return NAV_ITEMS
+        .map((item) => {
+          // No exponer items de admin (employees, companies, tools, location)
+          const permissionRequirement = EMPLOYEE_NAV_PERMISSIONS[item.id];
+
+          if (EMPLOYEE_ALWAYS_VISIBLE.has(item.id)) return item;
+          if (!permissionRequirement) return null;
+
+          const { module } = permissionRequirement;
+          const canView = hasPermission(permissions, module, 'canView');
+          const canEdit = hasPermission(permissions, module, 'canEdit');
+          const allowed = canView || canEdit;
+          return allowed ? item : null;
+        })
+        .filter(Boolean) as NavItem[];
+    }
+
+    return [];
+  }, [permissions, userType]);
   // #end-function
 
   const toggle = (id: string) => setOpenIds((s) => ({ ...s, [id]: !s[id] }));

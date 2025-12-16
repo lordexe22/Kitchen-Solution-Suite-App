@@ -129,11 +129,15 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       const response = await loginUser(loginData);
       
       // Actualizar el store con los datos del usuario
+      useUserDataStore.getState().setId(response.user.id);
       useUserDataStore.getState().setFirstName(response.user.firstName);
       useUserDataStore.getState().setLastName(response.user.lastName);
       useUserDataStore.getState().setEmail(response.user.email);
       useUserDataStore.getState().setImageUrl(response.user.imageUrl);
       useUserDataStore.getState().setType(response.user.type);
+      useUserDataStore.getState().setBranchId(response.user.branchId ?? null);
+      useUserDataStore.getState().setCompanyId(response.user.companyId ?? null);
+      useUserDataStore.getState().setPermissions(response.user.permissions ?? null);
       useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
@@ -186,11 +190,15 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       const response = await loginUser(loginData);
       
       // Actualizar el store con los datos del usuario
+      useUserDataStore.getState().setId(response.user.id);
       useUserDataStore.getState().setFirstName(response.user.firstName);
       useUserDataStore.getState().setLastName(response.user.lastName);
       useUserDataStore.getState().setEmail(response.user.email);
       useUserDataStore.getState().setImageUrl(response.user.imageUrl);
       useUserDataStore.getState().setType(response.user.type);
+      useUserDataStore.getState().setBranchId(response.user.branchId ?? null);
+      useUserDataStore.getState().setCompanyId(response.user.companyId ?? null);
+      useUserDataStore.getState().setPermissions(response.user.permissions ?? null);
       useUserDataStore.getState().setState(response.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       

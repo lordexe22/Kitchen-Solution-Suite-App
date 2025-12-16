@@ -12,8 +12,6 @@ export const EMPLOYEE_PERMISSION_MODULES = {
   CATEGORIES: 'categories',
   SCHEDULES: 'schedules',
   SOCIALS: 'socials',
-  LOCATION: 'location',
-  BRANCH_INFO: 'branchInfo',
 } as const;
 // #end-const
 
@@ -22,11 +20,9 @@ export const EMPLOYEE_PERMISSION_MODULES = {
  * Acciones posibles sobre cada módulo.
  * 
  * - canView: Permiso de lectura/visualización
- * - canCreate: Permiso para crear nuevos recursos
- * - canEdit: Permiso para modificar recursos existentes
- * - canDelete: Permiso para eliminar recursos
+ * - canEdit: Permiso para modificar, crear y eliminar recursos
  */
-export type PermissionAction = 'canView' | 'canCreate' | 'canEdit' | 'canDelete';
+export type PermissionAction = 'canView' | 'canEdit';
 // #end-type
 
 // #interface ModulePermissions
@@ -36,9 +32,7 @@ export type PermissionAction = 'canView' | 'canCreate' | 'canEdit' | 'canDelete'
  */
 export interface ModulePermissions {
   canView?: boolean;
-  canCreate?: boolean;
   canEdit?: boolean;
-  canDelete?: boolean;
 }
 // #end-interface
 
@@ -54,8 +48,6 @@ export interface EmployeePermissions {
   categories?: ModulePermissions;
   schedules?: ModulePermissions;
   socials?: ModulePermissions;
-  location?: Omit<ModulePermissions, 'canCreate' | 'canDelete'>; // Solo view y edit
-  branchInfo?: Omit<ModulePermissions, 'canCreate' | 'canDelete'>; // Solo view y edit
 }
 // #end-interface
 
@@ -63,42 +55,30 @@ export interface EmployeePermissions {
 /**
  * Permisos por defecto para un empleado nuevo.
  * 
- * Configuración conservadora:
- * - Solo lectura en productos, categorías e información de sucursal
- * - Sin acceso a horarios, redes sociales ni ubicación
+ * Configuración conservadora (zero-trust):
+ * - Sin permisos por defecto en ningún módulo
+ * - El administrador debe otorgar permisos explícitamente
  */
 export const DEFAULT_EMPLOYEE_PERMISSIONS: EmployeePermissions = {
   products: { 
-    canView: true, 
-    canCreate: false, 
+    canView: false, 
     canEdit: false, 
     canDelete: false 
   },
   categories: { 
-    canView: true, 
-    canCreate: false, 
+    canView: false, 
     canEdit: false, 
     canDelete: false 
   },
   schedules: { 
     canView: false, 
-    canCreate: false, 
     canEdit: false, 
     canDelete: false 
   },
   socials: { 
     canView: false, 
-    canCreate: false, 
     canEdit: false, 
     canDelete: false 
-  },
-  location: { 
-    canView: false, 
-    canEdit: false 
-  },
-  branchInfo: { 
-    canView: true, 
-    canEdit: false 
   },
 };
 // #end-const
@@ -106,6 +86,10 @@ export const DEFAULT_EMPLOYEE_PERMISSIONS: EmployeePermissions = {
 // #function hasPermission
 /**
  * Verifica si un conjunto de permisos incluye una acción específica en un módulo.
+ * 
+ * Lógica importante:
+ * - canEdit implica automáticamente canView (si puedes editar, puedes ver)
+ * - canView solo permite lectura
  * 
  * @param permissions - Objeto de permisos del empleado
  * @param module - Módulo a verificar
@@ -123,6 +107,11 @@ export function hasPermission(
   if (!modulePermissions) return false;
   
   if (!(action in modulePermissions)) return false;
+  
+  // Si solicita canView y tiene canEdit, permitir (canEdit implica canView)
+  if (action === 'canView' && modulePermissions['canEdit'] === true) {
+    return true;
+  }
   
   return modulePermissions[action as keyof typeof modulePermissions] === true;
 }

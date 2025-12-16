@@ -2,30 +2,24 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { autoLoginByToken } from '../services/authentication/authentication';
+import type { UserResponse } from '../services/authentication/authentication.types';
 import { useUserDataStore } from '../store/UserData.store';
 import { useTagsStore } from '../store/Tags.store';
-
-interface UserResponse {
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    imageUrl: string | null;
-    type: string;
-    state: string;
-  };
-}
 
 export const useAutoLogin = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
+  const setId = useUserDataStore(state => state.setId);
   const setFirstName = useUserDataStore(state => state.setFirstName);
   const setLastName = useUserDataStore(state => state.setLastName);
   const setEmail = useUserDataStore(state => state.setEmail);
   const setImageUrl = useUserDataStore(state => state.setImageUrl);
   const setType = useUserDataStore(state => state.setType);
+  const setBranchId = useUserDataStore(state => state.setBranchId);
+  const setCompanyId = useUserDataStore(state => state.setCompanyId);
+  const setPermissions = useUserDataStore(state => state.setPermissions);
   const setState = useUserDataStore(state => state.setState);
   const setIsAuthenticated = useUserDataStore(state => state.setIsAuthenticated);
   const loadUserTags = useTagsStore(state => state.loadUserTags);
@@ -46,11 +40,15 @@ export const useAutoLogin = () => {
       try {
         const response = await autoLoginByToken() as UserResponse;
 
+        setId(response.user.id);
         setFirstName(response.user.firstName);
         setLastName(response.user.lastName);
         setEmail(response.user.email);
         setImageUrl(response.user.imageUrl);
         setType(response.user.type);
+        setBranchId(response.user.branchId ?? null);
+        setCompanyId(response.user.companyId ?? null);
+        setPermissions(response.user.permissions ?? null);
         setState(response.user.state);
         setIsAuthenticated(true);
 
@@ -69,11 +67,15 @@ export const useAutoLogin = () => {
 
     checkAuth();
   }, [
+    setId,
     setFirstName,
     setLastName,
     setEmail,
     setImageUrl,
     setType,
+    setBranchId,
+    setCompanyId,
+    setPermissions,
     setState,
     setIsAuthenticated,
     loadUserTags,
