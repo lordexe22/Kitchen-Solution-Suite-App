@@ -13,9 +13,10 @@ import styles from './DraggableCategory.module.css';
 // #interface DraggableCategoryProps
 interface DraggableCategoryProps {
   category: CategoryWithParsedGradient;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   children?: ReactNode; // Contenido expandible (productos)
+  isDraggable?: boolean; // Si el elemento puede ser arrastrado
 }
 // #end-interface
 
@@ -29,7 +30,8 @@ export default function DraggableCategory({
   category,
   onEdit,
   onDelete,
-  children
+  children,
+  isDraggable = true
 }: DraggableCategoryProps) {
   // #state [isExpanded, setIsExpanded]
   const [isExpanded, setIsExpanded] = useState(false);
@@ -115,13 +117,15 @@ export default function DraggableCategory({
       className={`${styles.categoryCard} ${isDragging ? styles.dragging : ''}`}
     >
       {/* Drag Handle */}
-      <div
-        className={styles.dragHandle}
-        {...attributes}
-        {...listeners}
-      >
-        <span className={styles.dragIcon}>⋮⋮</span>
-      </div>
+      {isDraggable && (
+        <div
+          className={styles.dragHandle}
+          {...attributes}
+          {...listeners}
+        >
+          <span className={styles.dragIcon}>⋮⋮</span>
+        </div>
+      )}
 
       {/* Category Header */}
       <div className={styles.categoryWrapper}>
@@ -172,26 +176,30 @@ export default function DraggableCategory({
             >
               {isExporting ? '⏳' : '📤'}
             </button>
-            <button
-              className={styles.actionBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              title="Editar"
-            >
-              ✏️
-            </button>
-            <button
-              className={styles.actionBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              title="Eliminar"
-            >
-              🗑️
-            </button>
+            {onEdit && (
+              <button
+                className={styles.actionBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                title="Editar"
+              >
+                ✏️
+              </button>
+            )}
+            {onDelete && (
+              <button
+                className={styles.actionBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                title="Eliminar"
+              >
+                🗑️
+              </button>
+            )}
           </div>
         </div>
 

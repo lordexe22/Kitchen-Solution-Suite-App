@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { BranchWithLocation, BranchSchedule, DayOfWeek } from '../../store/Branches.types';
 import { DAYS_OF_WEEK } from '../../store/Branches.types';
 import ScheduleDayEditor from '../ScheduleDayEditor/ScheduleDayEditor';
+import { useModulePermissions } from '../../hooks/useModulePermissions';
 import styles from './ScheduleRow.module.css';
 import '/src/styles/button.css';
 // #end-section
@@ -40,7 +41,7 @@ interface ScheduleRowProps {
 // #component ScheduleRow
 /**
  * Componente que muestra una tabla con los horarios de una sucursal.
- * Permite editar cada día individualmente.
+ * Permite editar cada día individualmente (solo si el usuario tiene permisos de edición).
  */
 const ScheduleRow = ({ 
   branch, 
@@ -52,6 +53,10 @@ const ScheduleRow = ({
   isLoading 
 }: ScheduleRowProps) => {
   const [editingDay, setEditingDay] = useState<DayOfWeek | null>(null);
+  
+  // #hook useModulePermissions - verificar permisos del usuario
+  const { canEdit } = useModulePermissions('schedules');
+  // #end-hook
 
   // #function getScheduleForDay
   /**
@@ -77,9 +82,12 @@ const ScheduleRow = ({
   // #function handleCellClick
   /**
    * Maneja el click en una celda de día.
+   * Solo permite editar si el usuario tiene permisos de edición.
    */
   const handleCellClick = (day: DayOfWeek) => {
-    setEditingDay(day);
+    if (canEdit) {
+      setEditingDay(day);
+    }
   };
   // #end-function
 
@@ -201,9 +209,10 @@ const ScheduleRow = ({
             return (
               <div
                 key={day.value}
-                className={`${styles.dayCell} ${isClosed ? styles.dayClosed : styles.dayOpen}`}
+                className={`${styles.dayCell} ${isClosed ? styles.dayClosed : styles.dayOpen} ${!canEdit ? styles.readOnly : ''}`}
                 onClick={() => !isLoading && handleCellClick(day.value)}
-                title={`Click para editar ${day.label}`}
+                title={canEdit ? `Click para editar ${day.label}` : formatSchedule(schedule)}
+                style={{ cursor: canEdit ? 'pointer' : 'default' }}
               >
                 {formatSchedule(schedule)}
               </div>
@@ -215,27 +224,29 @@ const ScheduleRow = ({
       {/* #end-section */}
 
       {/* #section Footer with copy/paste buttons */}
-      <div className={styles.footer}>
-        <button
-          className="btn-sec btn-sm"
-          onClick={handleCopyConfig}
-          disabled={isLoading || schedules.length === 0}
-          title="Copiar configuración de esta sucursal"
-        >
-          📋 Copiar configuración
-        </button>
-        
-        {copiedConfig && copiedConfig.schedules.length > 0 && copiedConfig.companyId === companyId && (
+      {canEdit && (
+        <div className={styles.footer}>
           <button
-            className="btn-pri btn-sm"
-            onClick={handlePasteConfig}
-            disabled={isLoading}
-            title="Pegar configuración copiada"
+            className="btn-sec btn-sm"
+            onClick={handleCopyConfig}
+            disabled={isLoading || schedules.length === 0}
+            title="Copiar configuración de esta sucursal"
           >
-            📥 Pegar configuración ({copiedConfig.schedules.length})
+            📋 Copiar configuración
           </button>
-        )}
-      </div>
+          
+          {copiedConfig && copiedConfig.schedules.length > 0 && copiedConfig.companyId === companyId && (
+            <button
+              className="btn-pri btn-sm"
+              onClick={handlePasteConfig}
+              disabled={isLoading}
+              title="Pegar configuración copiada"
+            >
+              📥 Pegar configuración ({copiedConfig.schedules.length})
+            </button>
+          )}
+        </div>
+      )}
       {/* #end-section */}
 
       {/* Editor de día */}

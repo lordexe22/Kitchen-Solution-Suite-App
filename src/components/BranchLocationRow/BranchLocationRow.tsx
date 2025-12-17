@@ -1,6 +1,7 @@
 /* src/components/BranchLocationRow/BranchLocationRow.tsx */
 import { useState, useEffect } from 'react';
 import type { BranchWithLocation, BranchLocationFormData } from '../../store/Branches.types';
+import { useModulePermissions } from '../../hooks/useModulePermissions';
 import styles from './BranchLocationRow.module.css';
 import '/src/styles/button.css';
 
@@ -14,6 +15,10 @@ interface Props {
 }
 
 const BranchLocationRow = ({ branch, location, onSaveLocation, onDeleteLocation, isLoading }: Props) => {
+  // #hook useModulePermissions - verificar permisos del usuario
+  const { canEdit } = useModulePermissions('schedules'); // location usa el mismo módulo que schedules
+  // #end-hook
+  
   const [formData, setFormData] = useState<BranchLocationFormData>({
     address: '',
     city: '',
@@ -70,51 +75,53 @@ const BranchLocationRow = ({ branch, location, onSaveLocation, onDeleteLocation,
     <div className={styles.container}>
       <div className={styles.rowTop}>
         <div className={styles.title}>{branch.name}</div>
-        <div className={styles.actions}>
-          <button className="btn-sec btn-sm" onClick={() => { setFormData(location || { address: '', city: '', state: '', country: '', postalCode: '', latitude: '', longitude: '' }); }} disabled={isLoading}>Restaurar</button>
-          <button className="btn-pri btn-sm" onClick={handleSave} disabled={isLoading}>Guardar</button>
-          {location && (
-            <button className="btn-danger btn-sm" onClick={handleDelete} disabled={isLoading}>Eliminar</button>
-          )}
-        </div>
+        {canEdit && (
+          <div className={styles.actions}>
+            <button className="btn-sec btn-sm" onClick={() => { setFormData(location || { address: '', city: '', state: '', country: '', postalCode: '', latitude: '', longitude: '' }); }} disabled={isLoading}>Restaurar</button>
+            <button className="btn-pri btn-sm" onClick={handleSave} disabled={isLoading}>Guardar</button>
+            {location && (
+              <button className="btn-danger btn-sm" onClick={handleDelete} disabled={isLoading}>Eliminar</button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className={styles.fields}>
         <div className={styles.field}>
           <label>Dirección *</label>
-          <input name="address" value={formData.address} onChange={handleChange} />
+          <input name="address" value={formData.address} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
         </div>
 
         <div className={styles.fieldRow}>
           <div className={styles.field}>
             <label>Ciudad *</label>
-            <input name="city" value={formData.city} onChange={handleChange} />
+            <input name="city" value={formData.city} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
           </div>
           <div className={styles.field}>
             <label>Estado/Provincia *</label>
-            <input name="state" value={formData.state} onChange={handleChange} />
+            <input name="state" value={formData.state} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
           </div>
         </div>
 
         <div className={styles.fieldRow}>
           <div className={styles.field}>
             <label>País *</label>
-            <input name="country" value={formData.country} onChange={handleChange} />
+            <input name="country" value={formData.country} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
           </div>
           <div className={styles.field}>
             <label>Código Postal</label>
-            <input name="postalCode" value={formData.postalCode} onChange={handleChange} />
+            <input name="postalCode" value={formData.postalCode} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
           </div>
         </div>
 
         <div className={styles.fieldRow}>
           <div className={styles.field}>
             <label>Latitud</label>
-            <input name="latitude" value={formData.latitude} onChange={handleChange} />
+            <input name="latitude" value={formData.latitude} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
           </div>
           <div className={styles.field}>
             <label>Longitud</label>
-            <input name="longitude" value={formData.longitude} onChange={handleChange} />
+            <input name="longitude" value={formData.longitude} onChange={handleChange} disabled={!canEdit} readOnly={!canEdit} />
           </div>
         </div>
       </div>

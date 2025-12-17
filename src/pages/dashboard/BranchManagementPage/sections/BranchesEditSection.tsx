@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import BranchAccordion from '../../../../components/BranchAccordion/BranchAccordion';
 import BranchNameModal from '../../../../components/BranchNameModal/BranchNameModal';
 import { useBranches } from '../../../../hooks/useBranches';
+import { useModulePermissions } from '../../../../hooks/useModulePermissions';
 import type { BranchWithLocation } from '../../../../store/Branches.types';
 import type { BranchSectionProps } from '../BranchManagementPage.types';
 import styles from '../BranchManagementPage.module.css';
@@ -11,12 +12,16 @@ import styles from '../BranchManagementPage.module.css';
 // #component BranchesEditSection
 /**
  * Componente que maneja la sección de edición de sucursales.
- * Permite crear, renombrar y eliminar sucursales.
+ * Permite crear, renombrar y eliminar sucursales (solo con permisos de edición).
  * Si filterByBranchId está presente, solo muestra esa sucursal (modo employee).
  */
 const BranchesEditSection = ({ companyId, onError = () => {}, filterByBranchId }: BranchSectionProps) => {
   // #hook useBranches
   const { branches, isLoading, loadBranches, createBranch, updateBranchName, deleteBranch } = useBranches(companyId);
+  // #end-hook
+  
+  // #hook useModulePermissions - verificar permisos del usuario
+  const { canEdit } = useModulePermissions('schedules'); // usa el mismo módulo que schedules para gestión de sucursales
   // #end-hook
 
   // #state [showNameModal, setShowNameModal]
@@ -87,9 +92,11 @@ const BranchesEditSection = ({ companyId, onError = () => {}, filterByBranchId }
         {/* #section Header */}
         <div className={styles.branchesHeader}>
           <h4 className={styles.sectionTitle}>Sucursales</h4>
-          <button className="btn-pri btn-sm" onClick={handleCreateBranch} disabled={isLoading}>
-            + Nueva Sucursal
-          </button>
+          {canEdit && (
+            <button className="btn-pri btn-sm" onClick={handleCreateBranch} disabled={isLoading}>
+              + Nueva Sucursal
+            </button>
+          )}
         </div>
         {/* #end-section */}
 
@@ -113,8 +120,8 @@ const BranchesEditSection = ({ companyId, onError = () => {}, filterByBranchId }
                 key={branch.id}
                 branch={branch}
                 displayIndex={index + 1}
-                onEdit={() => handleEditName(branch)}
-                onDelete={() => handleDeleteBranch(branch.id)}
+                onEdit={canEdit ? () => handleEditName(branch) : undefined}
+                onDelete={canEdit ? () => handleDeleteBranch(branch.id) : undefined}
               />
             ))}
           </div>

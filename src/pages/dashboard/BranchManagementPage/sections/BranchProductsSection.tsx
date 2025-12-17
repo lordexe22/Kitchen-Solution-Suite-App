@@ -14,6 +14,7 @@ import { calculateProductPrice } from '../../../../store/Products.types';
 import { useBranches } from '../../../../hooks/useBranches';
 import { useCategories } from '../../../../hooks/useCategories';
 import { useProducts } from '../../../../hooks/useProducts';
+import { useModulePermissions } from '../../../../hooks/useModulePermissions';
 import { uploadProductImages, deleteProductImage } from '../../../../services/products/productsImages.service';
 import { uploadCategoryImage } from '../../../../services/categories/categoryImage.service';
 import { importCategory } from '../../../../services/categories/categories.service';
@@ -94,6 +95,10 @@ export default BranchProductsSection;
  * Contenedor de productos y categorías de una sucursal.
  */
 function BranchProductsContainer({ branchId }: { branchId: number }) {
+  // #hook useModulePermissions - verificar permisos del usuario
+  const { canEdit } = useModulePermissions('products');
+  // #end-hook
+  
   const [categories, setCategories] = useState<CategoryWithParsedGradient[]>([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<{
@@ -324,47 +329,63 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
   return (
     <div className={styles.categoriesContainer}>
       {/* Botones de acción */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        <button 
-          className="btn-pri btn-sm" 
-          onClick={handleOpenCreateModal} 
-          disabled={isLoading || isImporting}
-        >
-          + Nueva Categoría
-        </button>
+      {canEdit && (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          <button 
+            className="btn-pri btn-sm" 
+            onClick={handleOpenCreateModal} 
+            disabled={isLoading || isImporting}
+          >
+            + Nueva Categoría
+          </button>
 
-        <button 
-          className="btn-sec btn-sm" 
-          onClick={handleClickImport}
-          disabled={isLoading || isImporting}
-        >
-          {isImporting ? '⏳ Importando...' : '📥 Importar Categoría'}
-        </button>
+          <button 
+            className="btn-sec btn-sm" 
+            onClick={handleClickImport}
+            disabled={isLoading || isImporting}
+          >
+            {isImporting ? '⏳ Importando...' : '📥 Importar Categoría'}
+          </button>
 
-        {/* Input file oculto */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xlsx"
-          onChange={handleImportCategory}
-          style={{ display: 'none' }}
-        />
-      </div>
+          {/* Input file oculto */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx"
+            onChange={handleImportCategory}
+            style={{ display: 'none' }}
+          />
+        </div>
+      )}
 
       {isLoading && categories.length === 0 && <p className={styles.loading}>Cargando categorías...</p>}
+      {!isLoading && categories.length === 0 && (
+        <p className={styles.emptyMessage}>
+          {canEdit 
+            ? 'No hay categorías creadas. Crea la primera para comenzar a agregar productos.'
+            : 'No hay categorías disponibles en esta sucursal.'}
+        </p>
+      )}
 
       {categories.length > 0 && (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
+        <DndContext 
+          sensors={canEdit ? sensors : []} 
+          collisionDetection={closestCenter} 
+          onDragStart={canEdit ? handleDragStart : undefined} 
+          onDragEnd={canEdit ? handleDragEnd : undefined} 
+          onDragCancel={canEdit ? handleDragCancel : undefined}
+        >
           <SortableContext items={categories.map((cat) => cat.id)} strategy={verticalListSortingStrategy}>
             <div className={styles.categoriesList}>
               {categories.map((category) => (
                 <DraggableCategory
                   key={category.id}
                   category={category}
-                  onEdit={() => handleOpenEditModal(category, categories.indexOf(category))}
-                  onDelete={() => handleDeleteCategory(category.id)}
+                  onEdit={canEdit ? () => handleOpenEditModal(category, categories.indexOf(category)) : undefined}
+                  onDelete={canEdit ? () => handleDeleteCategory(category.id) : undefined}
+                  isDraggable={canEdit}
                 >
-                  <BranchProductsInCategory categoryId={category.id} />
+                  <BranchProductsInCategory categoryId={category.id} canEdit={canEdit} />
                 </DraggableCategory>
               ))}
             </div>
@@ -399,7 +420,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
 /**
  * Sección de productos de una categoría dentro de la rama.
  */
-function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
+function BranchProductsInCategory({ categoryId, canEdit }: { categoryId: number; canEdit: boolean }) {
   const [products, setProducts] = useState<ProductWithCalculatedPrice[]>([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductWithCalculatedPrice | null>(null);
@@ -600,24 +621,39 @@ function BranchProductsInCategory({ categoryId }: { categoryId: number }) {
 
   return (
     <div className={styles.productsSection}>
-      <button className="btn-pri btn-sm" onClick={handleOpenCreateModal} disabled={isLoading}>
-        + Nuevo Producto
-      </button>
+      {canEdit && (
+        <button className="btn-pri btn-sm" onClick={handleOpenCreateModal} disabled={isLoading}>
+          + Nuevo Producto
+        </button>
+      )}
 
       {isLoading && products.length === 0 && <p className={styles.loading}>Cargando productos...</p>}
-      {!isLoading && products.length === 0 && <p className={styles.emptyMessage}>No hay productos en esta categoría. Crea el primero.</p>}
+      {!isLoading && products.length === 0 && (
+        <p className={styles.emptyMessage}>
+          {canEdit 
+            ? 'No hay productos en esta categoría. Crea el primero.'
+            : 'No hay productos en esta categoría.'}
+        </p>
+      )}
 
       {products.length > 0 && (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
+        <DndContext 
+          sensors={canEdit ? sensors : []} 
+          collisionDetection={closestCenter} 
+          onDragStart={canEdit ? handleDragStart : undefined} 
+          onDragEnd={canEdit ? handleDragEnd : undefined} 
+          onDragCancel={canEdit ? handleDragCancel : undefined}
+        >
           <SortableContext items={products.map((p) => p.id)} strategy={verticalListSortingStrategy}>
             <div className={styles.productsList}>
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onEdit={() => handleOpenEditModal(product)}
-                  onDelete={() => handleDeleteProduct(product.id)}
-                  onClick={() => handleProductClick(product)}
+                  onEdit={canEdit ? () => handleOpenEditModal(product) : undefined}
+                  onDelete={canEdit ? () => handleDeleteProduct(product.id) : undefined}
+                  onClick={canEdit ? () => handleProductClick(product) : undefined}
+                  isDraggable={canEdit}
                 />
               ))}
             </div>

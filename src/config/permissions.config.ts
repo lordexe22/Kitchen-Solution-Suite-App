@@ -64,18 +64,15 @@ export interface EmployeePermissions {
 export const DEFAULT_EMPLOYEE_PERMISSIONS: EmployeePermissions = {
   products: { 
     canView: false, 
-    canEdit: false, 
-    canDelete: false 
+    canEdit: false
   },
   schedules: { 
     canView: false, 
-    canEdit: false, 
-    canDelete: false 
+    canEdit: false
   },
   socials: { 
     canView: false, 
-    canEdit: false, 
-    canDelete: false 
+    canEdit: false
   },
 };
 // #end-const

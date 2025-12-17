@@ -2,6 +2,7 @@
 // #section imports
 import { useState, useEffect } from 'react';
 import type { BranchWithLocation, BranchSocial, SocialPlatform, BranchSocialFormData } from '../../store/Branches.types';
+import { useModulePermissions } from '../../hooks/useModulePermissions';
 import styles from './SocialRow.module.css';
 import '/src/styles/button.css';
 // #end-section
@@ -100,7 +101,7 @@ const PLATFORMS: Array<{
 // #component SocialRow
 /**
  * Componente que muestra una lista de redes sociales editables inline.
- * Permite editar cada red social con validación en tiempo real.
+ * Permite editar cada red social con validación en tiempo real (solo si el usuario tiene permisos de edición).
  */
 const SocialRow = ({ 
   branch,
@@ -114,6 +115,10 @@ const SocialRow = ({
   onCopyConfig,
   isLoading 
 }: SocialRowProps) => {
+  // #hook useModulePermissions - verificar permisos del usuario
+  const { canEdit } = useModulePermissions('socials');
+  // #end-hook
+  
   // #state [editingValues, setEditingValues]
   /**
    * Almacena los valores temporales mientras el usuario edita.
@@ -375,33 +380,36 @@ const SocialRow = ({
                     value={editingValue.value}
                     onChange={(e) => handleInputChange(platform.value, e.target.value)}
                     placeholder={platform.placeholder}
-                    disabled={isLoading || isSaving}
+                    disabled={!canEdit || isLoading || isSaving}
+                    readOnly={!canEdit}
                   />
 
                   {/* #section Action buttons */}
-                  <div className={styles.socialActions}>
-                    {showSaveButton && (
-                      <button
-                        className={`btn-pri btn-sm ${styles.saveButton}`}
-                        onClick={() => handleSave(platform.value)}
-                        disabled={isSaving}
-                        title="Guardar cambios"
-                      >
-                        {isSaving ? '⏳' : '✓'}
-                      </button>
-                    )}
+                  {canEdit && (
+                    <div className={styles.socialActions}>
+                      {showSaveButton && (
+                        <button
+                          className={`btn-pri btn-sm ${styles.saveButton}`}
+                          onClick={() => handleSave(platform.value)}
+                          disabled={isSaving}
+                          title="Guardar cambios"
+                        >
+                          {isSaving ? '⏳' : '✓'}
+                        </button>
+                      )}
 
-                    {showDeleteButton && (
-                      <button
-                        className={`btn-danger btn-sm ${styles.deleteButton}`}
-                        onClick={() => handleDelete(platform.value)}
-                        disabled={isLoading}
-                        title={`Eliminar ${platform.label}`}
-                      >
-                        🗑️
-                      </button>
-                    )}
-                  </div>
+                      {showDeleteButton && (
+                        <button
+                          className={`btn-danger btn-sm ${styles.deleteButton}`}
+                          onClick={() => handleDelete(platform.value)}
+                          disabled={isLoading}
+                          title={`Eliminar ${platform.label}`}
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  )}
                   {/* #end-section */}
                 </div>
 
@@ -421,27 +429,29 @@ const SocialRow = ({
       {/* #end-section */}
 
       {/* #section Footer with copy/paste buttons */}
-      <div className={styles.footer}>
-        <button
-          className="btn-sec btn-sm"
-          onClick={handleCopyConfig}
-          disabled={isLoading || socials.length === 0}
-          title="Copiar configuración de esta sucursal"
-        >
-          📋 Copiar configuración
-        </button>
-        
-        {copiedConfig && copiedConfig.socials.length > 0 && copiedConfig.companyId === companyId && (
+      {canEdit && (
+        <div className={styles.footer}>
           <button
-            className="btn-pri btn-sm"
-            onClick={handlePasteConfig}
-            disabled={isLoading}
-            title="Pegar configuración copiada"
+            className="btn-sec btn-sm"
+            onClick={handleCopyConfig}
+            disabled={isLoading || socials.length === 0}
+            title="Copiar configuración de esta sucursal"
           >
-            📥 Pegar configuración ({copiedConfig.socials.length})
+            📋 Copiar configuración
           </button>
-        )}
-      </div>
+          
+          {copiedConfig && copiedConfig.socials.length > 0 && copiedConfig.companyId === companyId && (
+            <button
+              className="btn-pri btn-sm"
+              onClick={handlePasteConfig}
+              disabled={isLoading}
+              title="Pegar configuración copiada"
+            >
+              📥 Pegar configuración ({copiedConfig.socials.length})
+            </button>
+          )}
+        </div>
+      )}
       {/* #end-section */}
     </div>
   );

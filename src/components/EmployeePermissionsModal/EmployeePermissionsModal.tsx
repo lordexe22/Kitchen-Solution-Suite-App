@@ -89,15 +89,46 @@ const EmployeePermissionsModal = ({ employee, onClose, onUpdate }: EmployeePermi
   // #function handlePermissionChange
   /**
    * Actualiza un permiso específico para un módulo y acción.
+   * Si se activa canEdit, automáticamente se desactiva canView (editar incluye ver).
+   * Si se activa canView, automáticamente se desactiva canEdit.
    */
   const handlePermissionChange = useCallback((module: keyof EmployeePermissions, action: PermissionAction, value: boolean) => {
-    setPermissions((prev: EmployeePermissions) => ({
-      ...prev,
-      [module]: {
-        ...prev[module],
-        [action]: value
+    setPermissions((prev: EmployeePermissions) => {
+      const currentModule = prev[module] || emptyModulePerms;
+      
+      // Si se activa canEdit, desactivar canView (editar incluye ver)
+      if (action === 'canEdit' && value) {
+        return {
+          ...prev,
+          [module]: {
+            ...currentModule,
+            canEdit: true,
+            canView: false
+          }
+        };
       }
-    }));
+      
+      // Si se activa canView, desactivar canEdit
+      if (action === 'canView' && value) {
+        return {
+          ...prev,
+          [module]: {
+            ...currentModule,
+            canView: true,
+            canEdit: false
+          }
+        };
+      }
+      
+      // Desactivación normal
+      return {
+        ...prev,
+        [module]: {
+          ...currentModule,
+          [action]: value
+        }
+      };
+    });
   }, []);
   // #end-function
 

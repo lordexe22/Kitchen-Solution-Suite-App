@@ -7,16 +7,18 @@ import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
   product: ProductWithCalculatedPrice;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   onClick?: () => void;
+  isDraggable?: boolean;
 }
 
 export default function ProductCard({
   product,
   onEdit,
   onDelete,
-  onClick
+  onClick,
+  isDraggable = true
 }: ProductCardProps) {
   const {
     attributes,
@@ -60,13 +62,15 @@ export default function ProductCard({
         }
       } : undefined}
     >
-      <div
-        className={styles.dragHandle}
-        {...attributes}
-        {...listeners}
-      >
-        <span className={styles.dragIcon}>⋮⋮</span>
-      </div>
+      {isDraggable && (
+        <div
+          className={styles.dragHandle}
+          {...attributes}
+          {...listeners}
+        >
+          <span className={styles.dragIcon}>⋮⋮</span>
+        </div>
+      )}
 
       <div className={styles.productContent}>
         {product.mainImage ? (
@@ -164,26 +168,30 @@ export default function ProductCard({
         </div>
 
         <div className={styles.productActions}>
-          <button
-            className={styles.actionBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            title="Editar producto"
-          >
-            ✏️
-          </button>
-          <button
-            className={styles.actionBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            title="Eliminar producto"
-          >
-            🗑️
-          </button>
+          {onEdit && (
+            <button
+              className={styles.actionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              title="Editar producto"
+            >
+              ✏️
+            </button>
+          )}
+          {onDelete && (
+            <button
+              className={styles.actionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              title="Eliminar producto"
+            >
+              🗑️
+            </button>
+          )}
         </div>
       </div>
     </div>
