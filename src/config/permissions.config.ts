@@ -6,10 +6,11 @@
  * 
  * Cada módulo representa una sección de la sucursal que el empleado
  * podría gestionar según los permisos otorgados por el administrador.
+ * 
+ * NOTA: El módulo 'products' incluye tanto productos como categorías.
  */
 export const EMPLOYEE_PERMISSION_MODULES = {
   PRODUCTS: 'products',
-  CATEGORIES: 'categories',
   SCHEDULES: 'schedules',
   SOCIALS: 'socials',
 } as const;
@@ -42,10 +43,11 @@ export interface ModulePermissions {
  * 
  * Cada módulo puede tener permisos granulares de lectura/escritura.
  * Por defecto, un empleado nuevo no tiene permisos (todo false/undefined).
+ * 
+ * NOTA: El módulo 'products' incluye tanto productos como categorías.
  */
 export interface EmployeePermissions {
   products?: ModulePermissions;
-  categories?: ModulePermissions;
   schedules?: ModulePermissions;
   socials?: ModulePermissions;
 }
@@ -61,11 +63,6 @@ export interface EmployeePermissions {
  */
 export const DEFAULT_EMPLOYEE_PERMISSIONS: EmployeePermissions = {
   products: { 
-    canView: false, 
-    canEdit: false, 
-    canDelete: false 
-  },
-  categories: { 
     canView: false, 
     canEdit: false, 
     canDelete: false 

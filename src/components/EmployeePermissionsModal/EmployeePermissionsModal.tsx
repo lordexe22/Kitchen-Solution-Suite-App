@@ -185,8 +185,7 @@ const EmployeePermissionsModal = ({ employee, onClose, onUpdate }: EmployeePermi
    */
   const getModuleLabel = (module: string): string => {
     const labels: Record<string, string> = {
-      products: 'Productos',
-      categories: 'Categorías',
+      products: 'Productos y Categorías',
       schedules: 'Horarios',
       socials: 'Redes Sociales',
     };
