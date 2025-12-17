@@ -17,6 +17,7 @@ import BranchLocationSection from './sections/BranchLocationSection';
 import BranchesEditSection from './sections/BranchesEditSection';
 import type { BranchSchedule } from '../../../store/Branches.types';
 import type { BranchSocial } from '../../../store/Branches.types';
+import { useUserDataStore } from '../../../store/UserData.store';
 import styles from './BranchManagementPage.module.css';
 
 // #component BranchManagementPage
@@ -49,6 +50,12 @@ const BranchManagementPage = () => {
 
   // #hook useSelectedSection
   const { activeSection, sectionConfig } = useSelectedSection();
+  // #end-hook
+
+  // #hook useUserDataStore - obtener datos del usuario logueado
+  const userType = useUserDataStore((s) => s.type);
+  const userBranchId = useUserDataStore((s) => s.branchId);
+  const userCompanyId = useUserDataStore((s) => s.companyId);
   // #end-hook
 
   // #state [globalError, setGlobalError]
@@ -129,6 +136,7 @@ const BranchManagementPage = () => {
     const commonProps = {
       companyId,
       onError: setGlobalError,
+      filterByBranchId: userType === 'employee' ? userBranchId : undefined,
     };
 
     switch (activeSection) {
@@ -230,16 +238,34 @@ const BranchManagementPage = () => {
             {/* #section Companies list with dynamic section content */}
             {companies.length > 0 && (
               <div className={styles.accordionList}>
-                {companies.map((company) => (
-                  <CompanyAccordion
-                    key={company.id}
-                    company={company}
-                    onEdit={() => handleOpenEditCompanyModal(company)}
-                    onDelete={() => handleDeleteCompany(company.id)}
-                  >
-                    {getSectionComponent(company.id)}
-                  </CompanyAccordion>
-                ))}
+                {userType === 'employee' ? (
+                  // #section Employee view - render solo su compañía sin accordion
+                  userCompanyId && companies.find(c => c.id === userCompanyId) ? (
+                    <div className={styles.employeeView}>
+                      {getSectionComponent(userCompanyId)}
+                    </div>
+                  ) : (
+                    <EmptyState
+                      title="No se encontró tu compañía"
+                      description="No tienes acceso a ninguna compañía"
+                      icon="⚠️"
+                    />
+                  )
+                  // #end-section
+                ) : (
+                  // #section Admin/Owner view - render todas las compañías con accordion
+                  companies.map((company) => (
+                    <CompanyAccordion
+                      key={company.id}
+                      company={company}
+                      onEdit={() => handleOpenEditCompanyModal(company)}
+                      onDelete={() => handleDeleteCompany(company.id)}
+                    >
+                      {getSectionComponent(company.id)}
+                    </CompanyAccordion>
+                  ))
+                  // #end-section
+                )}
               </div>
             )}
             {/* #end-section */}

@@ -36,8 +36,9 @@ import styles from '../BranchManagementPage.module.css';
 // #component BranchProductsSection
 /**
  * Componente que maneja la sección de productos y categorías por sucursal.
+ * Si filterByBranchId está presente, solo muestra esa sucursal (modo employee).
  */
-const BranchProductsSection = ({ companyId }: BranchSectionProps) => {
+const BranchProductsSection = ({ companyId, filterByBranchId }: BranchSectionProps) => {
   // #hook useBranches
   const { branches, isLoading: isLoadingBranches, loadBranches } = useBranches(companyId);
   // #end-hook
@@ -71,7 +72,9 @@ const BranchProductsSection = ({ companyId }: BranchSectionProps) => {
         {/* #section Branch list */}
         {branches.length > 0 && (
           <div className={styles.branchList}>
-            {branches.map((branch, index) => (
+            {branches
+              .filter(branch => !filterByBranchId || branch.id === filterByBranchId)
+              .map((branch, index) => (
               <BranchAccordion key={branch.id} branch={branch} displayIndex={index + 1} expandable={true}>
                 <BranchProductsContainer branchId={branch.id} />
               </BranchAccordion>

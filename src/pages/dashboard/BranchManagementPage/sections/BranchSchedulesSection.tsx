@@ -27,12 +27,14 @@ interface BranchSchedulesSectionProps extends BranchSectionProps {
 /**
  * Componente que maneja la sección de horarios de sucursales.
  * Carga branches, schedules y renderiza BranchAccordion expandibles.
+ * Si filterByBranchId está presente, solo muestra esa sucursal (modo employee).
  */
 const BranchSchedulesSection = ({
   companyId,
   onError = () => {},
   copiedConfig = null,
   onCopyConfig = () => {},
+  filterByBranchId,
 }: BranchSchedulesSectionProps) => {
   // #hook useBranches
   const {
@@ -66,13 +68,18 @@ const BranchSchedulesSection = ({
   // #effect - Load schedules when branches are available
   useEffect(() => {
     if (branches.length > 0 && !isLoadingSchedules) {
-      const needsSchedules = branches.some((branch) => !branchSchedulesMap.has(branch.id));
+      // Filtrar branches si es employee
+      const branchesToLoad = filterByBranchId 
+        ? branches.filter(b => b.id === filterByBranchId)
+        : branches;
+
+      const needsSchedules = branchesToLoad.some((branch) => !branchSchedulesMap.has(branch.id));
 
       if (needsSchedules) {
         setIsLoadingSchedules(true);
 
         Promise.all(
-          branches.map(async (branch) => {
+          branchesToLoad.map(async (branch) => {
             if (!branchSchedulesMap.has(branch.id)) {
               try {
                 const schedules = await loadBranchSchedules(branch.id);
@@ -88,7 +95,7 @@ const BranchSchedulesSection = ({
         });
       }
     }
-  }, [branches, loadBranchSchedules, updateBranchSchedules, isLoadingSchedules, branchSchedulesMap]);
+  }, [branches, loadBranchSchedules, updateBranchSchedules, isLoadingSchedules, branchSchedulesMap, filterByBranchId]);
   // #end-effect
 
   // #event handleUpdateSchedules
@@ -143,7 +150,9 @@ const BranchSchedulesSection = ({
         {/* #section Branch list */}
         {branches.length > 0 && (
           <div className={styles.branchList}>
-            {branches.map((branch, index) => (
+            {branches
+              .filter(branch => !filterByBranchId || branch.id === filterByBranchId)
+              .map((branch, index) => (
               <BranchAccordion
                 key={branch.id}
                 branch={branch}

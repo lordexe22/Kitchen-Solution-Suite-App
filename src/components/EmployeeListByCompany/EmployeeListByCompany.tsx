@@ -9,6 +9,7 @@ import { useCompaniesStore } from '../../store/Companies.store';
 import { useBranchesStore } from '../../store/Branches.store';
 import type { BranchWithSocials } from '../../store/Branches.types';
 import { fetchCompanyBranches } from '../../services/branches/branches.service';
+import { useUserDataStore } from '../../store/UserData.store';
 import CompanyAccordion from '../CompanyAccordion/CompanyAccordion';
 import BranchAccordion from '../BranchAccordion/BranchAccordion';
 import EmployeeRow from '../EmployeeRow';
@@ -49,6 +50,12 @@ const EmployeeListByCompany = ({ filters }: EmployeeListByCompanyProps) => {
   const branchesByCompany = useBranchesStore((state) => state.branchesByCompany);
   const setBranchesForCompany = useBranchesStore((state) => state.setBranchesForCompany);
   const hasBranchesForCompany = useBranchesStore((state) => state.hasBranchesForCompany);
+
+  // #hook useUserDataStore - obtener datos del usuario logueado
+  const userType = useUserDataStore((s) => s.type);
+  const userBranchId = useUserDataStore((s) => s.branchId);
+  const userCompanyId = useUserDataStore((s) => s.companyId);
+  // #end-hook
 
   // #function loadAllData - carga secuencial de compañías, sucursales y empleados
   const loadAllData = useCallback(async () => {
@@ -193,69 +200,130 @@ const EmployeeListByCompany = ({ filters }: EmployeeListByCompanyProps) => {
       {serverError && <ServerErrorBanner message={serverError} onClose={() => setServerError(null)} />}
 
       <div className={styles.listContainer}>
-        {Object.entries(groupedEmployees).map(([companyIdStr, branchesByBranchId]) => {
-          const companyId = Number(companyIdStr);
-          const company = companies.find(c => c.id === companyId);
-          
-          if (!company) return null;
+        {userType === 'employee' ? (
+          // #section Employee view - render solo su sucursal sin CompanyAccordion
+          userBranchId && userCompanyId ? (
+            (() => {
+              const branchEmployees = groupedEmployees[userCompanyId]?.[userBranchId];
+              if (!branchEmployees || branchEmployees.length === 0) {
+                return (
+                  <div className={styles.emptyState}>
+                    <p>No hay empleados en tu sucursal.</p>
+                  </div>
+                );
+              }
 
-          return (
-            <CompanyAccordion
-              key={`company-${companyId}`}
-              company={company}
-            >
-              <div className={styles.branchesContainer}>
-                {Object.entries(branchesByBranchId).map(([branchIdStr, empList]) => {
-                  const branchId = Number(branchIdStr);
-                  const typedEmpList = empList as EmployeeResponse[];
-                  
-                  // Buscar branch en el store
-                  let branchData: BranchWithSocials | null = null;
-                  const companyBranches = branchesByCompany[companyId];
-                  if (companyBranches) {
-                    branchData = companyBranches.find(b => b.id === branchId) ?? null;
-                  }
-                  
-                  // Si no encontramos la rama, usar un objeto fallback
-                  const now = new Date().toISOString();
-                  const branch: BranchWithSocials = branchData || {
-                    id: branchId,
-                    companyId: companyId,
-                    name: `Sucursal ${branchId}`,
-                    createdAt: now,
-                    updatedAt: now,
-                    isActive: true,
-                    deletedAt: null,
-                    location: null,
-                    schedules: [],
-                    socials: []
-                  };
+              const companyBranches = branchesByCompany[userCompanyId];
+              const branchData = companyBranches?.find(b => b.id === userBranchId);
+              
+              const now = new Date().toISOString();
+              const branch: BranchWithSocials = branchData || {
+                id: userBranchId,
+                companyId: userCompanyId,
+                name: `Sucursal ${userBranchId}`,
+                createdAt: now,
+                updatedAt: now,
+                isActive: true,
+                deletedAt: null,
+                location: null,
+                schedules: [],
+                socials: []
+              };
 
-                  return (
-                    <BranchAccordion
-                      key={`branch-${companyId}-${branchId}`}
-                      branch={branch}
-                      displayIndex={branchId}
-                      expandable={true}
-                    >
-                      <div className={styles.employeesListContainer}>
-                        {typedEmpList.map(emp => (
-                          <div
-                            key={emp.id}
-                            onClick={() => setSelectedEmployee(emp)}
-                            className={styles.employeeRowWrapper}
-                          >
-                            <EmployeeRow employee={emp} onClick={() => setSelectedEmployee(emp)} />
-                          </div>
-                        ))}
+              return (
+                <BranchAccordion
+                  key={`branch-${userCompanyId}-${userBranchId}`}
+                  branch={branch}
+                  displayIndex={userBranchId}
+                  expandable={true}
+                >
+                  <div className={styles.employeesListContainer}>
+                    {branchEmployees.map(emp => (
+                      <div
+                        key={emp.id}
+                        onClick={() => setSelectedEmployee(emp)}
+                        className={styles.employeeRowWrapper}
+                      >
+                        <EmployeeRow employee={emp} onClick={() => setSelectedEmployee(emp)} />
                       </div>
-                    </BranchAccordion>
-                  );
-                })}
-              </div>
-            </CompanyAccordion>
-          );
-        })}
+                    ))}
+                  </div>
+                </BranchAccordion>
+              );
+            })()
+          ) : (
+            <div className={styles.emptyState}>
+              <p>No tienes acceso a ninguna sucursal.</p>
+            </div>
+          )
+          // #end-section
+        ) : (
+          // #section Admin/Owner view - render todas las compañías con accordion
+          Object.entries(groupedEmployees).map(([companyIdStr, branchesByBranchId]) => {
+            const companyId = Number(companyIdStr);
+            const company = companies.find(c => c.id === companyId);
+            
+            if (!company) return null;
+
+            return (
+              <CompanyAccordion
+                key={`company-${companyId}`}
+                company={company}
+              >
+                <div className={styles.branchesContainer}>
+                  {Object.entries(branchesByBranchId).map(([branchIdStr, empList]) => {
+                    const branchId = Number(branchIdStr);
+                    const typedEmpList = empList as EmployeeResponse[];
+                    
+                    // Buscar branch en el store
+                    let branchData: BranchWithSocials | null = null;
+                    const companyBranches = branchesByCompany[companyId];
+                    if (companyBranches) {
+                      branchData = companyBranches.find(b => b.id === branchId) ?? null;
+                    }
+                    
+                    // Si no encontramos la rama, usar un objeto fallback
+                    const now = new Date().toISOString();
+                    const branch: BranchWithSocials = branchData || {
+                      id: branchId,
+                      companyId: companyId,
+                      name: `Sucursal ${branchId}`,
+                      createdAt: now,
+                      updatedAt: now,
+                      isActive: true,
+                      deletedAt: null,
+                      location: null,
+                      schedules: [],
+                      socials: []
+                    };
+
+                    return (
+                      <BranchAccordion
+                        key={`branch-${companyId}-${branchId}`}
+                        branch={branch}
+                        displayIndex={branchId}
+                        expandable={true}
+                      >
+                        <div className={styles.employeesListContainer}>
+                          {typedEmpList.map(emp => (
+                            <div
+                              key={emp.id}
+                              onClick={() => setSelectedEmployee(emp)}
+                              className={styles.employeeRowWrapper}
+                            >
+                              <EmployeeRow employee={emp} onClick={() => setSelectedEmployee(emp)} />
+                            </div>
+                          ))}
+                        </div>
+                      </BranchAccordion>
+                    );
+                  })}
+                </div>
+              </CompanyAccordion>
+            );
+          })
+          // #end-section
+        )}
       </div>
 
       {selectedEmployee && (

@@ -12,6 +12,7 @@ export interface BranchSectionProps {
   companyId: number;
   onError?: (error: string) => void;
   onClearError?: () => void;
+  filterByBranchId?: number | null;
 }
 
 /**

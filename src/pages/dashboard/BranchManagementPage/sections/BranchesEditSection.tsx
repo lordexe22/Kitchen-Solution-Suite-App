@@ -12,8 +12,9 @@ import styles from '../BranchManagementPage.module.css';
 /**
  * Componente que maneja la sección de edición de sucursales.
  * Permite crear, renombrar y eliminar sucursales.
+ * Si filterByBranchId está presente, solo muestra esa sucursal (modo employee).
  */
-const BranchesEditSection = ({ companyId, onError = () => {} }: BranchSectionProps) => {
+const BranchesEditSection = ({ companyId, onError = () => {}, filterByBranchId }: BranchSectionProps) => {
   // #hook useBranches
   const { branches, isLoading, loadBranches, createBranch, updateBranchName, deleteBranch } = useBranches(companyId);
   // #end-hook
@@ -105,7 +106,9 @@ const BranchesEditSection = ({ companyId, onError = () => {} }: BranchSectionPro
         {/* #section Branch list */}
         {!isLoading && branches.length > 0 && (
           <div className={styles.branchList}>
-            {branches.map((branch, index) => (
+            {branches
+              .filter(branch => !filterByBranchId || branch.id === filterByBranchId)
+              .map((branch, index) => (
               <BranchAccordion
                 key={branch.id}
                 branch={branch}

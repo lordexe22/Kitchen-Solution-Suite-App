@@ -8,7 +8,7 @@ import type { BranchLocationFormData } from '../../../../store/Branches.types';
 import type { BranchSectionProps } from '../BranchManagementPage.types';
 import styles from '../BranchManagementPage.module.css';
 
-const BranchLocationSection = ({ companyId, onError = () => {} }: BranchSectionProps) => {
+const BranchLocationSection = ({ companyId, onError = () => {}, filterByBranchId }: BranchSectionProps) => {
   const { branches, isLoading, loadBranches, saveLocation, deleteLocation, updateBranchInStore } = useBranches(companyId);
 
   const [branchLocationsMap, setBranchLocationsMap] = useState<Map<number, BranchLocationFormData | null>>(new Map());
@@ -93,7 +93,9 @@ const BranchLocationSection = ({ companyId, onError = () => {} }: BranchSectionP
 
       {branches.length > 0 && (
         <div className={styles.branchList}>
-          {branches.map((branch, index) => (
+          {branches
+            .filter(branch => !filterByBranchId || branch.id === filterByBranchId)
+            .map((branch, index) => (
             <BranchAccordion key={branch.id} branch={branch} displayIndex={index + 1} expandable={true}>
               <BranchLocationRow
                 branch={branch}

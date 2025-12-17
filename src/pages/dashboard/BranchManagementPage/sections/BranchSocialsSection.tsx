@@ -27,12 +27,14 @@ interface BranchSocialsSectionProps extends BranchSectionProps {
 /**
  * Componente que maneja la sección de redes sociales de sucursales.
  * Carga branches, socials y renderiza BranchAccordion expandibles.
+ * Si filterByBranchId está presente, solo muestra esa sucursal (modo employee).
  */
 const BranchSocialsSection = ({
   companyId,
   onError = () => {},
   copiedConfig = null,
   onCopyConfig = () => {},
+  filterByBranchId,
 }: BranchSocialsSectionProps) => {
   // #hook useBranches
   const {
@@ -68,13 +70,18 @@ const BranchSocialsSection = ({
   // #effect - Load socials when branches are available
   useEffect(() => {
     if (branches.length > 0 && !isLoadingSocials) {
-      const needsSocials = branches.some((branch) => !branchSocialsMap.has(branch.id));
+      // Filtrar branches si es employee
+      const branchesToLoad = filterByBranchId 
+        ? branches.filter(b => b.id === filterByBranchId)
+        : branches;
+
+      const needsSocials = branchesToLoad.some((branch) => !branchSocialsMap.has(branch.id));
 
       if (needsSocials) {
         setIsLoadingSocials(true);
 
         Promise.all(
-          branches.map(async (branch) => {
+          branchesToLoad.map(async (branch) => {
             if (!branchSocialsMap.has(branch.id)) {
               try {
                 const socials = await loadBranchSocials(branch.id);
@@ -90,7 +97,7 @@ const BranchSocialsSection = ({
         });
       }
     }
-  }, [branches, loadBranchSocials, updateBranchSocials, isLoadingSocials, branchSocialsMap]);
+  }, [branches, loadBranchSocials, updateBranchSocials, isLoadingSocials, branchSocialsMap, filterByBranchId]);
   // #end-effect
 
   // #event handleUpdateSocials
@@ -136,7 +143,9 @@ const BranchSocialsSection = ({
         {/* #section Branch list */}
         {branches.length > 0 && (
           <div className={styles.branchList}>
-            {branches.map((branch, index) => (
+            {branches
+              .filter(branch => !filterByBranchId || branch.id === filterByBranchId)
+              .map((branch, index) => (
               <BranchAccordion
                 key={branch.id}
                 branch={branch}
