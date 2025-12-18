@@ -22,9 +22,20 @@ const EmployeeDashboardPage = () => {
   const email = useUserDataStore(s => s.email);
   const type = useUserDataStore(s => s.type);
   const state = useUserDataStore(s => s.state);
+  const branchName = useUserDataStore(s => s.branchName);
+  const companyName = useUserDataStore(s => s.companyName);
+  const companyLogoUrl = useUserDataStore(s => s.companyLogoUrl);
   const isAuthenticated = useUserDataStore(s => s.isAuthenticated);
   const reset = useUserDataStore(s => s.reset);
   const navigate = useNavigate();
+
+  // #debug - verificar datos de compañía
+  console.log('🏢 Company Data:', {
+    companyName,
+    branchName,
+    companyLogoUrl,
+  });
+  // #end-debug
 
   // #function handleLogout
   const handleLogout = async () => {
@@ -74,6 +85,28 @@ const EmployeeDashboardPage = () => {
           <p className={styles.subtitle}>Registro exitoso</p>
         </div>
 
+        {/* #section Company Info */}
+        {(companyName || companyLogoUrl) && (
+          <div className={styles.companySection}>
+            {companyLogoUrl && (
+              <img 
+                src={companyLogoUrl} 
+                alt={companyName || 'Logo de la compañía'} 
+                className={styles.companyLogo}
+              />
+            )}
+            <div className={styles.companyInfo}>
+              {companyName && (
+                <div className={styles.companyName}>{companyName}</div>
+              )}
+              {branchName && (
+                <div className={styles.branchName}>{branchName}</div>
+              )}
+            </div>
+          </div>
+        )}
+        {/* #end-section */}
+
         <div className={styles.infoSection}>
           <h2>Información del Usuario</h2>
           
@@ -101,8 +134,6 @@ const EmployeeDashboardPage = () => {
                 {state}
               </span>
             </div>
-
-            {/* Campos de branch y permisos no están en el store actual */}
           </div>
         </div>
 

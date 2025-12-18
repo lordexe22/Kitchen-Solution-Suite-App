@@ -18,7 +18,10 @@ export const useAutoLogin = () => {
   const setImageUrl = useUserDataStore(state => state.setImageUrl);
   const setType = useUserDataStore(state => state.setType);
   const setBranchId = useUserDataStore(state => state.setBranchId);
+  const setBranchName = useUserDataStore(state => state.setBranchName);
   const setCompanyId = useUserDataStore(state => state.setCompanyId);
+  const setCompanyName = useUserDataStore(state => state.setCompanyName);
+  const setCompanyLogoUrl = useUserDataStore(state => state.setCompanyLogoUrl);
   const setPermissions = useUserDataStore(state => state.setPermissions);
   const setState = useUserDataStore(state => state.setState);
   const setIsAuthenticated = useUserDataStore(state => state.setIsAuthenticated);
@@ -40,6 +43,13 @@ export const useAutoLogin = () => {
       try {
         const response = await autoLoginByToken() as UserResponse;
 
+        console.log('✅ Auto-login response:', response);
+        console.log('🏢 Company data from response:', {
+          branchName: response.user.branchName,
+          companyName: response.user.companyName,
+          companyLogoUrl: response.user.companyLogoUrl,
+        });
+
         setId(response.user.id);
         setFirstName(response.user.firstName);
         setLastName(response.user.lastName);
@@ -47,7 +57,10 @@ export const useAutoLogin = () => {
         setImageUrl(response.user.imageUrl);
         setType(response.user.type);
         setBranchId(response.user.branchId ?? null);
+        setBranchName(response.user.branchName ?? null);
         setCompanyId(response.user.companyId ?? null);
+        setCompanyName(response.user.companyName ?? null);
+        setCompanyLogoUrl(response.user.companyLogoUrl ?? null);
         setPermissions(response.user.permissions ?? null);
         setState(response.user.state);
         setIsAuthenticated(true);
@@ -74,7 +87,9 @@ export const useAutoLogin = () => {
     setImageUrl,
     setType,
     setBranchId,
+    setBranchName,
     setCompanyId,
+    setCompanyName,
     setPermissions,
     setState,
     setIsAuthenticated,

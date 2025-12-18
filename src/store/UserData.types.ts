@@ -14,7 +14,10 @@ export interface UserDataStore {
   state: string | null;
   isAuthenticated: boolean;
   branchId: number | null;
+  branchName: string | null;
   companyId: number | null;
+  companyName: string | null;
+  companyLogoUrl: string | null;
   permissions: EmployeePermissions | null;
 
   setFirstName: (firstName: string | null) => void;
@@ -25,7 +28,10 @@ export interface UserDataStore {
   setId: (id: number | null) => void;
   setState: (state: string | null) => void;
   setBranchId: (branchId: number | null) => void;
+  setBranchName: (branchName: string | null) => void;
   setCompanyId: (companyId: number | null) => void;
+  setCompanyName: (companyName: string | null) => void;
+  setCompanyLogoUrl: (companyLogoUrl: string | null) => void;
   setPermissions: (permissions: EmployeePermissions | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
 

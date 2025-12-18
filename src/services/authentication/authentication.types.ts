@@ -77,7 +77,10 @@ export interface UserResponse {
     imageUrl: string | null;
     type: string;
     branchId: number | null;
+    branchName: string | null;
     companyId: number | null;
+    companyName: string | null;
+    companyLogoUrl: string | null;
     permissions: EmployeePermissions | null;
     state: string;
   };

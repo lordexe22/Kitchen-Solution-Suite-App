@@ -21,6 +21,28 @@ const WelcomePage = () => {
         <main className={styles.main}>
           <h1 className={styles.title}>¡Bienvenido, {user.firstName}!</h1>
           
+          {/* #section Company Info - Solo para empleados */}
+          {user.type === 'employee' && (user.companyName || user.companyLogoUrl) && (
+            <div className={styles['company-section']}>
+              {user.companyLogoUrl && (
+                <img 
+                  src={user.companyLogoUrl} 
+                  alt={user.companyName || 'Logo de la compañía'} 
+                  className={styles['company-logo']}
+                />
+              )}
+              <div className={styles['company-info']}>
+                {user.companyName && (
+                  <div className={styles['company-name']}>{user.companyName}</div>
+                )}
+                {user.branchName && (
+                  <div className={styles['branch-name']}>{user.branchName}</div>
+                )}
+              </div>
+            </div>
+          )}
+          {/* #end-section */}
+          
           <div className={styles['user-info-card']}>
             <h2>Información del Usuario</h2>
             

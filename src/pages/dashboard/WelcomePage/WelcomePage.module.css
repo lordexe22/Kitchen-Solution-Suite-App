@@ -36,6 +36,60 @@
 }
 /* #end-style */
 
+/* #style .company-section - Sección de información de compañía (solo empleados) */
+.company-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  border: 2px solid #3b82f6;
+  max-width: 600px;
+}
+/* #end-style */
+
+/* #style .company-logo - Logo de la compañía */
+.company-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: white;
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+/* #end-style */
+
+/* #style .company-info - Información de compañía y sucursal */
+.company-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+/* #end-style */
+
+/* #style .company-name - Nombre de la compañía */
+.company-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e40af;
+  line-height: 1.2;
+}
+/* #end-style */
+
+/* #style .branch-name - Nombre de la sucursal */
+.branch-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #3b82f6;
+  line-height: 1.2;
+}
+/* #end-style */
+
 /* #style .user-info-card - Tarjeta de información del usuario */
 .user-info-card {
   background-color: #f9fafb;
