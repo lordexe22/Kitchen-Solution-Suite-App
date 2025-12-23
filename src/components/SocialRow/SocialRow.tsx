@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { BranchWithLocation, BranchSocial, SocialPlatform, BranchSocialFormData } from '../../store/Branches.types';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
+import { useToast } from '../../hooks/useToast';
 import styles from './SocialRow.module.css';
 import '/src/styles/button.css';
 // #end-section
@@ -117,6 +118,10 @@ const SocialRow = ({
 }: SocialRowProps) => {
   // #hook useModulePermissions - verificar permisos del usuario
   const { canEdit } = useModulePermissions('socials');
+  // #end-hook
+
+  // #hook useToast - notificaciones
+  const toast = useToast();
   // #end-hook
   
   // #state [editingValues, setEditingValues]
@@ -243,7 +248,7 @@ const SocialRow = ({
 
     } catch (error) {
       console.error('Error saving social:', error);
-      alert(error instanceof Error ? error.message : 'Error al guardar');
+      toast.error(error instanceof Error ? error.message : 'Error al guardar');
     } finally {
       setSavingPlatform(null);
     }
@@ -277,7 +282,7 @@ const SocialRow = ({
       }));
     } catch (error) {
       console.error('Error deleting social:', error);
-      alert(error instanceof Error ? error.message : 'Error al eliminar');
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar');
     }
   };
   // #end-function
@@ -288,12 +293,12 @@ const SocialRow = ({
    */
   const handleCopyConfig = () => {
     if (socials.length === 0) {
-      alert('No hay redes sociales configuradas para copiar');
+      toast.warning('No hay redes sociales configuradas para copiar');
       return;
     }
 
     onCopyConfig({ companyId, socials: [...socials] });
-    alert(`✓ Configuración copiada (${socials.length} redes sociales)\n\nAhora puedes pegarla en cualquier otra sucursal de esta compañía.`);
+    toast.success(`Configuración copiada (${socials.length} redes sociales). Ahora puedes pegarla en cualquier otra sucursal de esta compañía.`);
   };
   // #end-function
 
@@ -304,13 +309,13 @@ const SocialRow = ({
    */
   const handlePasteConfig = async () => {
     if (!copiedConfig || copiedConfig.socials.length === 0) {
-      alert('No hay configuración copiada');
+      toast.warning('No hay configuración copiada');
       return;
     }
 
     // Validar que sea de la misma compañía
     if (copiedConfig.companyId !== companyId) {
-      alert('No puedes pegar configuración de otra compañía');
+      toast.warning('No puedes pegar configuración de otra compañía');
       return;
     }
 
@@ -335,10 +340,10 @@ const SocialRow = ({
       }
 
       await onUpdateSocials(branch.id, newSocials);
-      alert('✓ Configuración aplicada exitosamente');
+      toast.success('Configuración aplicada exitosamente');
     } catch (error) {
       console.error('Error pasting config:', error);
-      alert(error instanceof Error ? error.message : 'Error al aplicar configuración');
+      toast.error(error instanceof Error ? error.message : 'Error al aplicar configuración');
     }
   };
   // #end-function

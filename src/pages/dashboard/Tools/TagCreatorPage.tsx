@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { TagCreatorModal } from '../../../modules/tagCreator';
 import type { TagConfiguration } from '../../../modules/tagCreator';
 import { useTagsStore } from '../../../store/Tags.store';
+import { useToast } from '../../../hooks/useToast';
 import styles from './TagCreatorPage.module.css';
 // #end-section
 
@@ -18,6 +19,10 @@ import styles from './TagCreatorPage.module.css';
  * - Sincronización con backend
  */
 export default function TagCreatorPage() {
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
+
   // #section state
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -56,9 +61,9 @@ export default function TagCreatorPage() {
     } catch (error) {
       console.error('Error creando etiqueta:', error);
       if (error instanceof Error) {
-        alert(error.message);
+        toast.error(error.message);
       } else {
-        alert('Error al crear la etiqueta');
+        toast.error('Error al crear la etiqueta');
       }
     }
   };
@@ -72,7 +77,7 @@ export default function TagCreatorPage() {
   const handleDeleteTag = async (tagId: number, tagName: string) => {
     // Verificar que no sea un system tag
     if (isSystemTag(tagName)) {
-      alert('No se pueden eliminar las etiquetas del sistema');
+      toast.warning('No se pueden eliminar las etiquetas del sistema');
       return;
     }
     
@@ -89,9 +94,9 @@ export default function TagCreatorPage() {
       } catch (error) {
         console.error('Error eliminando etiqueta:', error);
         if (error instanceof Error) {
-          alert(error.message);
+          toast.error(error.message);
         } else {
-          alert('Error al eliminar la etiqueta');
+          toast.error('Error al eliminar la etiqueta');
         }
       } finally {
         setIsDeleting(false);

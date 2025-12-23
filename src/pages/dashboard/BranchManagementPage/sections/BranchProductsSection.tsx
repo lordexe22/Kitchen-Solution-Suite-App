@@ -15,6 +15,7 @@ import { useBranches } from '../../../../hooks/useBranches';
 import { useCategories } from '../../../../hooks/useCategories';
 import { useProducts } from '../../../../hooks/useProducts';
 import { useModulePermissions } from '../../../../hooks/useModulePermissions';
+import { useToast } from '../../../../hooks/useToast';
 import { uploadProductImages, deleteProductImage } from '../../../../services/products/productsImages.service';
 import { uploadCategoryImage } from '../../../../services/categories/categoryImage.service';
 import { importCategory } from '../../../../services/categories/categories.service';
@@ -95,6 +96,10 @@ export default BranchProductsSection;
  * Contenedor de productos y categorías de una sucursal.
  */
 function BranchProductsContainer({ branchId }: { branchId: number }) {
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
+
   // #hook useModulePermissions - verificar permisos del usuario
   const { canEdit } = useModulePermissions('products');
   // #end-hook
@@ -209,7 +214,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
       setEditingCategory(null);
     } catch (error) {
       console.error('Error saving category:', error);
-      alert('Error al guardar la categoría. Por favor intenta de nuevo.');
+      toast.error('Error al guardar la categoría. Por favor intenta de nuevo.');
     }
   };
 
@@ -220,7 +225,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
       await deleteCategory(categoryId);
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert('Error al eliminar la categoría. Por favor intenta de nuevo.');
+      toast.error('Error al eliminar la categoría. Por favor intenta de nuevo.');
     }
   };
 
@@ -235,7 +240,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
 
     // Validar extensión
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
-      alert('Por favor selecciona un archivo Excel (.xlsx)');
+      toast.warning('Por favor selecciona un archivo Excel (.xlsx)');
       return;
     }
 
@@ -256,7 +261,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
         message.push('', `ℹ️ Nota: Se renombró de "${result.summary.originalName}" para evitar duplicados`);
       }
 
-      alert(message.join('\n'));
+      toast.success(message.join('\n'));
 
       // Recargar categorías para mostrar la nueva
       await loadCategories(true);
@@ -268,7 +273,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
 
     } catch (error) {
       console.error('Error importing category:', error);
-      alert(`Error al importar la categoría:\n\n${error instanceof Error ? error.message : 'Error desconocido'}`);
+      toast.error(`Error al importar la categoría:\n\n${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setIsImporting(false);
     }
@@ -312,7 +317,7 @@ function BranchProductsContainer({ branchId }: { branchId: number }) {
       await reorderCategories(updates);
     } catch (error) {
       console.error('Error reordering categories:', error);
-      alert('Error al reordenar. Se revertirán los cambios.');
+      toast.error('Error al reordenar. Se revertirán los cambios.');
       loadCategories(true);
     }
   };
@@ -551,7 +556,7 @@ function BranchProductsInCategory({ categoryId, canEdit }: { categoryId: number;
       setEditingProduct(null);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error al guardar el producto. Por favor intenta de nuevo.');
+      toast.error('Error al guardar el producto. Por favor intenta de nuevo.');
     }
   };
 
@@ -562,7 +567,7 @@ function BranchProductsInCategory({ categoryId, canEdit }: { categoryId: number;
       await deleteProduct(productId);
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Error al eliminar el producto. Por favor intenta de nuevo.');
+      toast.error('Error al eliminar el producto. Por favor intenta de nuevo.');
     }
   };
 
@@ -605,7 +610,7 @@ function BranchProductsInCategory({ categoryId, canEdit }: { categoryId: number;
       console.log('✅ Productos reordenados exitosamente');
     } catch (error) {
       console.error('❌ Error reordering products:', error);
-      alert('Error al reordenar. Se revertirán los cambios.');
+      toast.error('Error al reordenar. Se revertirán los cambios.');
       loadProducts();
     }
   };

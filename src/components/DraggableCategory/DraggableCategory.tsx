@@ -7,6 +7,7 @@ import type { CategoryWithParsedGradient } from '../../store/Categories.types';
 import { generateBackgroundCSS } from '../../modules/categoryCreator/categoryCreator.utils';
 import type { CategoryConfiguration } from '../../modules/categoryCreator/categoryCreator.types';
 import { exportCategory } from '../../services/categories/categories.service';
+import { useToast } from '../../hooks/useToast';
 import styles from './DraggableCategory.module.css';
 // #end-section
 
@@ -33,6 +34,10 @@ export default function DraggableCategory({
   children,
   isDraggable = true
 }: DraggableCategoryProps) {
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
+
   // #state [isExpanded, setIsExpanded]
   const [isExpanded, setIsExpanded] = useState(false);
   // #end-state
@@ -103,7 +108,7 @@ export default function DraggableCategory({
       // El archivo se descarga automáticamente
     } catch (error) {
       console.error('Error exportando categoría:', error);
-      alert('Error al exportar la categoría. Por favor intenta de nuevo.');
+      toast.error('Error al exportar la categoría. Por favor intenta de nuevo.');
     } finally {
       setIsExporting(false);
     }

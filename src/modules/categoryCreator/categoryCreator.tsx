@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { CategoryCreatorModalProps, GradientColors } from './categoryCreator.types';
 import { useCategoryCreator } from './categoryCreator.hooks';
+import { useToast } from '../../hooks/useToast';
 import { 
   MODAL_TEXTS, 
   ANGLE_PRESETS,
@@ -42,6 +43,10 @@ export function CategoryCreatorModal({
   confirmText = MODAL_TEXTS.confirmText,
   cancelText = MODAL_TEXTS.cancelText
 }: CategoryCreatorModalProps) {
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
+
   // #hook useCategoryCreator
   const {
     config,
@@ -174,13 +179,13 @@ export function CategoryCreatorModal({
     // Validar tipo
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert('Formato no válido. Solo JPG, PNG, GIF, WEBP');
+      toast.warning('Formato no válido. Solo JPG, PNG, GIF, WEBP');
       return;
     }
     
     // Validar tamaño (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('El archivo es muy grande. Máximo 5MB');
+      toast.warning('El archivo es muy grande. Máximo 5MB');
       return;
     }
     

@@ -2,10 +2,15 @@
 import { useEffect, useState } from 'react';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
+import { useToast } from '../../../hooks/useToast';
 import QRCreator from '../../../modules/qrCreator/qrCreator';
 import styles from './QRCreatorPage.module.css';
 
 export default function QRCreatorPage() {
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
+
   // #hooks - Gestión de compañías y sucursales
   const { companies, loadCompanies } = useCompanies();
   const [selectedCompany, setSelectedCompany] = useState<number | null>(null);
@@ -53,7 +58,7 @@ export default function QRCreatorPage() {
   const handleGenerate = () => {
     const url = generateURL();
     if (!url) {
-      alert('Por favor selecciona una sucursal e ingresa un número de mesa');
+      toast.warning('Por favor selecciona una sucursal e ingresa un número de mesa');
       return;
     }
     setGeneratedURL(url);

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { BranchWithLocation, BranchSocial, BranchSocialFormData } from '../../store/Branches.types';
 import { SOCIAL_PLATFORMS } from '../../store/Branches.types';
+import { useToast } from '../../hooks/useToast';
 import styles from './BranchSocialsModal.module.css';
 import '/src/styles/modal.css';
 import '/src/styles/button.css';
@@ -33,6 +34,10 @@ const BranchSocialsModal = ({
   onDeleteSocial,
   onApplyToAll
 }: BranchSocialsModalProps) => {
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
+
   const [socials, setSocials] = useState<BranchSocial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +135,7 @@ const BranchSocialsModal = ({
     setError(null);
     try {
       await onApplyToAll(branch.id);
-      alert('¡Redes sociales aplicadas exitosamente a todas las sucursales!');
+      toast.success('¡Redes sociales aplicadas exitosamente a todas las sucursales!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al aplicar');
     }

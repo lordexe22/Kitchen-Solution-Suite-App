@@ -5,6 +5,7 @@ import type { BranchWithLocation, BranchSchedule, DayOfWeek } from '../../store/
 import { DAYS_OF_WEEK } from '../../store/Branches.types';
 import ScheduleDayEditor from '../ScheduleDayEditor/ScheduleDayEditor';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
+import { useToast } from '../../hooks/useToast';
 import styles from './ScheduleRow.module.css';
 import '/src/styles/button.css';
 // #end-section
@@ -56,6 +57,10 @@ const ScheduleRow = ({
   
   // #hook useModulePermissions - verificar permisos del usuario
   const { canEdit } = useModulePermissions('schedules');
+  // #end-hook
+
+  // #hook useToast - notificaciones
+  const toast = useToast();
   // #end-hook
 
   // #function getScheduleForDay
@@ -137,12 +142,12 @@ const ScheduleRow = ({
    */
   const handleCopyConfig = () => {
     if (schedules.length === 0) {
-      alert('No hay horarios configurados para copiar');
+      toast.warning('No hay horarios configurados para copiar');
       return;
     }
 
     onCopyConfig({ companyId, schedules: [...schedules] });
-    alert(`✓ Configuración copiada (${schedules.length} horarios)\n\nAhora puedes pegarla en cualquier otra sucursal de esta compañía.`);
+    toast.success(`Configuración copiada (${schedules.length} horarios). Ahora puedes pegarla en cualquier otra sucursal de esta compañía.`);
   };
   // #end-function
 
@@ -153,13 +158,13 @@ const ScheduleRow = ({
    */
   const handlePasteConfig = async () => {
     if (!copiedConfig || copiedConfig.schedules.length === 0) {
-      alert('No hay configuración copiada');
+      toast.warning('No hay configuración copiada');
       return;
     }
 
     // Validar que sea de la misma compañía
     if (copiedConfig.companyId !== companyId) {
-      alert('No puedes pegar configuración de otra compañía');
+      toast.warning('No puedes pegar configuración de otra compañía');
       return;
     }
 
@@ -178,10 +183,10 @@ const ScheduleRow = ({
       }));
 
       await onUpdateSchedules(branch.id, newSchedules);
-      alert('✓ Configuración aplicada exitosamente');
+      toast.success('Configuración aplicada exitosamente');
     } catch (error) {
       console.error('Error pasting schedules:', error);
-      alert(error instanceof Error ? error.message : 'Error al aplicar horarios');
+      toast.error(error instanceof Error ? error.message : 'Error al aplicar horarios');
     }
   };
   // #end-function

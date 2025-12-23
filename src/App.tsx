@@ -14,6 +14,7 @@ import InvitationRegisterPage from "./pages/InvitationRegisterPage/InvitationReg
 // #subsection Protected components - carga inmediata
 import DashboardShell from './components/DashboardShell/DashboardShell';
 import ProtectedRoute from "./components/ProtectedRoute";
+import ToastContainer from "./components/ToastContainer";
 // #end-subsection
 
 // #subsection Dashboard pages - lazy loading
@@ -51,10 +52,12 @@ function App() {
   
   // #section render pages
   return (
-    <Routes>
-      {/* #route - public -- <MainPage /> */}
-      <Route path="/" element={<MainPage />} />
-      {/* #end-route */}
+    <>
+      <ToastContainer />
+      <Routes>
+        {/* #route - public -- <MainPage /> */}
+        <Route path="/" element={<MainPage />} />
+        {/* #end-route */}
       
       {/* #route - /register -- <InvitationRegisterPage /> [REGISTRO POR INVITACIÓN] */}
       <Route path="/register" element={<InvitationRegisterPage />} />
@@ -186,6 +189,7 @@ function App() {
       <Route path="*" element={<Navigate to="/" />} />
       {/* #end-route */}
     </Routes>
+    </>
   );
   // #end-section
 }

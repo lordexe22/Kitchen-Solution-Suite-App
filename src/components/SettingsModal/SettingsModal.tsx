@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { useUserDataStore } from '../../store/UserData.store';
 import { uploadUserAvatar, deleteUserAvatar } from '../../services/users/userAvatar.service';
+import { useToast } from '../../hooks/useToast';
 import styles from './SettingsModal.module.css';
 // #end-section
 
@@ -20,6 +21,10 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   // #state user data from store
   const { imageUrl, setImageUrl } = useUserDataStore();
   // #end-state
+
+  // #hook useToast
+  const toast = useToast();
+  // #end-hook
 
   // #state local states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -83,7 +88,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       setImageUrl(response.user.imageUrl || null);
       setSelectedFile(null);
       setPreviewUrl(null);
-      alert('Avatar actualizado exitosamente');
+      toast.success('Avatar actualizado exitosamente');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al subir imagen';
       setError(errorMessage);
@@ -109,7 +114,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     try {
       const response = await deleteUserAvatar();
       setImageUrl(response.user.imageUrl || null);
-      alert('Avatar eliminado exitosamente');
+      toast.success('Avatar eliminado exitosamente');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al eliminar imagen';
       setError(errorMessage);

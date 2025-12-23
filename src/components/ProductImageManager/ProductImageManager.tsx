@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useToast } from '../../hooks/useToast';
 import styles from './ProductImageManager.module.css';
 // #end-section
 
@@ -96,6 +97,7 @@ export default function ProductImageManager({
 }: ProductImageManagerProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
   // #event handleFileSelect
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +107,7 @@ export default function ProductImageManager({
 
     // Validar límite
     if (images.length + files.length > maxImages) {
-      alert(`Máximo ${maxImages} imágenes permitidas`);
+      toast.warning(`Máximo ${maxImages} imágenes permitidas`);
       return;
     }
 
@@ -114,7 +116,7 @@ export default function ProductImageManager({
     const invalidFiles = files.filter(f => !allowedTypes.includes(f.type));
     
     if (invalidFiles.length > 0) {
-      alert('Solo se permiten imágenes JPG, PNG, GIF o WEBP');
+      toast.warning('Solo se permiten imágenes JPG, PNG, GIF o WEBP');
       return;
     }
 
@@ -123,7 +125,7 @@ export default function ProductImageManager({
     const oversizedFiles = files.filter(f => f.size > maxSize);
     
     if (oversizedFiles.length > 0) {
-      alert('Las imágenes no deben superar 5MB');
+      toast.warning('Las imágenes no deben superar 5MB');
       return;
     }
 
@@ -145,7 +147,7 @@ export default function ProductImageManager({
       onImagesChange([...images, ...newImageUrls]);
     } catch (error) {
       console.error('Error loading images:', error);
-      alert('Error al cargar las imágenes');
+      toast.error('Error al cargar las imágenes');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
 import type { Company, CompanyFormData } from '../../store/Companies.types';
 import { useCompaniesStore } from '../../store/Companies.store';
+import { useToast } from '../../hooks/useToast';
 import styles from './CompanyFormModal.module.css';
 import '/src/styles/modal.css';
 import '/src/styles/button.css';
@@ -35,6 +36,10 @@ const CompanyFormModal = ({
 }: CompanyFormModalProps) => {
   const isEditing = !!company;
   const updateCompanyInStore = useCompaniesStore((state) => state.updateCompany);
+  
+  // #hook useToast - notificaciones
+  const toast = useToast();
+  // #end-hook
   
   const {
     register,
@@ -116,14 +121,14 @@ const CompanyFormModal = ({
     // Validar tipo de archivo
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert('Por favor selecciona una imagen válida (JPG, PNG, GIF, WEBP)');
+      toast.warning('Por favor selecciona una imagen válida (JPG, PNG, GIF, WEBP)');
       return;
     }
 
     // Validar tamaño (máximo 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      alert('La imagen es demasiado grande. Máximo 5MB');
+      toast.warning('La imagen es demasiado grande. Máximo 5MB');
       return;
     }
 
@@ -157,7 +162,7 @@ const CompanyFormModal = ({
           await onUploadLogo(savedCompany.id, selectedFile);
         } catch (error) {
           console.error('Error uploading logo:', error);
-          alert('La compañía se guardó pero hubo un error al subir el logo');
+          toast.warning('La compañía se guardó pero hubo un error al subir el logo');
         } finally {
           setIsUploadingLogo(false);
         }

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import type { BranchWithLocation, BranchLocationFormData } from '../../store/Branches.types';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
+import { useToast } from '../../hooks/useToast';
 import styles from './BranchLocationRow.module.css';
 import '/src/styles/button.css';
 
@@ -17,6 +18,10 @@ interface Props {
 const BranchLocationRow = ({ branch, location, onSaveLocation, onDeleteLocation, isLoading }: Props) => {
   // #hook useModulePermissions - verificar permisos del usuario
   const { canEdit } = useModulePermissions('schedules'); // location usa el mismo módulo que schedules
+  // #end-hook
+  
+  // #hook useToast - mostrar notificaciones
+  const toast = useToast();
   // #end-hook
   
   const [formData, setFormData] = useState<BranchLocationFormData>({
@@ -47,16 +52,16 @@ const BranchLocationRow = ({ branch, location, onSaveLocation, onDeleteLocation,
   const handleSave = async () => {
     // Validaciones mínimas
     if (!formData.address.trim() || !formData.city.trim() || !formData.state.trim() || !formData.country.trim()) {
-      alert('Completa los campos obligatorios: Dirección, Ciudad, Estado, País');
+      toast.warning('Completa los campos obligatorios: Dirección, Ciudad, Estado, País');
       return;
     }
 
     try {
       await onSaveLocation(branch.id, formData);
-      alert('✓ Ubicación guardada');
+      toast.success('Ubicación guardada correctamente');
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : 'Error al guardar ubicación');
+      toast.error(err instanceof Error ? err.message : 'Error al guardar ubicación');
     }
   };
 
@@ -64,10 +69,10 @@ const BranchLocationRow = ({ branch, location, onSaveLocation, onDeleteLocation,
     if (!confirm('¿Eliminar la ubicación de esta sucursal?')) return;
     try {
       await onDeleteLocation(branch.id);
-      alert('✓ Ubicación eliminada');
+      toast.success('Ubicación eliminada correctamente');
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : 'Error al eliminar ubicación');
+      toast.error(err instanceof Error ? err.message : 'Error al eliminar ubicación');
     }
   };
 
