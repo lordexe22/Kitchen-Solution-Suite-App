@@ -29,14 +29,6 @@ const EmployeeDashboardPage = () => {
   const reset = useUserDataStore(s => s.reset);
   const navigate = useNavigate();
 
-  // #debug - verificar datos de compañía
-  console.log('🏢 Company Data:', {
-    companyName,
-    branchName,
-    companyLogoUrl,
-  });
-  // #end-debug
-
   // #function handleLogout
   const handleLogout = async () => {
     try {

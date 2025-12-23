@@ -43,13 +43,6 @@ export const useAutoLogin = () => {
       try {
         const response = await autoLoginByToken() as UserResponse;
 
-        console.log('✅ Auto-login response:', response);
-        console.log('🏢 Company data from response:', {
-          branchName: response.user.branchName,
-          companyName: response.user.companyName,
-          companyLogoUrl: response.user.companyLogoUrl,
-        });
-
         setId(response.user.id);
         setFirstName(response.user.firstName);
         setLastName(response.user.lastName);
