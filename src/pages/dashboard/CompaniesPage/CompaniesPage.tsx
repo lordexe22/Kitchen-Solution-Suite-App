@@ -1,6 +1,6 @@
 /* src/pages/dashboard/CompaniesPage/CompaniesPage.tsx */
 // #section imports
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
@@ -10,6 +10,7 @@ import BranchNameModal from '../../../components/BranchNameModal/BranchNameModal
 import CompanyFormModal from '../../../components/CompanyFormModal/CompanyFormModal';
 import { useCompanies } from '../../../hooks/useCompanies';
 import { useBranches } from '../../../hooks/useBranches';
+import { useUserDataStore } from '../../../store/UserData.store';
 import type { Company, CompanyFormData } from '../../../store/Companies.types';
 import type { BranchWithLocation } from '../../../store/Branches.types';
 import styles from './CompaniesPage.module.css';
@@ -58,9 +59,14 @@ const CompaniesPage = () => {
   // #function handleCloseModal
   const handleCloseModal = () => {
     setShowModal(false);
+    // #hook userType - restringir acceso a empleados
+    const userType = useUserDataStore(s => s.type);
+    const canView = useMemo(() => userType === 'admin' || userType === 'ownership', [userType]);
     setEditingCompany(undefined);
   };
-  // #end-function
+      if (canView) {
+        loadCompanies();
+      }
   // #function handleSubmit
   const handleSubmit = async (data: CompanyFormData) => {
     if (editingCompany) {
@@ -117,7 +123,15 @@ const CompaniesPage = () => {
               </button>
             </div>
           )}
+            {!canView && (
+              <EmptyState
+                title="Sin acceso"
+                description="No tienes permisos para ver Mis Compañías."
+                icon="🔒"
+              />
+            )}
           {/* #end-section */}
+            {canView && (<h1 className={styles.title}>Mis Compañías</h1>
 
           {/* #section Loading */}
           {isLoading && companies.length === 0 && (
@@ -127,7 +141,7 @@ const CompaniesPage = () => {
 
           {/* #section Empty State */}
           {!isLoading && companies.length === 0 && !error && (
-            <EmptyState
+            {canView && error && (
               title="No hay compañías"
               description="Crea tu primera compañía para comenzar a gestionar tu negocio"
               actionButtonText="Crear Compañía"
@@ -137,12 +151,12 @@ const CompaniesPage = () => {
           )}
           {/* #end-section */}
 
-          {/* #section Companies List */}
+            {canView && isLoading && companies.length === 0 && (
           {companies.length > 0 && (
             <div className={styles.accordionList}>
               {companies.map((company) => (
                 <CompanyAccordion
-                  key={company.id}
+            {canView && !isLoading && companies.length === 0 && !error && (
                   company={company}
                   onEdit={() => handleOpenEditModal(company)}
                   onDelete={() => handleDelete(company.id)}
@@ -153,7 +167,7 @@ const CompaniesPage = () => {
             </div>
           )}
           {/* #end-section */}
-        </main>
+            {canView && companies.length > 0 && (
       </div>
 
       {/* #section CompanyFormModal */}
@@ -171,7 +185,7 @@ const CompaniesPage = () => {
   );
   // #end-section
 };
-export default CompaniesPage;
+        {canView && showModal && (
 // #end-component
 // #component BranchesSection
 /**

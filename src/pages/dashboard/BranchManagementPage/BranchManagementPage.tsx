@@ -1,6 +1,6 @@
 // src/pages/dashboard/BranchManagementPage/BranchManagementPage.tsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import EmptyState from '../../../components/EmptyState/EmptyState';
@@ -18,6 +18,7 @@ import BranchesEditSection from './sections/BranchesEditSection';
 import type { BranchSchedule } from '../../../store/Branches.types';
 import type { BranchSocial } from '../../../store/Branches.types';
 import { useUserDataStore } from '../../../store/UserData.store';
+import { useModulePermissions } from '../../../hooks/useModulePermissions';
 import styles from './BranchManagementPage.module.css';
 
 // #component BranchManagementPage
@@ -58,6 +59,12 @@ const BranchManagementPage = () => {
   const userCompanyId = useUserDataStore((s) => s.companyId);
   // #end-hook
 
+  // #hook useModulePermissions - permisos por módulo (para secciones con control granular)
+  const productsPerms = useModulePermissions('products');
+  const schedulesPerms = useModulePermissions('schedules');
+  const socialsPerms = useModulePermissions('socials');
+  // #end-hook
+
   // #state [globalError, setGlobalError]
   const [globalError, setGlobalError] = useState<string | null>(null);
   // #end-state
@@ -81,10 +88,30 @@ const BranchManagementPage = () => {
   } | null>(null);
   // #end-state
 
-  // #effect - Load companies on mount
+  // #memo canViewSection - Determina si el usuario puede ver la sección activa
+  const canViewSection = useMemo(() => {
+    switch (activeSection) {
+      case 'products':
+        return productsPerms.canView;
+      case 'schedules':
+        return schedulesPerms.canView;
+      case 'socials':
+        return socialsPerms.canView;
+      case 'location':
+      case 'companies':
+        // Solo admin/ownership pueden ver estas secciones
+        return userType === 'admin' || userType === 'ownership';
+      default:
+        return false;
+    }
+  }, [activeSection, productsPerms.canView, schedulesPerms.canView, socialsPerms.canView, userType]);
+
+  // #effect - Load companies solo si hay permiso de visualización
   useEffect(() => {
-    loadCompanies();
-  }, [loadCompanies]);
+    if (canViewSection) {
+      loadCompanies();
+    }
+  }, [loadCompanies, canViewSection]);
   // #end-effect
 
   // #function company modal handlers
@@ -204,6 +231,16 @@ const BranchManagementPage = () => {
             </div>
             {/* #end-section */}
 
+            {/* #section Access guard */}
+            {!canViewSection && (
+              <EmptyState
+                title="Sin acceso"
+                description="No tienes permisos para ver esta sección."
+                icon="🔒"
+              />
+            )}
+            {/* #end-section */}
+
             {/* #section Error handling */}
             {(globalError || companiesError) && (
               <div className={styles.error}>
@@ -220,7 +257,7 @@ const BranchManagementPage = () => {
             {/* #end-section */}
 
             {/* #section Empty state */}
-            {!isLoadingCompanies && companies.length === 0 && (
+            {!isLoadingCompanies && companies.length === 0 && canViewSection && (
               <EmptyState
                 title="No hay compañías"
                 description="Crea tu primera compañía para comenzar a gestionar tu negocio"
@@ -236,7 +273,7 @@ const BranchManagementPage = () => {
             {/* #end-section */}
 
             {/* #section Companies list with dynamic section content */}
-            {companies.length > 0 && (
+            {companies.length > 0 && canViewSection && (
               <div className={styles.accordionList}>
                 {userType === 'employee' ? (
                   // #section Employee view - render solo su compañía sin accordion

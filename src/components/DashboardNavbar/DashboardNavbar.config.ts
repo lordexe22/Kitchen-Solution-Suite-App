@@ -64,6 +64,12 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'Tag Creator',
         icon: '🏷️',
         path: '/dashboard/tools/tags'
+      },
+      {
+        id: 'tools_dev',
+        label: 'Dev Tools',
+        icon: '⚙️',
+        path: '/dashboard/tools/dev'
       }
     ]
   },

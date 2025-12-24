@@ -5,6 +5,8 @@ import { InvitationGenerator } from '../../../components/InvitationGenerator';
 import type { InvitationResponse } from '../../../components/InvitationGenerator';
 import EmployeeListByCompany from '../../../components/EmployeeListByCompany';
 import styles from './EmployeesPage.module.css';
+import EmptyState from '../../../components/EmptyState/EmptyState';
+import { useUserDataStore } from '../../../store/UserData.store';
 
 // #component EmployeesPage - página de gestión de empleados
 /**
@@ -16,6 +18,8 @@ import styles from './EmployeesPage.module.css';
  */
 const EmployeesPage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
+  const userType = useUserDataStore(s => s.type);
+  const canView = userType === 'admin' || userType === 'ownership';
 
   // #function handleInvitationGenerated - callback cuando se genera una invitación
   /**
@@ -39,17 +43,28 @@ const EmployeesPage = () => {
       <div className={styles.content}>
         <DashboardNavbar />
         <main className={styles.main}>
-          <h1 className={styles.title}>Empleados</h1>
+          {!canView && (
+            <EmptyState
+              title="Sin acceso"
+              description="No tienes permisos para gestionar empleados."
+              icon="🔒"
+            />
+          )}
+          {canView && <h1 className={styles.title}>Empleados</h1>}
           
           {/* #section Invitation generator */}
-          <InvitationGenerator onInvitationGenerated={handleInvitationGenerated} />
+          {canView && (
+            <InvitationGenerator onInvitationGenerated={handleInvitationGenerated} />
+          )}
           {/* #end-section */}
 
           {/* #section Employee list */}
-          <section className={styles.employeeListSection}>
-            <h2 className={styles.sectionTitle}>Gestionar Empleados</h2>
-            <EmployeeListByCompany />
-          </section>
+          {canView && (
+            <section className={styles.employeeListSection}>
+              <h2 className={styles.sectionTitle}>Gestionar Empleados</h2>
+              <EmployeeListByCompany />
+            </section>
+          )}
           {/* #end-section */}
         </main>
       </div>

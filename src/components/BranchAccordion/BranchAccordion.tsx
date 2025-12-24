@@ -19,6 +19,7 @@ interface BranchAccordionProps {
   onEditSocials?: () => void;
   onDelete?: () => void;
   onToggle?: () => void;
+  headerActions?: ReactNode;
 }
 // #end-interface
 
@@ -40,7 +41,8 @@ const BranchAccordion = ({
   expandable = false,
   onEdit,
   onDelete,
-  onToggle
+  onToggle,
+  headerActions
 }: BranchAccordionProps) => {
   // #const allowEdit, allowDelete, hasChildren, isExpandable
   const allowEdit = typeof onEdit === 'function';
@@ -178,6 +180,7 @@ const BranchAccordion = ({
 
         {/* #section Header Right - show action buttons */}
         <div className={styles.headerRight}>
+          {headerActions}
           {allowEdit && (
             <button 
               className="btn-sec btn-sm" 

@@ -25,6 +25,7 @@ const BranchManagementPage = lazy(() => import("./pages/dashboard/BranchManageme
 const ToolsPage = lazy(() => import("./pages/dashboard/Tools/ToolsPage"));
 const QRCreatorPage = lazy(() => import("./pages/dashboard/Tools/QRCreatorPage"));
 const TagCreatorPage = lazy(() => import("./pages/dashboard/Tools/TagCreatorPage"));
+const DevToolsPage = lazy(() => import("./pages/dashboard/Tools/DevToolsPage"));
 const AccordionDemo = lazy(() => import("./components/_demos/AccordionDemo").then(m => ({ default: m.AccordionDemo })));
 // #end-subsection
 // #end-section
@@ -167,6 +168,21 @@ function App() {
             <DashboardShell>
               <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando creador de etiquetas...</div>}>
                 <TagCreatorPage />
+              </Suspense>
+            </DashboardShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* #end-route */}
+      
+      {/* #route - /dashboard/tools/dev -- Dev Tools */}
+      <Route
+        path="/dashboard/tools/dev"
+        element={
+          <ProtectedRoute>
+            <DashboardShell>
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando herramientas de desarrollo...</div>}>
+                <DevToolsPage />
               </Suspense>
             </DashboardShell>
           </ProtectedRoute>

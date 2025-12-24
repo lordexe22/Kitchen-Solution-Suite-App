@@ -1,16 +1,16 @@
 /* src/pages/dashboard/Tools/ToolsPage.tsx */
-import { Link } from 'react-router-dom';
-import './ToolsPage.module.css';
 
-export default function ToolsPage() {
+// #component ToolsPage - Página principal de herramientas
+/**
+ * Página índice de herramientas disponibles.
+ */
+function ToolsPage() {
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Herramientas</h2>
-      <p>Selecciona una herramienta:</p>
-      <ul>
-        <li><Link to="/dashboard/tools/qr">QR Creator</Link></li>
-        <li><Link to="/dashboard/tools/tags">Tag Creator</Link></li>
-      </ul>
+    <div style={{ padding: '2rem' }}>
+      <h1>Herramientas</h1>
     </div>
   );
 }
+
+export default ToolsPage;
+// #end-component
