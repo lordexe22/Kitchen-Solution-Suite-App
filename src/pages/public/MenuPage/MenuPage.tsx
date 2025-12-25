@@ -147,14 +147,27 @@ export default function MenuPage() {
         ) : (
           <div className={styles.categoriesContainer}>
             {menu.categories.map(category => {
+              console.log('Categoría:', category.name, {
+                backgroundMode: category.backgroundMode,
+                backgroundColor: category.backgroundColor,
+                gradientConfig: category.gradientConfig,
+                textColor: category.textColor
+              });
               const isExpanded = expandedCategories.has(category.id);
+              // Generar gradiente CSS si corresponde
+              let backgroundStyle = category.backgroundColor;
+              if (category.backgroundMode === 'gradient' && category.gradientConfig) {
+                try {
+                  const grad = JSON.parse(category.gradientConfig);
+                  if (grad.type === 'linear' && grad.colors && grad.colors.length > 1) {
+                    backgroundStyle = `linear-gradient(${grad.angle ?? 135}deg, ${grad.colors.join(', ')})`;
+                  }
+                } catch (e) {
+                  backgroundStyle = category.backgroundColor;
+                }
+              }
               const categoryStyle = {
-                backgroundColor: category.backgroundMode === 'solid' 
-                  ? category.backgroundColor 
-                  : undefined,
-                background: category.backgroundMode === 'gradient' && category.gradientConfig
-                  ? category.gradientConfig
-                  : undefined,
+                background: backgroundStyle,
                 color: category.textColor
               };
 
@@ -166,26 +179,29 @@ export default function MenuPage() {
                     style={categoryStyle}
                     onClick={() => toggleCategory(category.id)}
                   >
-                    <div className={styles.categoryInfo}>
-                      {category.imageUrl && (
-                        <img 
-                          src={category.imageUrl} 
-                          alt={category.name}
-                          className={styles.categoryImage}
-                        />
-                      )}
-                      <div className={styles.categoryText}>
-                        <h2 className={styles.categoryName}>{category.name}</h2>
-                        {category.description && (
-                          <p className={styles.categoryDescription}>
-                            {category.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    {/* Flecha primero, alineada a la izquierda */}
                     <span className={styles.expandIcon}>
                       {isExpanded ? '▼' : '▶'}
                     </span>
+
+                    {/* Título y descripción */}
+                    <div className={styles.categoryText}>
+                      <h2 className={styles.categoryName}>{category.name}</h2>
+                      {category.description && (
+                        <p className={styles.categoryDescription}>
+                          {category.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Imagen/Icono de categoría al final, pegada a la derecha */}
+                    {category.imageUrl && (
+                      <img
+                        src={category.imageUrl}
+                        alt={category.name}
+                        className={styles.categoryImage}
+                      />
+                    )}
                   </button>
 
                   {/* Lista de productos (expandible) */}
