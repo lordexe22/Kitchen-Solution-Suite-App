@@ -34,6 +34,7 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import styles from '../BranchManagementPage.module.css';
+import ClientPreviewModalWindow from '../../../../components/ClientPreviewModalWindow';
 
 // #component BranchProductsSection
 /**
@@ -108,6 +109,7 @@ function BranchProductsHeaderActions({ branchId }: { branchId: number }) {
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isClientPreviewOpen, setIsClientPreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -205,7 +207,7 @@ function BranchProductsHeaderActions({ branchId }: { branchId: number }) {
   // #event handleViewAsClient
   const handleViewAsClient = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implementar vista previa del cliente
+    setIsClientPreviewOpen(true);
   };
   // #end-event
 
@@ -255,6 +257,15 @@ function BranchProductsHeaderActions({ branchId }: { branchId: number }) {
           onConfirm={handleCreateCategory}
           title="Nueva Categoría"
           confirmText="Crear"
+        />
+      )}
+
+      {/* Modal de vista cliente */}
+      {isClientPreviewOpen && (
+        <ClientPreviewModalWindow
+          isOpen={isClientPreviewOpen}
+          onClose={() => setIsClientPreviewOpen(false)}
+          branchId={branchId}
         />
       )}
     </>

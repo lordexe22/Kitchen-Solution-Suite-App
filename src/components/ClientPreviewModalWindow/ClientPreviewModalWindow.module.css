@@ -1,0 +1,174 @@
+/* src/components/ClientPreviewModalWindow/ClientPreviewModalWindow.module.css */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  max-width: 100vw;
+  aspect-ratio: 9 / 16; /* Proporción estándar de celular */
+  height: 95vh;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.statusBar {
+  height: 22px;
+  background: linear-gradient(180deg, #fafafa, #f0f0f0);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.closeBtn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+  /* Barra de desplazamiento oculta por defecto, visible solo durante scroll activo (estilo móvil) */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) - oculta por defecto */
+.content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+/* Mostrar scrollbar solo cuando se está arrastrando el thumb activamente */
+.content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.content::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.branchInfo {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f2f2f2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.companyLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #f5f5f5;
+  flex-shrink: 0;
+}
+
+.categoryItem {
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.categoryHeader {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  min-height: 150px;
+}
+
+.categoryTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.categoryInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryName {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.categoryDescription {
+  margin: 6px 0 0 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.categoryImage {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.caret {
+  transition: transform 0.2s ease;
+}
+
+.caretOpen {
+  transform: rotate(90deg);
+}
+
+.productsList {
+  padding: 12px 16px 20px 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.loading,
+.errorMessage,
+.emptyMessage {
+  padding: 16px;
+  font-size: 0.95rem;
+}
+
+/* Footer eliminado por solicitud */
