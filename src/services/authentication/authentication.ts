@@ -3,6 +3,7 @@
 import type { RegisterUserData, UserLoginData, UserResponse } from "./authentication.types";
 import { httpClient } from '../../api/httpClient.instance';
 // #end-section
+
 // #function registerUser
 /**
  * Registra un nuevo usuario en el sistema.
@@ -17,24 +18,7 @@ export const registerUser = async (registerUserData: RegisterUserData): Promise<
   return httpClient.post('/auth/register', registerUserData);
 };
 // #end-function
-// #function registerUserWithInvitation
-/**
- * Registra un nuevo usuario en el sistema usando un token de invitación.
- * El usuario será creado como employee asignado a una sucursal.
- *
- * @async
- * @param {RegisterUserData} registerUserData - Datos del usuario a registrar.
- * @param {string} invitationToken - Token de invitación válido.
- * @returns {Promise<UserResponse>} Datos del usuario registrado como employee.
- * @throws {Error} Si la solicitud al backend falla o el token es inválido.
- */
-export const registerUserWithInvitation = async (
-  registerUserData: RegisterUserData, 
-  invitationToken: string
-): Promise<UserResponse> => {
-  return httpClient.post(`/auth/register/invitation?token=${invitationToken}`, registerUserData);
-};
-// #end-function
+
 // #function loginUser
 /**
  * Inicia sesión de un usuario en el sistema.
@@ -49,29 +33,30 @@ export const loginUser = async (loginUserData: UserLoginData): Promise<UserRespo
   return httpClient.post('/auth/login', loginUserData);
 };
 // #end-function
-// #function logoutUser
-/**
- * Cierra la sesión del usuario llamando al endpoint de logout.
- * Limpia la cookie HTTP-only del lado del servidor.
- *
- * @async
- * @returns {Promise<void>}
- * @throws {Error} Si la solicitud al backend falla.
- */
-export const logoutUser = async (): Promise<void> => {
-  await httpClient.post('/auth/jwt/logout');
-};
-// #end-function
-// #function autoLoginByToken
+
+// #function autoLogin
 /**
  * Intenta autenticar al usuario automáticamente usando el JWT en cookie.
  * Si el token es válido, retorna los datos del usuario.
  *
  * @async
- * @returns {Promise<{user: any}>} Datos del usuario autenticado.
+ * @returns {Promise<UserResponse>} Datos del usuario autenticado.
  * @throws {Error} Si el token es inválido o expiró.
  */
-export const autoLoginByToken = async () => {
-  return httpClient.post('/auth/auto-login-by-token');
+export const autoLogin = async (): Promise<UserResponse> => {
+  return httpClient.post('/auth/auto-login');
+};
+// #end-function
+
+// #function logoutUser
+/**
+ * Cierra la sesión del usuario eliminando el JWT de las cookies.
+ *
+ * @async
+ * @returns {Promise<{ success: boolean }>} Confirmación del logout.
+ * @throws {Error} Si la solicitud falla.
+ */
+export const logoutUser = async (): Promise<{ success: boolean }> => {
+  return httpClient.post('/auth/logout');
 };
 // #end-function

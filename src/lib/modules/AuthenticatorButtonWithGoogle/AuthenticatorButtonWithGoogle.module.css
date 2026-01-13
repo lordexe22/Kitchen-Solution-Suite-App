@@ -1,0 +1,10 @@
+/* AuthenticatorButtonWithGoogle.module.css */
+/* #info - Styles for AuthenticatorButtonWithGoogle component.
+    Google handles the internal button styles.
+    These styles are for the wrapper and external customizations. 
+*/
+/* #style .container */ 
+.container {
+  display: inline-block;
+}
+/* #end-style */

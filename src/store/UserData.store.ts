@@ -1,3 +1,4 @@
+// src/store/UserData.store.ts
 import { create } from 'zustand';
 import type { UserDataStore } from './UserData.types';
 
@@ -48,5 +49,4 @@ export const useUserDataStore = create<UserDataStore>()((set) => ({
     permissions: null,
     isAuthenticated: false,
   })
-
-}))
+}));

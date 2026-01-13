@@ -123,7 +123,7 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       const loginData: UserLoginData = {
         platformName: 'google',
         email: googleUser.email,
-        platformToken: googleUser.sub
+        password: googleUser.sub
       };
 
       const response = await loginUser(loginData);

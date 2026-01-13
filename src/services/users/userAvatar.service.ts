@@ -60,6 +60,6 @@ export const uploadUserAvatar = async (file: File): Promise<UserAvatarResponse> 
  */
 export const deleteUserAvatar = async (): Promise<UserAvatarResponse> => {
   const response = await httpClient.delete<UserAvatarResponse>('/users/avatar');
-  return response;
+  return response.data;
 };
 // #end-function
