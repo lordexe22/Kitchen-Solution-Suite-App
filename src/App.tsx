@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAutoLogin } from "./hooks/useAutoLogin";
 import MainPage from "./pages/public/MainPage/MainPage";
 import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
+import DevToolsPage from "./pages/dashboard/DevToolsPage/DevToolsPage";
 // #end-section
 
 // #component App
@@ -29,6 +30,7 @@ function App() {
     <Routes>
       <Route path="/" element={<MainPage />} />
       <Route path="/dashboard" element={<WelcomePage />} />
+      <Route path="/dashboard/devtools" element={<DevToolsPage />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
