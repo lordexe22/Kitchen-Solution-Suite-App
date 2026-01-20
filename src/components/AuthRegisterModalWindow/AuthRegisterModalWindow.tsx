@@ -4,9 +4,11 @@ import { useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
+import type { CredentialResponse } from '@react-oauth/google'
 import { useUserDataStore } from '../../store/UserData.store'
 import { registerUser } from '../../services/authentication/authentication'
 import type { RegisterUserData } from '../../services/authentication/authentication.types'
+import { decodeGoogleToken } from '../../modules/authenticatorWithGoogle/authenticatorWithGoogle.utils'
 import styles from './AuthRegisterModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
@@ -109,17 +111,18 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   // #function buildUserPayload - creates user object to send to server
   const buildUserPayload = (
     formData?: RegisterFormData,
-    googleUser?: GoogleUser | null
+    googlePayload?: GoogleUser | null,
+    googleCredential?: string
   ): RegisterUserData  => {
-    if (googleUser) {
-      // Registration with Google
+    if (googlePayload && googleCredential) {
+      // Registration with Google - send full JWT credential to server
       return {
-        firstName: googleUser.given_name,
-        lastName: googleUser.family_name,
-        email: googleUser.email,
+        firstName: googlePayload.given_name,
+        lastName: googlePayload.family_name,
+        email: googlePayload.email,
         password: null,
-        imageUrl: googleUser.picture,
-        platformToken: googleUser.sub,
+        imageUrl: googlePayload.picture,
+        credential: googleCredential, // Send full JWT token
         platformName: 'google'
       };
     } else if (formData) {
@@ -130,7 +133,6 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
         email: formData.email,
         password: formData.password,
         imageUrl: null,
-        platformToken: null,
         platformName: 'local'
       };
     }
@@ -211,28 +213,35 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   })
   // #end-event
   // #event handleGoogleAuth - handles Google authentication
-  const handleGoogleAuth = async (googleUser: GoogleUser | null) => {
+  const handleGoogleAuth = async (credentialResponse: CredentialResponse) => {
     // Limpiar errores previos
     setServerError(null);
 
-    // Si el usuario canceló, no hacer nada
-    if (!googleUser) {
-      return;
-    }
-
-    // Validar que Google retornó los datos mínimos necesarios
-    if (!googleUser.sub || !googleUser.email || !googleUser.given_name || !googleUser.family_name) {
+    const credential = credentialResponse.credential
+    if (!credential) {
       setError('email', {
         type: 'oauth',
-        message: 'Invalid data received from Google. Please try again or use email registration.'
+        message: 'Invalid credential from Google. Please try again.'
       });
       return;
     }
 
-    setIsLoading(true); // ← AGREGAR
+    setIsLoading(true);
 
     try {
-      const userPayload = buildUserPayload(undefined, googleUser);
+      // Decodificar el token para extraer datos para el formulario
+      const googleUser = decodeGoogleToken(credential);
+      
+      // Validar que Google retornó los datos mínimos necesarios
+      if (!googleUser.sub || !googleUser.email || !googleUser.given_name || !googleUser.family_name) {
+        setError('email', {
+          type: 'oauth',
+          message: 'Invalid data received from Google. Please try again or use email registration.'
+        });
+        return;
+      }
+
+      const userPayload = buildUserPayload(undefined, googleUser, credential);
       const response = await registerUser(userPayload);
       
       // Actualizar el store con los datos del usuario
@@ -269,9 +278,9 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
         }
       }
     } finally {
-      setIsLoading(false); // ← AGREGAR
+      setIsLoading(false);
     }
-  };
+  }
   // #end-event
   // #event onCloseModal - handles modal close  
   const {

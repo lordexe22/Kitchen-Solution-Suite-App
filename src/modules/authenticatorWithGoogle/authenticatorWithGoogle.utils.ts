@@ -28,37 +28,30 @@ export const decodeGoogleToken = (token: string): GoogleUser => {
 // #function handleGoogleSuccess - Procesa el login exitoso de Google
 /**
  * Maneja el éxito de la autenticación con Google.
- * Decodifica el token y llama a la función de callback con el usuario decodificado.
- * @param response Respuesta que devuelve GoogleLogin.
- * @param onAuth Callback que recibe el usuario decodificado o null en caso de error.
+ * Pasa el credential completo (token JWT sin decodificar) al servidor para validación.
+ * @param response Respuesta que devuelve GoogleLogin con credential.
+ * @param onAuth Callback que recibe el CredentialResponse completo.
  */
 export const handleGoogleSuccess = (
   response: CredentialResponse,
-  onAuth: (user: GoogleUser | null) => void
+  onAuth: (response: CredentialResponse) => void
 ) => {
   if (!response.credential) {
     console.error("Google login failed: credential is missing");
-    onAuth(null);
     return;
   }
 
-  try {
-    const googleUser = decodeGoogleToken(response.credential);
-    onAuth(googleUser);
-  } catch (err) {
-    console.error("Error decoding Google token:", err);
-    onAuth(null);
-  }
+  // Pasar el credential JWT completo sin decodificar
+  // El servidor será responsable de validar la firma
+  onAuth(response);
 };
 // #end-function
 // #function handleGoogleError - Maneja errores de login con Google
 /**
  * Maneja el error de autenticación con Google.
- * Llama a la función de callback con null.
- * @param onAuth Callback que recibe null indicando fallo de autenticación.
+ * No llama al callback ya que el error ya fue manejado por GoogleLogin.
  */
-export const handleGoogleError = (onAuth: (user: GoogleUser | null) => void) => {
+export const handleGoogleError = () => {
   console.error("Google login failed");
-  onAuth(null);
 };
 // #end-function

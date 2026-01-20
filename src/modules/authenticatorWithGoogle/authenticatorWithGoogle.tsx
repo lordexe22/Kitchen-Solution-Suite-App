@@ -18,7 +18,7 @@ const AuthenticatorWithGoogle = (
     <GoogleOAuthProvider clientId={googleConfig.clientId}>
       <GoogleLogin
         onSuccess={(response) => handleGoogleSuccess(response, onAuth)}
-        onError={() => handleGoogleError(onAuth)}
+        onError={() => handleGoogleError()}
         text={mode === "login" ? "signin_with" : "signup_with"}
         useOneTap={true}
         type="standard"

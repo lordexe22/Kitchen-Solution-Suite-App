@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
-import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
+import type { CredentialResponse } from '@react-oauth/google'
 import { loginUser } from '../../services/authentication/authentication'
 import type { UserLoginData } from '../../services/authentication/authentication.types'
 import styles from './AuthLoginModalWindow.module.css'
@@ -100,19 +100,14 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
   };
   // #end-function
   // #function handleGoogleAuth - Maneja la autenticación con Google
-  const handleGoogleAuth = async (googleUser: GoogleUser | null) => {
+  const handleGoogleAuth = async (response: CredentialResponse) => {
     // Limpiar errores previos
     setServerError(null);
 
-    if (!googleUser) {
-      return;
-    }
-
-    // Validar datos mínimos de Google
-    if (!googleUser.sub || !googleUser.email) {
+    if (!response.credential) {
       setError('email', {
         type: 'oauth',
-        message: 'Invalid data received from Google. Please try again.'
+        message: 'Invalid credential from Google. Please try again.'
       });
       return;
     }
@@ -120,25 +115,26 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
     setIsLoading(true);
 
     try {
+      // Enviar el token JWT completo de Google al servidor
+      // El servidor se encargará de validar la firma
       const loginData: UserLoginData = {
         platformName: 'google',
-        email: googleUser.email,
-        password: googleUser.sub
+        credential: response.credential  // ← Token JWT completo sin modificar
       };
 
-      const response = await loginUser(loginData);
+      const loginResponse = await loginUser(loginData);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setId(response.user.id);
-      useUserDataStore.getState().setFirstName(response.user.firstName);
-      useUserDataStore.getState().setLastName(response.user.lastName);
-      useUserDataStore.getState().setEmail(response.user.email);
-      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
-      useUserDataStore.getState().setType(response.user.type);
-      useUserDataStore.getState().setBranchId(response.user.branchId ?? null);
-      useUserDataStore.getState().setCompanyId(response.user.companyId ?? null);
-      useUserDataStore.getState().setPermissions(response.user.permissions ?? null);
-      useUserDataStore.getState().setState(response.user.state);
+      useUserDataStore.getState().setId(loginResponse.user.id);
+      useUserDataStore.getState().setFirstName(loginResponse.user.firstName);
+      useUserDataStore.getState().setLastName(loginResponse.user.lastName);
+      useUserDataStore.getState().setEmail(loginResponse.user.email);
+      useUserDataStore.getState().setImageUrl(loginResponse.user.imageUrl);
+      useUserDataStore.getState().setType(loginResponse.user.type);
+      useUserDataStore.getState().setBranchId(loginResponse.user.branchId ?? null);
+      useUserDataStore.getState().setCompanyId(loginResponse.user.companyId ?? null);
+      useUserDataStore.getState().setPermissions(loginResponse.user.permissions ?? null);
+      useUserDataStore.getState().setState(loginResponse.user.state);
       useUserDataStore.getState().setIsAuthenticated(true);
       
       console.log('✅ Store actualizado');

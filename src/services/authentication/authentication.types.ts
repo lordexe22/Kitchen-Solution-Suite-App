@@ -9,12 +9,14 @@ export type RegisterUserData = {
   password: string | null;
   platformToken?: string | null;
   imageUrl?: string | null;
+  credential?: string; // Para Google: token JWT completo
 };
 
 export type UserLoginData = {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
   platformName: PlatformName;
+  credential?: string;  // Para Google: token JWT completo
 };
 
 export type UserResponse = {

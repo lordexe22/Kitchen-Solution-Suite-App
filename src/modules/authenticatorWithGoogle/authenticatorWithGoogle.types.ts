@@ -2,6 +2,8 @@
 /** #info
  * in this file we define the types and interfacer for the component
 */
+import type { CredentialResponse } from '@react-oauth/google';
+
 // #interface GoogleUser - user data obtained from decoded google token
 export interface GoogleUser {
   iss: string;       // issuer
@@ -30,8 +32,8 @@ export interface GoogleConfig {
  * Props del componente AuthenticatorWithGoogle.
  */
 export interface AuthenticatorWithGoogleProps {
-  /** Callback que recibe el usuario decodificado luego de un login exitoso. */
-  onAuth: (user: GoogleUser | null) => void;
+  /** Callback que recibe el CredentialResponse completo (token JWT sin validar) */
+  onAuth: (response: CredentialResponse) => void;
   /** Modo de uso del botón, que define si se está logueando o creando una nueva cuenta. */
   mode: "login" | "register";
 }
