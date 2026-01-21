@@ -28,12 +28,8 @@ export type UserResponse = {
     lastName: string;
     imageUrl: string | null;
     type: 'admin' | 'employee' | 'guest' | 'dev';
-    branchId: number | null;
-    branchName: string | null;
-    companyId: number | null;
-    companyName: string | null;
-    companyLogoUrl: string | null;
-    permissions: any | null;
+    belongToBranchId: number | null;
+    belongToCompanyId: number | null;
     state: 'pending' | 'active' | 'suspended';
   };
 };
