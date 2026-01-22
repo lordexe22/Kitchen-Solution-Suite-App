@@ -4,7 +4,7 @@ import { NAV_ITEMS } from './DashboardNavbar.config';
 import styles from './DashboardNavbar.module.css';
 import { useState, useMemo } from 'react';
 import type { NavItem } from './DashboardNavbar.types';
-import { useUserDataStore } from '../../store/UserData.store';
+import { useUserDataStore } from '../../store/userData/UserData.store';
 import { hasPermission } from '../../config/permissions.config';
 
 const EMPLOYEE_NAV_PERMISSIONS: Partial<Record<string, { module: 'products' | 'schedules' | 'socials'; }>> = {

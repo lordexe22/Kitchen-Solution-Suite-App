@@ -5,7 +5,7 @@ import type { AppHeaderProps } from './AppHeader.types';
 import { APP_HEADER_TEXTS } from './AppHeader.config';
 import styles from './AppHeader.module.css';
 import '/src/styles/button.css';
-import { useUserDataStore } from '../../store/UserData.store';
+import { useUserDataStore } from '../../store/userData/UserData.store';
 import AuthRegisterModalWindow from '../AuthRegisterModalWindow/AuthRegisterModalWindow';
 import AuthLoginModalWindow from '../AuthLoginModalWindow/AuthLoginModalWindow';
 import SettingsModal from '../SettingsModal/SettingsModal';

@@ -5,7 +5,7 @@ import {useForm} from 'react-hook-form'
 import { AuthenticatorWithGoogle } from "../../modules/authenticatorWithGoogle"
 import type { GoogleUser } from '../../modules/authenticatorWithGoogle'
 import type { CredentialResponse } from '@react-oauth/google'
-import { useUserDataStore } from '../../store/UserData.store'
+import { useUserDataStore } from '../../store/userData/UserData.store'
 import { registerUser } from '../../services/authentication/authentication'
 import type { RegisterUserData } from '../../services/authentication/authentication.types'
 import { decodeGoogleToken } from '../../modules/authenticatorWithGoogle/authenticatorWithGoogle.utils'

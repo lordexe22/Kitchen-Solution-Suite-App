@@ -3,7 +3,7 @@
 // #section imports
 import { useState, useRef } from 'react';
 import type { ChangeEvent } from 'react';
-import { useUserDataStore } from '../../store/UserData.store';
+import { useUserDataStore } from '../../store/userData/UserData.store';
 import { uploadUserAvatar, deleteUserAvatar } from '../../services/users/userAvatar.service';
 import { useToast } from '../../hooks/useToast';
 import styles from './SettingsModal.module.css';
