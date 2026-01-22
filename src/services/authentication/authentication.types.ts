@@ -27,7 +27,7 @@ export type UserResponse = {
     firstName: string;
     lastName: string;
     imageUrl: string | null;
-    type: 'admin' | 'employee' | 'guest' | 'dev';
+    type: 'admin' | 'employee' | 'guest' | 'ownership';
     belongToBranchId: number | null;
     belongToCompanyId: number | null;
     state: 'pending' | 'active' | 'suspended';
