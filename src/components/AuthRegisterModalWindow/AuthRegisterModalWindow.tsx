@@ -174,14 +174,8 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       const userPayload = buildUserPayload(data);
       const response = await registerUser(userPayload);
       
-      // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setFirstName(response.user.firstName);
-      useUserDataStore.getState().setLastName(response.user.lastName);
-      useUserDataStore.getState().setEmail(response.user.email);
-      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
-      useUserDataStore.getState().setType(response.user.type);
-      useUserDataStore.getState().setState(response.user.state);
-      useUserDataStore.getState().setIsAuthenticated(true);
+      // Actualizar el store con los datos del usuario completos
+      useUserDataStore.getState().getUserDataFromServer(response.user);
       
       navigate('/dashboard');
       onCloseModal();
@@ -245,13 +239,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       const response = await registerUser(userPayload);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().setFirstName(response.user.firstName);
-      useUserDataStore.getState().setLastName(response.user.lastName);
-      useUserDataStore.getState().setEmail(response.user.email);
-      useUserDataStore.getState().setImageUrl(response.user.imageUrl);
-      useUserDataStore.getState().setType(response.user.type);
-      useUserDataStore.getState().setState(response.user.state);
-      useUserDataStore.getState().setIsAuthenticated(true);
+      useUserDataStore.getState().getUserDataFromServer(response.user);
       
       navigate('/dashboard');
       onCloseModal();

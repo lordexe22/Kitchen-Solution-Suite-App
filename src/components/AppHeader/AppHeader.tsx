@@ -25,8 +25,8 @@ const AppHeader = (props: AppHeaderProps) => {
   // #end-variable
 
   // #state user (Zustand store)
-  const user = useUserDataStore();
-  const userType = useUserDataStore(s => s.type);
+  const { user, isHydrated, logout } = useUserDataStore();
+  const userType = useUserDataStore(s => s.user?.type ?? null);
   // #end-state
 
   // #state showRegisterModal, showLoginModal, showSettingsModal, isLoggingOut
@@ -51,11 +51,11 @@ const AppHeader = (props: AppHeaderProps) => {
     setIsLoggingOut(true);
     try {
       await logoutUser(); // Call logout endpoint
-      user.reset(); // Reset user store data
+      logout(); // Clear user store data
       close(); // Close dropdown
     } catch (error) {
       console.error('❌ Error al cerrar sesión:', error);
-      user.reset(); // Clear store even if logout API fails
+      logout(); // Clear store even if logout API fails
       close(); // Close dropdown      
       console.warn('⚠️ Error del servidor, pero sesión cerrada localmente');
     } finally {
@@ -79,7 +79,7 @@ const AppHeader = (props: AppHeaderProps) => {
 
         {/* #section Header Right */}
         <div className={styles['header-right']}>
-          {!user.isAuthenticated ? (
+          {!isHydrated || !user ? (
             <>
               {/* #section Botones de Login y Register */}
               <button 

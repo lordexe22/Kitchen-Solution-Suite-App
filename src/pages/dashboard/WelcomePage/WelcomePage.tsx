@@ -1,12 +1,35 @@
 // src/pages/dashboard/WelcomePage/WelcomePage.tsx
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
-import { useUserDataStore } from '../../../store/UserData.store';
+import { useUserDataStore } from '../../../store/userData/UserData.store';
 import styles from './WelcomePage.module.css';
 
 const WelcomePage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
-  const user = useUserDataStore();
+  const { user, isHydrated } = useUserDataStore();
+
+  if (!isHydrated) {
+    return null; // Aún no hidratado; podría renderizar un loader
+  }
+
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <AppHeader 
+          appLogoUrl={appLogoUrl} 
+          appName='Kitchen Solutions' 
+          onLogin={() => {}}
+          onLogout={() => {}}
+        />
+        <div className={styles.content}>
+          <DashboardNavbar />
+          <main className={styles.main}>
+            <h1 className={styles.title}>No hay sesión activa</h1>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -21,27 +44,7 @@ const WelcomePage = () => {
         <main className={styles.main}>
           <h1 className={styles.title}>¡Bienvenido, {user.firstName}!</h1>
           
-          {/* #section Company Info - Solo para empleados */}
-          {user.type === 'employee' && (user.companyName || user.companyLogoUrl) && (
-            <div className={styles['company-section']}>
-              {user.companyLogoUrl && (
-                <img 
-                  src={user.companyLogoUrl} 
-                  alt={user.companyName || 'Logo de la compañía'} 
-                  className={styles['company-logo']}
-                />
-              )}
-              <div className={styles['company-info']}>
-                {user.companyName && (
-                  <div className={styles['company-name']}>{user.companyName}</div>
-                )}
-                {user.branchName && (
-                  <div className={styles['branch-name']}>{user.branchName}</div>
-                )}
-              </div>
-            </div>
-          )}
-          {/* #end-section */}
+          {/* Sección de compañía removida porque el store no expone esos campos */}
           
           <div className={styles['user-info-card']}>
             <h2>Información del Usuario</h2>
