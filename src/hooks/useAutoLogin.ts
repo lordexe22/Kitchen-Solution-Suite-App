@@ -17,14 +17,17 @@ export const useAutoLogin = () => {
       try {
         const response = await autoLogin() as UserResponse;
 
+        // Pasar user al store (puede ser null si no hay sesión activa)
         getUserDataFromServer(response.user);
 
-        if (location.pathname === '/') {
+        // Solo navegar al dashboard si hay usuario autenticado
+        if (response.user && location.pathname === '/') {
           navigate('/dashboard', { replace: true });
         }
 
       } catch {
-        // No hay sesión activa
+        // Error en la solicitud de autologin - marcar como hidratado con null
+        getUserDataFromServer(null);
       } finally {
         setIsCheckingAuth(false);
       }

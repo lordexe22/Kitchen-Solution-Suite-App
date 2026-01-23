@@ -1,46 +1,42 @@
 // src/store/UserData.store.ts
+// #section imports
 import { create } from 'zustand';
 import type { UserDataStore } from './UserData.types';
-
+import { validateAndNormalizeEditableFields, validateAndNormalizeUser } from './UserData.types';
+// #end-section
+// #store UserDataStore
 export const useUserDataStore = create<UserDataStore>()((set) => ({
-  id: null,
-  firstName: null,
-  lastName: null,
-  email: null,
-  imageUrl: null,
-  type: null,
-  belongToBranchId: null,
-  belongToCompanyId: null,
-  state: null,
-  isAuthenticated: false,
+  user: null,
+  isHydrated: false,
 
-  // Actualiza múltiples campos en una sola operación, reduciendo renders
-  update: (partial) => set(partial),
-
-  // Aplica datos de usuario devueltos por el servidor
-  getUserDataFromServer: (user) => set({
-    id: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    imageUrl: user.imageUrl ?? null,
-    type: user.type,
-    belongToBranchId: user.belongToBranchId ?? null,
-    belongToCompanyId: user.belongToCompanyId ?? null,
-    state: user.state,
-    isAuthenticated: true,
+  // Actualiza solo campos editables (cliente) - solo disponible después de hidratación
+  update: (partial) => set((state) => {
+    if (!state.isHydrated) {
+      console.warn('[UserDataStore] update rejected: store not hydrated yet');
+      return state;
+    }
+    const result = validateAndNormalizeEditableFields(partial, state.user);
+    if (!result.ok) {
+      console.warn('[UserDataStore] update rejected:', result.reason);
+      return state;
+    }
+    return { user: result.value };
   }),
 
-  reset: () => set({
-    id: null,
-    firstName: null,
-    lastName: null,
-    email: null,
-    imageUrl: null,
-    state: null,
-    type: null,
-    belongToBranchId: null,
-    belongToCompanyId: null,
-    isAuthenticated: false,
-  })
+  // Reemplaza el usuario completo con datos del servidor y marca como hidratado
+  getUserDataFromServer: (user) => {
+    if (user === null) {
+      set({ user: null, isHydrated: true });
+      return;
+    }
+    const result = validateAndNormalizeUser(user);
+    if (!result.ok) {
+      console.warn('[UserDataStore] server user rejected:', result.reason);
+      return;
+    }
+    set({ user: result.value, isHydrated: true });
+  },
+
+  logout: () => set({ user: null }),
 }));
+// #end-store

@@ -31,5 +31,5 @@ export type UserResponse = {
     belongToBranchId: number | null;
     belongToCompanyId: number | null;
     state: 'pending' | 'active' | 'suspended';
-  };
+  } | null;
 };
