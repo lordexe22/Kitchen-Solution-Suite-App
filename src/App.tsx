@@ -5,6 +5,7 @@ import { useAutoLogin } from "./hooks/useAutoLogin";
 import MainPage from "./pages/public/MainPage/MainPage";
 import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
 import DevToolsPage from "./pages/dashboard/DevToolsPage/DevToolsPage";
+import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
 // #end-section
 
 // #component App
@@ -31,6 +32,7 @@ function App() {
       <Route path="/" element={<MainPage />} />
       <Route path="/dashboard" element={<WelcomePage />} />
       <Route path="/dashboard/devtools" element={<DevToolsPage />} />
+      <Route path="/dashboard/companies" element={<CompaniesPage />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
