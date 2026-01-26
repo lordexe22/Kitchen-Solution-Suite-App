@@ -25,6 +25,10 @@ const MainPage = () => {
         onLogout={()=>{}}
       />
       {/* #end-section */}
+
+      <main className={styles['content']}>
+        <h1 className={styles['title']}>Main Page</h1>
+      </main>
     </div>
   );
   // #end-section

@@ -12,6 +12,7 @@ import SettingsModal from '../SettingsModal/SettingsModal';
 import { useDropdown } from './AppHeader.hooks';
 import { getInitials } from './AppHeader.utils';
 import { logoutUser } from '../../services/authentication/authentication';
+import { useNavigate } from 'react-router-dom';
 // #end-section
 
 // #component AppHeader
@@ -27,6 +28,7 @@ const AppHeader = (props: AppHeaderProps) => {
   // #state user (Zustand store)
   const { user, isHydrated, logout } = useUserDataStore();
   const userType = useUserDataStore(s => s.user?.type ?? null);
+  const navigate = useNavigate();
   // #end-state
 
   // #state showRegisterModal, showLoginModal, showSettingsModal, isLoggingOut
@@ -53,10 +55,12 @@ const AppHeader = (props: AppHeaderProps) => {
       await logoutUser(); // Call logout endpoint
       logout(); // Clear user store data
       close(); // Close dropdown
+      navigate('/');
     } catch (error) {
       console.error('❌ Error al cerrar sesión:', error);
       logout(); // Clear store even if logout API fails
-      close(); // Close dropdown      
+      close(); // Close dropdown
+      navigate('/');
       console.warn('⚠️ Error del servidor, pero sesión cerrada localmente');
     } finally {
       setIsLoggingOut(false); // Reset logout state
