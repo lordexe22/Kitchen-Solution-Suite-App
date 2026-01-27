@@ -6,12 +6,12 @@ import type { Company } from '../types/companies.types';
  * Store de Companies usando Zustand.
  * Solo maneja estado, NO hace fetching (eso lo hace el service).
  */
-interface CompaniesStore {
-  // Estado
+
+export interface CompaniesStore {
   companies: Company[];
-  
-  // Setters
+  isHydrated: boolean;
   setCompanies: (companies: Company[]) => void;
+  hydrateCompanies: (companies: Company[]) => void;
   addCompany: (company: Company) => void;
   updateCompany: (id: number, updates: Partial<Company>) => void;
   removeCompany: (id: number) => void;
@@ -24,30 +24,22 @@ interface CompaniesStore {
  * @example
  * const { companies, setCompanies, addCompany } = useCompaniesStore();
  */
+
 export const useCompaniesStore = create<CompaniesStore>((set) => ({
-  // Estado inicial
   companies: [],
-  
-  // Setter: Reemplazar toda la lista
+  isHydrated: false,
   setCompanies: (companies) => set({ companies }),
-  
-  // Setter: Agregar una compañía
+  hydrateCompanies: (companies) => set({ companies, isHydrated: true }),
   addCompany: (company) => set((state) => ({
     companies: [...state.companies, company]
   })),
-  
-  // Setter: Actualizar una compañía
   updateCompany: (id, updates) => set((state) => ({
     companies: state.companies.map((company) =>
       company.id === id ? { ...company, ...updates } : company
     )
   })),
-  
-  // Setter: Eliminar una compañía
   removeCompany: (id) => set((state) => ({
     companies: state.companies.filter((company) => company.id !== id)
   })),
-  
-  // Setter: Limpiar todas las compañías
-  clearCompanies: () => set({ companies: [] })
+  clearCompanies: () => set({ companies: [], isHydrated: false })
 }));

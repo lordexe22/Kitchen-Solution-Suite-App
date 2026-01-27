@@ -1,6 +1,6 @@
 /* src/components/CompanyFormModal/CompanyFormModal.tsx */
 import { useForm } from 'react-hook-form';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Company, CompanyFormData } from '../../types/companies.types';
 import { useCompaniesStore } from '../../store/Companies.store';
 import styles from './CompanyFormModal.module.css';
@@ -13,19 +13,16 @@ interface CompanyFormModalProps {
   /** Callback para cerrar el modal */
   onClose: () => void;
   /** Callback para crear o actualizar - retorna la compañía guardada */
-  onSubmit: (data: CompanyFormData) => Promise<Company>;
+  onSubmit: (data: CompanyFormData, setFormError: (error: string) => void) => Promise<Company>;
   /** Callback para subir logo */
   onUploadLogo?: (companyId: number, file: File) => Promise<Company>;
-  /** Función para verificar disponibilidad del nombre */
-  onCheckNameAvailability?: (name: string) => Promise<boolean>;
 }
 
 const CompanyFormModal = ({
   company,
   onClose,
   onSubmit,
-  onUploadLogo,
-  onCheckNameAvailability
+  onUploadLogo
 }: CompanyFormModalProps) => {
   const isEditing = !!company;
   const updateCompanyInStore = useCompaniesStore((state) => state.updateCompany);
@@ -35,8 +32,7 @@ const CompanyFormModal = ({
     handleSubmit,
     formState: { errors },
     setError,
-    clearErrors,
-    watch
+    clearErrors
   } = useForm<CompanyFormData>({
     defaultValues: {
       name: company?.name || '',
@@ -45,51 +41,10 @@ const CompanyFormModal = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingName, setIsCheckingName] = useState(false);
-  const [nameAvailable, setNameAvailable] = useState<boolean | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(company?.logoUrl || null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoRemoved, setLogoRemoved] = useState(false);
-
-  const watchedName = watch('name');
-
-  // Verificar disponibilidad del nombre al escribir (solo al crear)
-  useEffect(() => {
-    if (isEditing || !onCheckNameAvailability || !watchedName) {
-      setNameAvailable(null);
-      return;
-    }
-
-    if (company && watchedName === (company as Company).name) {
-      setNameAvailable(null);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      if (watchedName.trim().length > 0) {
-        setIsCheckingName(true);
-        try {
-          const available = await onCheckNameAvailability(watchedName.trim());
-          setNameAvailable(available);
-          if (!available) {
-            setError('name', {
-              type: 'manual',
-              message: 'Este nombre ya está en uso'
-            });
-          } else {
-            clearErrors('name');
-          }
-        } catch (error) {
-          console.error('Error checking name:', error);
-        } finally {
-          setIsCheckingName(false);
-        }
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [watchedName, isEditing, company, onCheckNameAvailability, setError, clearErrors]);
 
   // Manejar selección de archivo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,9 +84,16 @@ const CompanyFormModal = ({
 
   const handleFormSubmit = handleSubmit(async (data) => {
     setIsLoading(true);
+    // Limpiar error previo del campo name
+    clearErrors('name');
     try {
       // 1. Crear o actualizar la compañía
-      const savedCompany = await onSubmit(data);
+      const savedCompany = await onSubmit(data, (error: string) => {
+        setError('name', {
+          type: 'manual',
+          message: error
+        });
+      });
 
       // 2. Si se seleccionó un archivo Y existe onUploadLogo, subir el logo
       if (selectedFile && onUploadLogo && savedCompany?.id) {
@@ -217,12 +179,6 @@ const CompanyFormModal = ({
                   })}
                   className={styles.input}
                 />
-                {isCheckingName && (
-                  <span className={styles.checkingText}>Verificando disponibilidad...</span>
-                )}
-                {!isEditing && nameAvailable === true && (
-                  <span className={styles.successText}>✓ Nombre disponible</span>
-                )}
                 {renderErrors(errors.name)}
               </div>
 
@@ -294,12 +250,7 @@ const CompanyFormModal = ({
                 <button
                   type="submit"
                   className="btn-pri btn-md"
-                  disabled={
-                    isLoading || 
-                    isUploadingLogo || 
-                    isCheckingName || 
-                    (nameAvailable === false && !isEditing)
-                  }
+                  disabled={isLoading || isUploadingLogo}
                 >
                   {isLoading 
                     ? 'Guardando...' 

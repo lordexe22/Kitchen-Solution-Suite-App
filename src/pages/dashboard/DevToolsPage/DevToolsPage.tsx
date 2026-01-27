@@ -26,7 +26,7 @@ interface TableSchema {
   primaryKeys: string[];
 }
 
-const API_BASE = 'http://localhost:3000/api/devtools';
+const API_BASE = 'http://localhost:3000/api/dashboard/devtools';
 
 const DevToolsPage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;

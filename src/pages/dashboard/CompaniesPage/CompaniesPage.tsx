@@ -1,5 +1,6 @@
 /* src/pages/dashboard/CompaniesPage/CompaniesPage.tsx */
 import { useEffect, useState } from 'react';
+import { useCompaniesStore } from '../../../store/Companies.store';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import CompanyFormModal from '../../../components/CompanyFormModal/CompanyFormModal';
@@ -18,17 +19,25 @@ const CompaniesPage = () => {
     createCompany,
     updateCompany,
     deleteCompany,
+    archiveCompany,
     checkNameAvailability,
     uploadLogo
   } = useCompanies();
 
   const [showModal, setShowModal] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined);
+    // Solo mostrar errores de carga generales, no errores de validación de nombre
+    const isGeneralError = error && error !== 'Nombre no disponible';
 
-  // Cargar compañías al montar el componente
+
+  // Log del estado del store de compañías
+  const companiesStore = useCompaniesStore();
   useEffect(() => {
-    loadCompanies();
-  }, [loadCompanies]);
+    // Mostrar en consola el estado completo del store de compañías
+    // (incluye companies, isHydrated, etc.)
+    // eslint-disable-next-line no-console
+    console.log('[STORE] Estado actual de compañías:', companiesStore);
+  }, [companiesStore]);
 
   const handleOpenCreateModal = () => {
     setEditingCompany(undefined);
@@ -45,13 +54,13 @@ const CompaniesPage = () => {
     setEditingCompany(undefined);
   };
 
-  const handleSubmit = async (data: CompanyFormData) => {
+  const handleSubmit = async (data: CompanyFormData, setFormError: (error: string) => void) => {
     if (editingCompany) {
-      const result = await updateCompany(editingCompany.id, data);
+      const result = await updateCompany(editingCompany.id, data, setFormError);
       handleCloseModal();
       return result;
     } else {
-      const result = await createCompany(data);
+      const result = await createCompany(data, setFormError);
       handleCloseModal();
       return result;
     }
@@ -85,8 +94,8 @@ const CompaniesPage = () => {
             </button>
           </div>
 
-          {/* Error */}
-          {error && (
+          {/* Solo mostrar errores generales, no errores de validación de nombre */}
+          {isGeneralError && (
             <div className={styles.error}>
               <p>❌ {error}</p>
               <button className="btn-sec btn-sm" onClick={loadCompanies}>
@@ -120,9 +129,9 @@ const CompaniesPage = () => {
           )}
 
           {/* Companies List */}
-          {companies.length > 0 && (
+          {companies.filter(c => c.state === 'active').length > 0 && (
             <div className={styles.accordionList}>
-              {companies.map((company) => (
+              {companies.filter(company => company.state === 'active').map((company) => (
                 <div key={company.id} className={styles.companyCard}>
                   <div className={styles.companyHeader}>
                     <div className={styles.companyInfo}>
@@ -141,18 +150,43 @@ const CompaniesPage = () => {
                       </div>
                     </div>
                     <div className={styles.companyActions}>
-                      <button 
-                        className="btn-sec btn-sm"
-                        onClick={() => handleOpenEditModal(company)}
-                      >
-                        ✏️ Editar
-                      </button>
-                      <button 
-                        className="btn-ter btn-sm"
-                        onClick={() => handleDelete(company.id)}
-                      >
-                        🗑️ Eliminar
-                      </button>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button 
+                          className="btn-sec btn-sm"
+                          onClick={() => handleOpenEditModal(company)}
+                        >
+                          ✏️ Editar
+                        </button>
+                        <button 
+                          className="btn-ter btn-sm"
+                          onClick={() => handleDelete(company.id)}
+                        >
+                          🗑️ Eliminar
+                        </button>
+                        {company.state === 'active' && (
+                          <button
+                            className="btn-ter btn-sm"
+                            onClick={async () => {
+                              if (confirm('¿Seguro que deseas archivar esta compañía?')) {
+                                try {
+                                  await archiveCompany(company.id);
+                                } catch (err) {
+                                  // Mostrar error real en consola y alert
+                                  // eslint-disable-next-line no-console
+                                  console.error('Error al archivar la compañía:', err);
+                                  let msg = 'Error al archivar la compañía.';
+                                  if (err instanceof Error && err.message) {
+                                    msg += `\n${err.message}`;
+                                  }
+                                  alert(msg);
+                                }
+                              }
+                            }}
+                          >
+                            🗄️ Archivar
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -169,7 +203,6 @@ const CompaniesPage = () => {
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           onUploadLogo={uploadLogo}
-          onCheckNameAvailability={checkNameAvailability}
         />
       )}
     </div>

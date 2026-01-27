@@ -10,10 +10,10 @@ export interface Company {
   description: string | null;
   ownerId: number;
   logoUrl: string | null;
+  state: 'active' | 'archived'; // Actualizado para coincidir con el backend
+  archivedAt: string | null; // Actualizado para coincidir con el backend
   createdAt: string; // En frontend las fechas vienen como string del JSON
   updatedAt: string;
-  isActive: boolean;
-  deletedAt: string | null;
 }
 
 /**

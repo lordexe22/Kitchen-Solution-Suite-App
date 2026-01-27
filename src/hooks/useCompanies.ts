@@ -2,13 +2,11 @@
 import { useCallback, useState } from 'react';
 import { useCompaniesStore } from '../store/Companies.store';
 import type { CompanyFormData, Company } from '../types/companies.types';
+import * as companiesService from '../services/companies/companies.service';
 
 /**
  * Hook personalizado para gestionar compañías.
- * Orquesta el store (estado) y el service (HTTP).
- * 
- * NOTA: Por ahora NO incluye servicios HTTP, solo maneja estado local.
- * En el futuro se conectará al backend.
+ * Orquesta el store (estado local) y el service (HTTP al backend).
  * 
  * @returns {object} Estado y funciones para gestionar compañías
  * 
@@ -31,19 +29,14 @@ export const useCompanies = () => {
 
   /**
    * Carga todas las compañías del usuario desde el backend.
-   * TODO: Conectar con el servicio HTTP real
+   * Requiere JWT válido en cookie.
    */
   const loadCompanies = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // TODO: Reemplazar con llamada real al backend
-      // const result = await fetchUserCompanies();
-      // setCompanies(result);
-      
-      // Por ahora, datos de ejemplo
-      const mockData: Company[] = [];
-      setCompanies(mockData);
+      const response = await companiesService.getAllCompanies({ state: 'active' });
+      setCompanies(response.companies);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar compañías';
       setError(errorMessage);
@@ -54,84 +47,76 @@ export const useCompanies = () => {
   }, [setCompanies]);
 
   /**
-   * Crea una nueva compañía.
-   * TODO: Conectar con el servicio HTTP real
+   * Crea una nueva compañía en el backend.
+   * Requiere JWT válido en cookie.
    * 
    * @param {CompanyFormData} data - Datos de la compañía
+   * @param {Function} setFormError - Callback para mostrar error en el formulario
    */
-  const createCompany = useCallback(async (data: CompanyFormData): Promise<Company> => {
+  const createCompany = useCallback(async (
+    data: CompanyFormData,
+    setFormError?: (error: string) => void
+  ): Promise<Company> => {
     setIsLoading(true);
     setError(null);
     try {
-      // TODO: Reemplazar con llamada real al backend
-      // const result = await createCompanyService(data);
-      
-      // Por ahora, crear datos mock
-      const mockCompany: Company = {
-        id: Date.now(),
-        name: data.name,
-        description: data.description || null,
-        ownerId: 1, // TODO: Obtener del usuario autenticado
-        logoUrl: data.logoUrl || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isActive: true,
-        deletedAt: null
-      };
-      
-      addCompany(mockCompany);
-      return mockCompany;
+      const response = await companiesService.createCompany(data);
+      addCompany(response.company);
+      return response.company;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al crear compañía';
       setError(errorMessage);
       console.error('Error creating company:', err);
-      throw new Error(errorMessage);
+      
+      // Si es error de nombre duplicado, notificar al formulario
+      if (errorMessage.includes('already taken') || errorMessage.includes('ya está en uso')) {
+        setFormError?.(errorMessage);
+      }
+      
+      throw err;
     } finally {
       setIsLoading(false);
     }
   }, [addCompany]);
 
   /**
-   * Actualiza una compañía existente.
-   * TODO: Conectar con el servicio HTTP real
+   * Actualiza una compañía existente en el backend.
+   * Requiere JWT válido en cookie y permisos de propietario.
    * 
    * @param {number} id - ID de la compañía
    * @param {Partial<CompanyFormData>} updates - Datos a actualizar
+   * @param {Function} setFormError - Callback para mostrar error en el formulario
    */
-  const updateCompany = useCallback(async (id: number, updates: Partial<CompanyFormData>): Promise<Company> => {
+  const updateCompany = useCallback(async (
+    id: number,
+    updates: Partial<CompanyFormData>,
+    setFormError?: (error: string) => void
+  ): Promise<Company> => {
     setIsLoading(true);
     setError(null);
     try {
-      // TODO: Reemplazar con llamada real al backend
-      // const result = await updateCompanyService(id, updates);
-      
-      // Por ahora, actualizar solo en el store
-      const existingCompany = companies.find(c => c.id === id);
-      if (!existingCompany) {
-        throw new Error('Compañía no encontrada');
-      }
-      
-      const updatedCompany: Company = {
-        ...existingCompany,
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
-      
-      updateCompanyInStore(id, updatedCompany);
-      return updatedCompany;
+      const response = await companiesService.updateCompany(id, updates);
+      updateCompanyInStore(id, response.company);
+      return response.company;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al actualizar compañía';
       setError(errorMessage);
       console.error('Error updating company:', err);
-      throw new Error(errorMessage);
+      
+      // Si es error de nombre duplicado, notificar al formulario
+      if (errorMessage.includes('already taken') || errorMessage.includes('ya está en uso')) {
+        setFormError?.(errorMessage);
+      }
+      
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  }, [companies, updateCompanyInStore]);
+  }, [updateCompanyInStore]);
 
   /**
-   * Elimina (soft delete) una compañía.
-   * TODO: Conectar con el servicio HTTP real
+   * Elimina permanentemente una compañía del backend.
+   * Requiere JWT válido en cookie y permisos de propietario.
    * 
    * @param {number} id - ID de la compañía
    */
@@ -139,10 +124,7 @@ export const useCompanies = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // TODO: Reemplazar con llamada real al backend
-      // await deleteCompanyService(id);
-      
-      // Por ahora, eliminar solo del store
+      await companiesService.deleteCompany(id);
       removeCompany(id);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al eliminar compañía';
@@ -155,64 +137,66 @@ export const useCompanies = () => {
   }, [removeCompany]);
 
   /**
-   * Sube el logo de una compañía.
-   * TODO: Conectar con el servicio HTTP real
+   * Archiva una compañía en el backend.
+   * Requiere JWT válido en cookie y permisos de propietario.
    * 
-   * @param companyId - ID de la compañía
-   * @param file - Archivo de imagen
+   * @param {number} id - ID de la compañía
    */
-  const uploadLogo = useCallback(async (companyId: number, file: File): Promise<Company> => {
+  const archiveCompany = useCallback(async (id: number): Promise<Company> => {
     setIsLoading(true);
     setError(null);
     try {
-      // TODO: Reemplazar con llamada real al backend
-      // const result = await uploadCompanyLogo(companyId, file);
-      
-      // Por ahora, simular URL del logo
-      const mockLogoUrl = URL.createObjectURL(file);
-      const existingCompany = companies.find(c => c.id === companyId);
-      
-      if (!existingCompany) {
-        throw new Error('Compañía no encontrada');
-      }
-      
-      const updatedCompany: Company = {
-        ...existingCompany,
-        logoUrl: mockLogoUrl,
-        updatedAt: new Date().toISOString()
-      };
-      
-      updateCompanyInStore(companyId, updatedCompany);
-      return updatedCompany;
+      const response = await companiesService.archiveCompany(id);
+      updateCompanyInStore(id, response.company);
+      return response.company;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al subir logo';
+      const errorMessage = err instanceof Error ? err.message : 'Error al archivar compañía';
       setError(errorMessage);
-      console.error('Error uploading logo:', err);
+      console.error('Error archiving company:', err);
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [companies, updateCompanyInStore]);
+  }, [updateCompanyInStore]);
+
+  /**
+   * Reactiva una compañía archivada en el backend.
+   * Requiere JWT válido en cookie y permisos de propietario.
+   * 
+   * @param {number} id - ID de la compañía
+   */
+  const reactivateCompany = useCallback(async (id: number): Promise<Company> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await companiesService.reactivateCompany(id);
+      updateCompanyInStore(id, response.company);
+      return response.company;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al reactivar compañía';
+      setError(errorMessage);
+      console.error('Error reactivating company:', err);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [updateCompanyInStore]);
 
   /**
    * Verifica si un nombre de compañía está disponible.
-   * TODO: Conectar con el servicio HTTP real
+   * Útil para validación en tiempo real en formularios.
    * 
    * @param {string} name - Nombre a verificar
    */
   const checkNameAvailability = useCallback(async (name: string): Promise<boolean> => {
     try {
-      // TODO: Reemplazar con llamada real al backend
-      // return await checkCompanyNameAvailability(name);
-      
-      // Por ahora, verificar solo localmente
-      const exists = companies.some(c => c.name.toLowerCase() === name.toLowerCase());
-      return !exists;
+      const response = await companiesService.checkNameAvailability(name);
+      return response.available;
     } catch (err) {
       console.error('Error checking name availability:', err);
       return false;
     }
-  }, [companies]);
+  }, []);
 
   return {
     companies,
@@ -222,7 +206,8 @@ export const useCompanies = () => {
     createCompany,
     updateCompany,
     deleteCompany,
-    uploadLogo,
+    archiveCompany,
+    reactivateCompany,
     checkNameAvailability
   };
 };

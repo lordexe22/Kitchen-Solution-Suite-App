@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { autoLogin } from '../services/authentication/authentication';
 import type { UserResponse } from '../services/authentication/authentication.types';
 import { useUserDataStore } from '../store/userData/UserData.store';
+import { useCompaniesStore } from '../store/Companies.store';
+import { getAllCompanies } from '../services/companies/companies.service';
 
 export const useAutoLogin = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -11,14 +13,27 @@ export const useAutoLogin = () => {
   const location = useLocation();
 
   const getUserDataFromServer = useUserDataStore(state => state.getUserDataFromServer);
+  const hydrateCompanies = useCompaniesStore(state => state.hydrateCompanies);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await autoLogin() as UserResponse;
-
-        // Pasar user al store (puede ser null si no hay sesión activa)
         getUserDataFromServer(response.user);
+
+        // Si el usuario está autenticado, cargar compañías inmediatamente
+        if (response.user) {
+          try {
+            const companiesResp = await getAllCompanies(); // Trae todas (activas e inactivas)
+            hydrateCompanies(companiesResp.companies);
+          } catch (err) {
+            // Error crítico: bloquear app y mostrar mensaje global
+            alert('Error en el servidor. Por favor intente conectarse más tarde.');
+            hydrateCompanies([]); // Dejar el store vacío pero hidratado
+            // Opcional: podrías redirigir a una página de error
+            return;
+          }
+        }
 
         // Solo navegar al dashboard si hay usuario autenticado
         if (response.user && location.pathname === '/') {
@@ -26,8 +41,8 @@ export const useAutoLogin = () => {
         }
 
       } catch {
-        // Error en la solicitud de autologin - marcar como hidratado con null
         getUserDataFromServer(null);
+        hydrateCompanies([]); // No hay usuario, limpiar compañías
       } finally {
         setIsCheckingAuth(false);
       }
