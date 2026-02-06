@@ -19,10 +19,10 @@ export const useAutoLogin = () => {
     const checkAuth = async () => {
       try {
         const response = await autoLogin() as UserResponse;
-        getUserDataFromServer(response.user);
+        getUserDataFromServer(response.data);
 
         // Si el usuario está autenticado, cargar compañías inmediatamente
-        if (response.user) {
+        if (response.data) {
           try {
             const companiesResp = await getAllCompanies(); // Trae todas (activas e inactivas)
             hydrateCompanies(companiesResp.companies);
@@ -36,7 +36,7 @@ export const useAutoLogin = () => {
         }
 
         // Solo navegar al dashboard si hay usuario autenticado
-        if (response.user && location.pathname === '/') {
+        if (response.data && location.pathname === '/') {
           navigate('/dashboard', { replace: true });
         }
 

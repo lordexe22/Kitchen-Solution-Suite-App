@@ -123,9 +123,8 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       };
 
       const loginResponse = await loginUser(loginData);
-      
       // Actualizar el store en un solo paso
-+      useUserDataStore.getState().getUserDataFromServer(loginResponse.user);
+      useUserDataStore.getState().getUserDataFromServer(loginResponse.data);
       
       console.log('✅ Store actualizado');
       
@@ -174,9 +173,8 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
       };
 
       const response = await loginUser(loginData);
-      
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().getUserDataFromServer(response.user);
+      useUserDataStore.getState().getUserDataFromServer(response.data);
       
       navigate('/dashboard');
 

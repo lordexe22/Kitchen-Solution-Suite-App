@@ -33,19 +33,11 @@ export const uploadUserAvatar = async (file: File): Promise<UserAvatarResponse> 
   const formData = new FormData();
   formData.append('avatar', file);
 
-  const response = await fetch('http://localhost:4000/api/users/avatar', {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
+  const response = await httpClient.post('http://localhost:4000/api/users/avatar', formData, {
+    withCredentials: true,
+    headers: { 'Content-Type': 'multipart/form-data' }
   });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to upload avatar');
-  }
-
-  const data = await response.json();
-  return data.data;
+  return response.data;
 };
 // #end-function
 

@@ -20,8 +20,7 @@ export type UserLoginData = {
 };
 
 export type UserResponse = {
-  success: boolean;
-  user: {
+  data: {
     id: number;
     email: string;
     firstName: string;

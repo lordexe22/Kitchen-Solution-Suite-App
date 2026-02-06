@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import styles from './DevToolsPage.module.css';
+import { httpClient } from '../../../api/httpClient.instance';
 
 type RecordData = Record<string, unknown>;
 
@@ -67,7 +68,7 @@ const DevToolsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/tables`, withCredentials());
+      const response = await httpClient.get(`${API_BASE}/tables`, withCredentials());
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -93,7 +94,7 @@ const DevToolsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/tables/${table}/schema`, withCredentials());
+      const response = await httpClient.get(`${API_BASE}/tables/${table}/schema`, withCredentials());
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: No se pudo obtener el schema de la tabla`);
@@ -148,7 +149,7 @@ const DevToolsPage = () => {
       setLoading(true);
       setError(null);
       setCurrentRecordIndex(0);
-      const response = await fetch(`${API_BASE}/${selectedTable}${buildQueryString()}`, withCredentials());
+      const response = await httpClient.get(`${API_BASE}/${selectedTable}${buildQueryString()}`, withCredentials());
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -202,10 +203,7 @@ const DevToolsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/${selectedTable}`, withCredentials({
-        method: 'POST',
-        body: JSON.stringify(payload),
-      }));
+      const response = await httpClient.post(`${API_BASE}/${selectedTable}`, payload, withCredentials());
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -235,10 +233,7 @@ const DevToolsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/${selectedTable}`, withCredentials({
-        method: 'POST',
-        body: JSON.stringify(createFormData),
-      }));
+      const response = await httpClient.post(`${API_BASE}/${selectedTable}`, createFormData, withCredentials());
 
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
@@ -269,10 +264,7 @@ const DevToolsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/${selectedTable}/${editId}`, withCredentials({
-        method: 'PUT',
-        body: JSON.stringify(editFormData),
-      }));
+      const response = await httpClient.put(`${API_BASE}/${selectedTable}/${editId}`, editFormData, withCredentials());
 
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
@@ -297,7 +289,7 @@ const DevToolsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/${selectedTable}/${id}`, withCredentials({ method: 'DELETE' }));
+      const response = await httpClient.delete(`${API_BASE}/${selectedTable}/${id}`, withCredentials());
 
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
