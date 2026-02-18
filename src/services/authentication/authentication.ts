@@ -1,4 +1,4 @@
-// src/services/authentication/authentication.ts
+/* src/services/authentication/authentication.ts */
 // #section Imports
 import type { RegisterUserData, UserLoginData, UserResponse } from "./authentication.types";
 import { httpClient } from '../../api/httpClient.instance';
@@ -15,10 +15,9 @@ import { httpClient } from '../../api/httpClient.instance';
  * @throws {Error} Si la solicitud al backend falla.
  */
 export const registerUser = async (registerUserData: RegisterUserData): Promise<UserResponse> => {
-  return httpClient.post('/auth/register', registerUserData);
+  return httpClient.post('/public/auth/register', registerUserData);
 };
 // #end-function
-
 // #function loginUser
 /**
  * Inicia sesión de un usuario en el sistema.
@@ -30,10 +29,9 @@ export const registerUser = async (registerUserData: RegisterUserData): Promise<
  * @throws {Error} Si las credenciales son inválidas o la solicitud falla.
  */
 export const loginUser = async (loginUserData: UserLoginData): Promise<UserResponse> => {
-  return httpClient.post('/auth/login', loginUserData);
+  return httpClient.post('/public/auth/login', loginUserData);
 };
 // #end-function
-
 // #function autoLogin
 /**
  * Intenta autenticar al usuario automáticamente usando el JWT en cookie.
@@ -44,10 +42,9 @@ export const loginUser = async (loginUserData: UserLoginData): Promise<UserRespo
  * @throws {Error} Si el token es inválido o expiró.
  */
 export const autoLogin = async (): Promise<UserResponse> => {
-  return httpClient.post('/auth/auto-login');
+  return httpClient.post('/public/auth/auto-login');
 };
 // #end-function
-
 // #function logoutUser
 /**
  * Cierra la sesión del usuario eliminando el JWT de las cookies.
@@ -57,6 +54,6 @@ export const autoLogin = async (): Promise<UserResponse> => {
  * @throws {Error} Si la solicitud falla.
  */
 export const logoutUser = async (): Promise<{ success: boolean }> => {
-  return httpClient.post('/auth/logout');
+  return httpClient.post('/public/auth/logout');
 };
 // #end-function

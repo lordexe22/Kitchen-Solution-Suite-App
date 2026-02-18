@@ -175,7 +175,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       const response = await registerUser(userPayload);
       
       // Actualizar el store con los datos del usuario completos
-      useUserDataStore.getState().getUserDataFromServer(response.user);
+      useUserDataStore.getState().getUserDataFromServer(response.data);
       
       navigate('/dashboard');
       onCloseModal();
@@ -239,7 +239,7 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
       const response = await registerUser(userPayload);
       
       // Actualizar el store con los datos del usuario
-      useUserDataStore.getState().getUserDataFromServer(response.user);
+      useUserDataStore.getState().getUserDataFromServer(response.data);
       
       navigate('/dashboard');
       onCloseModal();

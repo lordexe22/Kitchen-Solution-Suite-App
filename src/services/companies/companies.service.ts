@@ -61,7 +61,8 @@ export const getAllCompanies = async (
   const queryString = queryParams.toString();
   const url = `/dashboard/company${queryString ? `?${queryString}` : ''}`;
   
-  return httpClient.get(url);
+  const response = await httpClient.get<{ data: GetAllCompaniesResponse }>(url);
+  return response.data;
 };
 // #end-function
 
@@ -76,7 +77,8 @@ export const getAllCompanies = async (
  * @throws {Error} Si el nombre ya existe o la validación falla.
  */
 export const createCompany = async (companyData: CompanyFormData): Promise<CreateCompanyResponse> => {
-  return httpClient.post('/dashboard/company', companyData);
+  const response = await httpClient.post<{ data: Company }>('/dashboard/company', companyData);
+  return { success: true, company: response.data };
 };
 // #end-function
 
@@ -95,7 +97,8 @@ export const updateCompany = async (
   companyId: number,
   companyData: Partial<CompanyFormData>
 ): Promise<UpdateCompanyResponse> => {
-  return httpClient.patch(`/dashboard/company/${companyId}`, companyData);
+  const response = await httpClient.patch<{ data: Company }>(`/dashboard/company/${companyId}`, companyData);
+  return { success: true, company: response.data };
 };
 // #end-function
 
@@ -110,7 +113,8 @@ export const updateCompany = async (
  * @throws {Error} Si el usuario no tiene permisos o la compañía no existe.
  */
 export const deleteCompany = async (companyId: number): Promise<DeleteCompanyResponse> => {
-  return httpClient.delete(`/dashboard/company/${companyId}`);
+  await httpClient.delete(`/dashboard/company/${companyId}`);
+  return { success: true };
 };
 // #end-function
 
@@ -125,7 +129,8 @@ export const deleteCompany = async (companyId: number): Promise<DeleteCompanyRes
  * @throws {Error} Si el usuario no tiene permisos o la compañía no existe.
  */
 export const archiveCompany = async (companyId: number): Promise<UpdateCompanyResponse> => {
-  return httpClient.post(`/dashboard/company/${companyId}/archive`);
+  const response = await httpClient.post<{ data: { company: Company; message: string } }>(`/dashboard/company/${companyId}/archive`);
+  return { success: true, company: response.data.company };
 };
 // #end-function
 
@@ -139,7 +144,8 @@ export const archiveCompany = async (companyId: number): Promise<UpdateCompanyRe
  * @throws {Error} Si el usuario no tiene permisos o la compañía no existe.
  */
 export const reactivateCompany = async (companyId: number): Promise<UpdateCompanyResponse> => {
-  return httpClient.post(`/dashboard/company/${companyId}/reactivate`);
+  const response = await httpClient.post<{ data: { company: Company; message: string } }>(`/dashboard/company/${companyId}/reactivate`);
+  return { success: true, company: response.data.company };
 };
 // #end-function
 
@@ -154,6 +160,7 @@ export const reactivateCompany = async (companyId: number): Promise<UpdateCompan
  * @throws {Error} Si la solicitud falla.
  */
 export const checkNameAvailability = async (name: string): Promise<CheckNameResponse> => {
-  return httpClient.get(`/dashboard/company/check-name?name=${encodeURIComponent(name)}`);
+  const response = await httpClient.get<{ data: { available: boolean } }>(`/dashboard/company/check-name?name=${encodeURIComponent(name)}`);
+  return { success: true, available: response.data.available };
 };
 // #end-function

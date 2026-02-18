@@ -33,11 +33,10 @@ export const uploadUserAvatar = async (file: File): Promise<UserAvatarResponse> 
   const formData = new FormData();
   formData.append('avatar', file);
 
-  const response = await httpClient.post('http://localhost:4000/api/users/avatar', formData, {
+  return httpClient.post<UserAvatarResponse>('/users/avatar', formData, {
     withCredentials: true,
-    headers: { 'Content-Type': 'multipart/form-data' }
+    headers: {} // Dejar que el navegador establezca el Content-Type con boundary para FormData
   });
-  return response.data;
 };
 // #end-function
 
@@ -51,7 +50,6 @@ export const uploadUserAvatar = async (file: File): Promise<UserAvatarResponse> 
  * const updatedUser = await deleteUserAvatar();
  */
 export const deleteUserAvatar = async (): Promise<UserAvatarResponse> => {
-  const response = await httpClient.delete<UserAvatarResponse>('/users/avatar');
-  return response.data;
+  return httpClient.delete<UserAvatarResponse>('/users/avatar');
 };
 // #end-function
