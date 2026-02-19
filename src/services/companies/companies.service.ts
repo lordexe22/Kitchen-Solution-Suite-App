@@ -164,3 +164,46 @@ export const checkNameAvailability = async (name: string): Promise<CheckNameResp
   return { success: true, available: response.data.available };
 };
 // #end-function
+
+// #function uploadCompanyLogo
+/**
+ * Sube o reemplaza el logo de una compañía.
+ * Envía el archivo como multipart/form-data al endpoint dedicado de logo.
+ *
+ * @async
+ * @param {number} companyId - ID de la compañía.
+ * @param {File} file - Archivo de imagen a subir.
+ * @returns {Promise<UpdateCompanyResponse>} Compañía actualizada con la nueva URL del logo.
+ * @throws {Error} Si el usuario no tiene permisos o la compañía no existe.
+ */
+export const uploadCompanyLogo = async (
+  companyId: number,
+  file: File
+): Promise<UpdateCompanyResponse> => {
+  const formData = new FormData();
+  formData.append('logo', file);
+
+  const response = await httpClient.post<{ data: { company: Company; message: string } }>(
+    `/dashboard/company/${companyId}/logo`,
+    formData
+  );
+  return { success: true, company: response.data.company };
+};
+// #end-function
+
+// #function deleteCompanyLogo
+/**
+ * Elimina el logo de una compañía.
+ *
+ * @async
+ * @param {number} companyId - ID de la compañía.
+ * @returns {Promise<UpdateCompanyResponse>} Compañía actualizada sin logo.
+ * @throws {Error} Si el usuario no tiene permisos o la compañía no existe.
+ */
+export const deleteCompanyLogo = async (companyId: number): Promise<UpdateCompanyResponse> => {
+  const response = await httpClient.delete<{ data: { company: Company; message: string } }>(
+    `/dashboard/company/${companyId}/logo`
+  );
+  return { success: true, company: response.data.company };
+};
+// #end-function

@@ -198,6 +198,43 @@ export const useCompanies = () => {
     }
   }, []);
 
+  /**
+   * Sube o reemplaza el logo de una compañía.
+   * Envía el archivo como multipart/form-data y actualiza el store.
+   *
+   * @param {number} companyId - ID de la compañía
+   * @param {File} file - Archivo de imagen a subir
+   */
+  const uploadLogo = useCallback(async (companyId: number, file: File): Promise<Company> => {
+    try {
+      const response = await companiesService.uploadCompanyLogo(companyId, file);
+      updateCompanyInStore(companyId, response.company);
+      return response.company;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al subir logo';
+      console.error('Error uploading logo:', err);
+      throw new Error(errorMessage);
+    }
+  }, [updateCompanyInStore]);
+
+  /**
+   * Elimina el logo de una compañía.
+   * Llama al backend y actualiza el store.
+   *
+   * @param {number} companyId - ID de la compañía
+   */
+  const deleteLogo = useCallback(async (companyId: number): Promise<Company> => {
+    try {
+      const response = await companiesService.deleteCompanyLogo(companyId);
+      updateCompanyInStore(companyId, response.company);
+      return response.company;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar logo';
+      console.error('Error deleting logo:', err);
+      throw new Error(errorMessage);
+    }
+  }, [updateCompanyInStore]);
+
   return {
     companies,
     isLoading,
@@ -208,6 +245,8 @@ export const useCompanies = () => {
     deleteCompany,
     archiveCompany,
     reactivateCompany,
-    checkNameAvailability
+    checkNameAvailability,
+    uploadLogo,
+    deleteLogo
   };
 };

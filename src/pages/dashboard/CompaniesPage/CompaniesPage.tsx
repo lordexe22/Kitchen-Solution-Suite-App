@@ -8,6 +8,8 @@ import { useCompanies } from '../../../hooks/useCompanies';
 import type { Company, CompanyFormData } from '../../../types/companies.types';
 import styles from './CompaniesPage.module.css';
 
+const COMPANY_PLACEHOLDER = `${import.meta.env.BASE_URL}company_placeholder.svg`;
+
 const CompaniesPage = () => {
   const appLogoUrl = `${import.meta.env.BASE_URL}page_icon.jpg`;
   
@@ -21,7 +23,8 @@ const CompaniesPage = () => {
     deleteCompany,
     archiveCompany,
     checkNameAvailability,
-    uploadLogo
+    uploadLogo,
+    deleteLogo
   } = useCompanies();
 
   const [showModal, setShowModal] = useState(false);
@@ -135,13 +138,21 @@ const CompaniesPage = () => {
                 <div key={company.id} className={styles.companyCard}>
                   <div className={styles.companyHeader}>
                     <div className={styles.companyInfo}>
-                      {company.logoUrl && (
-                        <img 
-                          src={company.logoUrl} 
-                          alt={company.name}
-                          className={styles.companyLogo}
-                        />
-                      )}
+                      <div className={styles.companyLogoWrapper}>
+                        {company.logoUrl ? (
+                          <img 
+                            src={company.logoUrl} 
+                            alt={`Logo de ${company.name}`}
+                            className={styles.companyLogo}
+                          />
+                        ) : (
+                          <img
+                            src={COMPANY_PLACEHOLDER}
+                            alt="Logo por defecto"
+                            className={styles.companyLogo}
+                          />
+                        )}
+                      </div>
                       <div className={styles.companyDetails}>
                         <h3 className={styles.companyName}>{company.name}</h3>
                         {company.description && (
@@ -203,6 +214,7 @@ const CompaniesPage = () => {
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           onUploadLogo={uploadLogo}
+          onDeleteLogo={deleteLogo}
         />
       )}
     </div>

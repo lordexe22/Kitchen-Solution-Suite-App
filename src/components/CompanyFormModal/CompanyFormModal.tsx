@@ -2,7 +2,6 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import type { Company, CompanyFormData } from '../../types/companies.types';
-import { useCompaniesStore } from '../../store/Companies.store';
 import styles from './CompanyFormModal.module.css';
 import '/src/styles/modal.css';
 import '/src/styles/button.css';
@@ -16,17 +15,19 @@ interface CompanyFormModalProps {
   onSubmit: (data: CompanyFormData, setFormError: (error: string) => void) => Promise<Company>;
   /** Callback para subir logo */
   onUploadLogo?: (companyId: number, file: File) => Promise<Company>;
+  /** Callback para eliminar logo */
+  onDeleteLogo?: (companyId: number) => Promise<Company>;
 }
 
 const CompanyFormModal = ({
   company,
   onClose,
   onSubmit,
-  onUploadLogo
+  onUploadLogo,
+  onDeleteLogo
 }: CompanyFormModalProps) => {
   const isEditing = !!company;
-  const updateCompanyInStore = useCompaniesStore((state) => state.updateCompany);
-  
+
   const {
     register,
     handleSubmit,
@@ -108,13 +109,13 @@ const CompanyFormModal = ({
         }
       }
 
-      // 3. Si se removió el logo, actualizar el store
-      if (logoRemoved && savedCompany?.id) {
+      // 3. Si se removió el logo, llamar al backend para eliminarlo
+      if (logoRemoved && !selectedFile && onDeleteLogo && savedCompany?.id) {
         try {
-          // TODO: Cuando se conecte al backend, llamar a deleteCompanyLogo
-          updateCompanyInStore(savedCompany.id, { logoUrl: null });
+          await onDeleteLogo(savedCompany.id);
         } catch (error) {
           console.error('Error removing logo:', error);
+          alert('La compañía se guardó pero hubo un error al eliminar el logo');
         }
       }
 
