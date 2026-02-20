@@ -18,6 +18,12 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/dashboard/companies',
   },
   {
+    id: 'locals',
+    label: 'Locales',
+    icon: '🏬',
+    path: '/dashboard/locals',
+  },
+  {
     id: 'employees',
     label: 'Empleados',
     icon: '👥',

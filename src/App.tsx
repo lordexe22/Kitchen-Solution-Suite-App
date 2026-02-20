@@ -6,7 +6,9 @@ import MainPage from "./pages/public/MainPage/MainPage";
 import WelcomePage from "./pages/dashboard/WelcomePage/WelcomePage";
 import DevToolsPage from "./pages/dashboard/DevToolsPage/DevToolsPage";
 import CompaniesPage from "./pages/dashboard/CompaniesPage/CompaniesPage";
+import LocalsPage from "./pages/dashboard/LocalsPage/LocalsPage";
 import { useUserDataStore } from "./store/userData/UserData.store";
+import type {JSX} from 'react';
 // #end-section
 
 // #component App
@@ -58,6 +60,7 @@ function App() {
       <Route path="/dashboard" element={<RequireAuth><WelcomePage /></RequireAuth>} />
       <Route path="/dashboard/devtools" element={<RequireAuth><DevToolsPage /></RequireAuth>} />
       <Route path="/dashboard/companies" element={<RequireAuth><CompaniesPage /></RequireAuth>} />
+      <Route path="/dashboard/locals" element={<RequireAuth><LocalsPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
