@@ -21,7 +21,6 @@ export interface SettingsModalProps {
   /** indica si el modal debe renderizarse y estar visible */
   isOpen: boolean;
   // #end-v-field
-
   // #f-field onClose - callback para cerrar el modal
   /** callback invocado para cerrar el modal */
   onClose: () => void;

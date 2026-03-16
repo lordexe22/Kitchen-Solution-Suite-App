@@ -17,23 +17,64 @@
  * @author Walter Ezequiel Puig
  */
 export interface GoogleUserRaw {
-  iss: string;              // Issuer (Google)
-  nbf: number;              // Not before
-  aud: string;              // app client ID
-  azp: string;              // Authorized party (client ID) 
-  sub: string;              // Google user ID
-  email: string;            // User email
-  email_verified: boolean;  // Is email verified
-  name: string;             // Full name
-  picture: string;          // Profile picture URL
-  given_name: string;       // Given name
-  family_name: string;      // Family name
-  iat: number;              // Issued at
-  exp: number;              // Expiration time
-  jti: string;              // JWT ID
+  // #v-field iss - emisor del token
+  /** emisor del token (Google) */
+  iss: string;
+  // #end-v-field
+  // #v-field nbf - not before timestamp
+  /** timestamp a partir del cual el token es válido */
+  nbf: number;
+  // #end-v-field
+  // #v-field aud - client ID de la aplicación
+  /** client ID de la aplicación registrado en Google */
+  aud: string;
+  // #end-v-field
+  // #v-field azp - authorized party
+  /** parte autorizada del token (client ID) */
+  azp: string;
+  // #end-v-field
+  // #v-field sub - ID único del usuario en Google
+  /** identificador único del usuario en Google */
+  sub: string;
+  // #end-v-field
+  // #v-field email - correo electrónico del usuario
+  /** correo electrónico del usuario */
+  email: string;
+  // #end-v-field
+  // #v-field email_verified - estado de verificación del correo
+  /** indica si el correo fue verificado por Google */
+  email_verified: boolean;
+  // #end-v-field
+  // #v-field name - nombre completo del usuario
+  /** nombre completo del usuario */
+  name: string;
+  // #end-v-field
+  // #v-field picture - URL de la foto de perfil
+  /** URL de la foto de perfil del usuario */
+  picture: string;
+  // #end-v-field
+  // #v-field given_name - nombre de pila del usuario
+  /** nombre de pila del usuario */
+  given_name: string;
+  // #end-v-field
+  // #v-field family_name - apellido del usuario
+  /** apellido del usuario */
+  family_name: string;
+  // #end-v-field
+  // #v-field iat - issued at timestamp
+  /** timestamp de emisión del token */
+  iat: number;
+  // #end-v-field
+  // #v-field exp - expiration timestamp
+  /** timestamp de expiración del token */
+  exp: number;
+  // #end-v-field
+  // #v-field jti - JWT ID
+  /** identificador único del JWT */
+  jti: string;
+  // #end-v-field
 }
 // #end-interface
-
 // #interface AuthSuccessResponse - Respuesta completa de autenticación exitosa
 /**
  * @description
@@ -84,7 +125,6 @@ export interface AuthSuccessResponse {
   // #end-v-field
 }
 // #end-interface
-
 // #interface ErrorData - Datos estructurados de un error de autenticación
 /**
  * @description
@@ -115,7 +155,6 @@ export interface ErrorData {
   // #end-v-field
 }
 // #end-interface
-
 // #interface AuthenticatorButtonWithGoogleProps - Props del componente AuthenticatorButtonWithGoogle
 /**
  * @description

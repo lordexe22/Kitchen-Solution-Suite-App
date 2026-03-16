@@ -54,7 +54,6 @@ export interface Company {
   // #end-v-field
 }
 // #end-interface
-
 // #type CompanyFormData - Datos del formulario para crear o editar una compañía
 /**
  * @description
@@ -71,11 +70,17 @@ export interface Company {
  * @author Walter Ezequiel Puig
  */
 export type CompanyFormData = {
+  // #v-field name - nombre de la compañía
   /** nombre de la compañía */
   name: string;
-  /** descripción opcional */
+  // #end-v-field
+  // #v-field description - descripción opcional de la compañía
+  /** descripción opcional de la compañía */
   description?: string;
-  /** URL del logo */
+  // #end-v-field
+  // #v-field logoUrl - URL del logo de la compañía
+  /** URL del logo de la compañía */
   logoUrl?: string;
+  // #end-v-field
 };
 // #end-type

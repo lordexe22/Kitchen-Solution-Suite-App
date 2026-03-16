@@ -17,7 +17,6 @@
  */
 export type PlatformName = 'local' | 'google';
 // #end-type
-
 // #type RegisterUserData - Datos necesarios para registrar un nuevo usuario
 /**
  * @description
@@ -34,25 +33,40 @@ export type PlatformName = 'local' | 'google';
  * @author Walter Ezequiel Puig
  */
 export type RegisterUserData = {
+  // #v-field platformName - plataforma de autenticación seleccionada
   /** plataforma de autenticación seleccionada */
   platformName: PlatformName;
+  // #end-v-field
+  // #v-field firstName - nombre de pila del usuario
   /** nombre de pila del usuario */
   firstName: string;
+  // #end-v-field
+  // #v-field lastName - apellido del usuario
   /** apellido del usuario */
   lastName: string;
+  // #end-v-field
+  // #v-field email - correo electrónico del usuario
   /** correo electrónico del usuario */
   email: string;
+  // #end-v-field
+  // #v-field password - contraseña para autenticación local
   /** contraseña para autenticación local (null si es OAuth) */
   password: string | null;
+  // #end-v-field
+  // #v-field platformToken - token de la plataforma OAuth
   /** token de la plataforma OAuth cuando corresponda */
   platformToken?: string | null;
+  // #end-v-field
+  // #v-field imageUrl - URL de imagen de perfil del proveedor OAuth
   /** URL de imagen de perfil proveniente del proveedor OAuth */
   imageUrl?: string | null;
+  // #end-v-field
+  // #v-field credential - token JWT de Google para validación en backend
   /** token JWT completo de Google para validación en backend */
   credential?: string;
+  // #end-v-field
 };
 // #end-type
-
 // #type UserLoginData - Datos necesarios para iniciar sesión
 /**
  * @description
@@ -69,17 +83,24 @@ export type RegisterUserData = {
  * @author Walter Ezequiel Puig
  */
 export type UserLoginData = {
+  // #v-field email - correo electrónico del usuario
   /** correo electrónico del usuario (autenticación local) */
   email?: string;
+  // #end-v-field
+  // #v-field password - contraseña del usuario
   /** contraseña del usuario (autenticación local) */
   password?: string;
+  // #end-v-field
+  // #v-field platformName - plataforma de autenticación utilizada
   /** plataforma de autenticación utilizada */
   platformName: PlatformName;
+  // #end-v-field
+  // #v-field credential - token JWT de Google para validación en backend
   /** token JWT completo de Google para validación en backend */
   credential?: string;
+  // #end-v-field
 };
 // #end-type
-
 // #type UserResponse - Respuesta del servidor al autenticar un usuario
 /**
  * @description
@@ -96,6 +117,7 @@ export type UserLoginData = {
  * @author Walter Ezequiel Puig
  */
 export type UserResponse = {
+  // #v-field data - datos del usuario autenticado
   /** datos del usuario autenticado o null si la autenticación falló */
   data: {
     /** identificador único del usuario */
@@ -117,5 +139,6 @@ export type UserResponse = {
     /** estado actual de la cuenta */
     state: 'pending' | 'active' | 'suspended';
   } | null;
+  // #end-v-field
 };
 // #end-type

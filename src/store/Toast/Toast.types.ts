@@ -17,7 +17,6 @@
  */
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 // #end-type
-
 // #interface Toast - Estructura de una notificación individual
 /**
  * @description
@@ -52,7 +51,6 @@ export interface Toast {
   // #end-v-field
 }
 // #end-interface
-
 // #interface ToastStore - Store de Zustand para gestionar toasts globales
 /**
  * @description

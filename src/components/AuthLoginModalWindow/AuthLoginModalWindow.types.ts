@@ -20,14 +20,12 @@ export interface LoginFormData {
   /** correo electrónico ingresado por el usuario */
   email: string;
   // #end-v-field
-
   // #v-field password - contraseña del usuario
   /** contraseña ingresada por el usuario */
   password: string;
   // #end-v-field
 }
 // #end-interface
-
 // #interface AuthLoginModalWindowProp - Props del componente AuthLoginModalWindow
 /**
  * @description

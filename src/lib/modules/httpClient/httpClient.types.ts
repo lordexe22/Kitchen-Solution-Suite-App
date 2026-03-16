@@ -15,7 +15,6 @@
  */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 // #end-type
-
 // #interface RetryConfig - Configuración de reintentos automáticos
 /**
  * @description
@@ -42,7 +41,6 @@ export interface RetryConfig {
   // #end-v-field
 }
 // #end-interface
-
 // #interface RequestConfig - Configuración completa de una petición HTTP
 /**
  * @description
@@ -93,7 +91,6 @@ export interface RequestConfig {
   // #end-v-field
 }
 // #end-interface
-
 // #interface ApiResponse - Respuesta normalizada de la API
 /**
  * @description
@@ -130,7 +127,6 @@ export interface ApiResponse<T> {
   // #end-v-field
 }
 // #end-interface
-
 // #interface HttpResponse - Respuesta cruda del cliente HTTP
 /**
  * @description
@@ -167,7 +163,6 @@ export interface HttpResponse<T> {
   // #end-v-field
 }
 // #end-interface
-
 // #interface HttpClientConfig - Configuración del cliente HTTP base
 /**
  * @description
@@ -206,7 +201,6 @@ export interface HttpClientConfig {
   // #end-v-field
 }
 // #end-interface
-
 // #type RequestInterceptor - Interceptor ejecutado antes de cada petición
 /**
  * @description
@@ -226,7 +220,6 @@ export type RequestInterceptor = (
   config: RequestConfig
 ) => RequestConfig | Promise<RequestConfig>;
 // #end-type
-
 // #type ResponseInterceptor - Interceptor ejecutado al recibir cada respuesta
 /**
  * @description
@@ -246,7 +239,6 @@ export type ResponseInterceptor = <T>(
   response: HttpResponse<T>
 ) => HttpResponse<T> | Promise<HttpResponse<T>>;
 // #end-type
-
 // #type ErrorInterceptor - Interceptor ejecutado cuando una petición falla
 /**
  * @description

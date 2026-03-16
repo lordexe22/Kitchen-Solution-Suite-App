@@ -34,7 +34,6 @@ export interface Local {
   // #end-v-field
 }
 // #end-interface
-
 // #interface LocalStore - Estado y acciones del store de locales
 /**
  * @description

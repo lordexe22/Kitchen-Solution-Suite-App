@@ -34,7 +34,6 @@ export interface AppHeaderProps {
   // #end-f-field
 }
 // #end-interface
-
 // #interface DropdownMenuItem - Ítem del menú desplegable del usuario
 /**
  * @description
@@ -77,7 +76,6 @@ export interface DropdownMenuItem {
   // #end-v-field
 }
 // #end-interface
-
 // #interface DropdownState - Estado de apertura del dropdown
 /**
  * @description
@@ -100,7 +98,6 @@ export interface DropdownState {
   // #end-v-field
 }
 // #end-interface
-
 // #interface UseDropdownOptions - Opciones de configuración para el hook useDropdown
 /**
  * @description
@@ -139,7 +136,6 @@ export interface UseDropdownOptions {
   // #end-f-field
 }
 // #end-interface
-
 // #interface UseDropdownReturn - Valor retornado por el hook useDropdown
 /**
  * @description
@@ -182,7 +178,6 @@ export interface UseDropdownReturn {
   // #end-f-field
 }
 // #end-interface
-
 // #type UserDisplayMode - Modo de visualización del usuario en el header
 /**
  * @description
@@ -200,7 +195,6 @@ export interface UseDropdownReturn {
  */
 export type UserDisplayMode = 'name' | 'email';
 // #end-type
-
 // #type DropdownAction - Acciones del reducer del dropdown
 /**
  * @description

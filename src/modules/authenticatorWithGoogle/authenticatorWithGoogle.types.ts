@@ -78,7 +78,6 @@ export interface GoogleUser {
   // #end-v-field
 }
 // #end-interface
-
 // #interface GoogleConfig - Datos de conexión con la API de Google
 /**
  * @description
@@ -101,7 +100,6 @@ export interface GoogleConfig {
   // #end-v-field
 }
 // #end-interface
-
 // #interface AuthenticatorWithGoogleProps - Props del componente AuthenticatorWithGoogle
 /**
  * @description

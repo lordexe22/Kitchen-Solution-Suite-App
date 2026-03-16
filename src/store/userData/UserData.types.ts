@@ -17,7 +17,6 @@
  */
 export type UserType = 'admin' | 'employee' | 'guest' | 'ownership' | null;
 // #end-type
-
 // #type UserState - Estado del usuario dentro del sistema
 /**
  * @description
@@ -35,7 +34,6 @@ export type UserType = 'admin' | 'employee' | 'guest' | 'ownership' | null;
  */
 export type UserState = 'pending' | 'active' | 'suspended' | null;
 // #end-type
-
 // #interface User - Entidad de usuario autenticado
 /**
  * @description
@@ -90,7 +88,6 @@ export interface User {
   // #end-v-field
 }
 // #end-interface
-
 // #type EditableUserFields - Campos del usuario editables desde el cliente
 /**
  * @description
@@ -108,7 +105,6 @@ export interface User {
  */
 export type EditableUserFields = Pick<User, 'firstName' | 'lastName' | 'email' | 'imageUrl'>;
 // #end-type
-
 // #interface UserDataStore - Store de datos del usuario autenticado
 /**
  * @description
@@ -126,23 +122,27 @@ export type EditableUserFields = Pick<User, 'firstName' | 'lastName' | 'email' |
  */
 export interface UserDataStore {
   // #v-field user - Entidad del usuario autenticado
+  /** entidad completa del usuario autenticado (null si no hay sesión activa) */
   user: User | null;
   // #end-v-field
   // #v-field isHydrated - Estado de hidratación del store
+  /** indica si el store fue inicializado con datos del servidor */
   isHydrated: boolean;
   // #end-v-field
   // #f-field update - Actualiza campos editables del usuario
+  /** actualiza campos editables del usuario en el store */
   update: (partial: Partial<EditableUserFields>) => void;
   // #end-f-field
   // #f-field getUserDataFromServer - Sincroniza datos del usuario desde el servidor
+  /** sincroniza los datos del usuario autenticado provenientes del servidor */
   getUserDataFromServer: (user: User | null) => void;
   // #end-f-field
   // #f-field logout - Limpia los datos del usuario al cerrar sesión
+  /** limpia los datos del usuario y restablece el store al estado inicial */
   logout: () => void;
   // #end-f-field
 };
 // #end-interface
-
 // #type ValidationResult - Resultado genérico de una operación de validación
 /**
  * @description
@@ -162,7 +162,6 @@ export interface UserDataStore {
  */
 export type ValidationResult<T> = { ok: true; value: T } | { ok: false; reason: string };
 // #end-type
-
 // #section validation helpers
 export const allowedTypes = ['admin', 'employee', 'guest', 'ownership'] as const;
 export const allowedStates = ['pending', 'active', 'suspended'] as const;

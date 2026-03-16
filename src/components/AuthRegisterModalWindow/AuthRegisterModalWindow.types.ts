@@ -20,29 +20,24 @@ export interface RegisterFormData {
   /** nombre de pila ingresado por el usuario */
   firstName: string;
   // #end-v-field
-
   // #v-field lastName - apellido del usuario
   /** apellido ingresado por el usuario */
   lastName: string;
   // #end-v-field
-
   // #v-field email - correo electrónico del usuario
   /** correo electrónico ingresado por el usuario */
   email: string;
   // #end-v-field
-
   // #v-field password - contraseña del usuario
   /** contraseña ingresada por el usuario */
   password: string;
   // #end-v-field
-
   // #v-field confirmPassword - confirmación de contraseña
   /** confirmación de la contraseña para validar coincidencia */
   confirmPassword: string;
   // #end-v-field
 }
 // #end-interface
-
 // #interface AuthRegisterModalWindowProp - Props del componente AuthRegisterModalWindow
 /**
  * @description

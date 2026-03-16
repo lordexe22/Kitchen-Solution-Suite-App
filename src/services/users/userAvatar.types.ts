@@ -31,7 +31,6 @@ export interface UserAvatarResponse {
     imageUrl: string | null;
   };
   // #end-v-field
-
   // #v-field cloudinary - datos del recurso en Cloudinary (opcional)
   /** información del recurso almacenado en Cloudinary; presente solo al subir una imagen */
   cloudinary?: {

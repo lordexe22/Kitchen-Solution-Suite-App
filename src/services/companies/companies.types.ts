@@ -21,19 +21,16 @@ export interface GetAllCompaniesParams {
   /** filtra compañías por su estado operativo */
   state?: 'active' | 'archived';
   // #end-v-field
-
   // #v-field page - número de página para paginación
   /** número de página solicitada en la paginación */
   page?: number;
   // #end-v-field
-
   // #v-field limit - cantidad de resultados por página
   /** cantidad máxima de resultados a retornar por página */
   limit?: number;
   // #end-v-field
 }
 // #end-interface
-
 // #interface GetAllCompaniesResponse - Respuesta del endpoint de listado de compañías
 /**
  * @description
@@ -54,34 +51,28 @@ export interface GetAllCompaniesResponse {
   /** indica si la solicitud fue procesada correctamente */
   success: boolean;
   // #end-v-field
-
   // #v-field companies - lista de compañías retornadas
   /** listado de compañías del usuario autenticado */
   companies: Company[];
   // #end-v-field
-
   // #v-field total - total de compañías disponibles
   /** total de compañías sin aplicar paginación */
   total: number;
   // #end-v-field
-
   // #v-field page - página actual
   /** número de página retornado */
   page: number;
   // #end-v-field
-
   // #v-field limit - límite aplicado
   /** cantidad de resultados por página aplicada */
   limit: number;
   // #end-v-field
-
   // #v-field totalPages - total de páginas disponibles
   /** total de páginas calculadas según el limit y el total */
   totalPages: number;
   // #end-v-field
 }
 // #end-interface
-
 // #interface CreateCompanyResponse - Respuesta del endpoint de creación de compañía
 /**
  * @description
@@ -102,14 +93,12 @@ export interface CreateCompanyResponse {
   /** indica si la compañía fue creada correctamente */
   success: boolean;
   // #end-v-field
-
   // #v-field company - compañía creada
   /** datos de la compañía recién creada */
   company: Company;
   // #end-v-field
 }
 // #end-interface
-
 // #interface UpdateCompanyResponse - Respuesta del endpoint de actualización de compañía
 /**
  * @description
@@ -130,14 +119,12 @@ export interface UpdateCompanyResponse {
   /** indica si la compañía fue actualizada correctamente */
   success: boolean;
   // #end-v-field
-
   // #v-field company - compañía actualizada
   /** datos actualizados de la compañía */
   company: Company;
   // #end-v-field
 }
 // #end-interface
-
 // #interface DeleteCompanyResponse - Respuesta del endpoint de eliminación de compañía
 /**
  * @description
@@ -160,7 +147,6 @@ export interface DeleteCompanyResponse {
   // #end-v-field
 }
 // #end-interface
-
 // #interface CheckNameResponse - Respuesta del endpoint de verificación de nombre
 /**
  * @description
@@ -181,7 +167,6 @@ export interface CheckNameResponse {
   /** indica si la solicitud fue procesada correctamente */
   success: boolean;
   // #end-v-field
-
   // #v-field available - indica si el nombre está disponible
   /** true si el nombre no está registrado y puede ser utilizado */
   available: boolean;
