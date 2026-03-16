@@ -1,6 +1,6 @@
 /* src/pages/dashboard/CompaniesPage/CompaniesPage.tsx */
 import { useEffect, useState } from 'react';
-import { useCompaniesStore } from '../../../store/Companies.store';
+import { useCompaniesStore } from '../../../store/Companies';
 import AppHeader from '../../../components/AppHeader';
 import DashboardNavbar from '../../../components/DashboardNavbar';
 import CompanyFormModal from '../../../components/CompanyFormModal/CompanyFormModal';

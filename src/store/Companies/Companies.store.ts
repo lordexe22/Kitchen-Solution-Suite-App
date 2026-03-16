@@ -1,30 +1,18 @@
-/* src/store/Companies.store.ts */
+/* src/store/Companies/Companies.store.ts */
 import { create } from 'zustand';
-import type { Company } from '../types/companies.types';
+import type { Company } from '../../types/companies.types';
+import type { CompaniesStore } from './Companies.types';
 
+// #store useCompaniesStore - store global para gestionar el estado de compañías
 /**
- * Store de Companies usando Zustand.
- * Solo maneja estado, NO hace fetching (eso lo hace el service).
- */
-
-export interface CompaniesStore {
-  companies: Company[];
-  isHydrated: boolean;
-  setCompanies: (companies: Company[]) => void;
-  hydrateCompanies: (companies: Company[]) => void;
-  addCompany: (company: Company) => void;
-  updateCompany: (id: number, updates: Partial<Company>) => void;
-  removeCompany: (id: number) => void;
-  clearCompanies: () => void;
-}
-
-/**
- * Hook del store de Companies.
- * 
+ * @description Hook del store de Companies.
+ * @purpose Centralizar el estado de compañías y proveer acciones para su manipulación sincrónica.
+ * @context Usado en hooks y componentes del dashboard. El fetching lo realizan los services, no este store.
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  * @example
  * const { companies, setCompanies, addCompany } = useCompaniesStore();
  */
-
 export const useCompaniesStore = create<CompaniesStore>((set) => ({
   companies: [],
   isHydrated: false,
@@ -43,3 +31,4 @@ export const useCompaniesStore = create<CompaniesStore>((set) => ({
   })),
   clearCompanies: () => set({ companies: [], isHydrated: false })
 }));
+// #end-store

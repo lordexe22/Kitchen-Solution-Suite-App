@@ -1,6 +1,6 @@
 /* src/hooks/useCompanies.ts */
 import { useCallback, useState } from 'react';
-import { useCompaniesStore } from '../store/Companies.store';
+import { useCompaniesStore } from '../store/Companies';
 import type { CompanyFormData, Company } from '../types/companies.types';
 import * as companiesService from '../services/companies/companies.service';
 

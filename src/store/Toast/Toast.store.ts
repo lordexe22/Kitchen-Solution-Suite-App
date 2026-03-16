@@ -1,24 +1,25 @@
-/* src/store/Toast.store.ts */
+/* src/store/Toast/Toast.store.ts */
 import { create } from 'zustand';
 import type { ToastStore, Toast } from './Toast.types';
 
-// #function generateId
+// #function generateId - genera un ID único para cada toast
 /**
- * Genera un ID único para cada toast
+ * Genera un ID único para cada toast.
  */
 const generateId = (): string => `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 // #end-function
 
-// #store useToastStore
+// #store useToastStore - store global para gestionar toasts/notificaciones temporales
 /**
- * Store global para gestionar toasts/notificaciones temporales
- * 
- * Uso:
- * ```tsx
+ * @description Store global para gestionar toasts/notificaciones temporales.
+ * @purpose Centralizar la emisión y eliminación de notificaciones transitorias del sistema.
+ * @context Consumido por el hook useToast y directamente por componentes que necesiten emitir notificaciones.
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
+ * @example
  * const { success, error } = useToastStore();
  * success('¡Operación exitosa!');
  * error('Algo salió mal');
- * ```
  */
 export const useToastStore = create<ToastStore>((set) => ({
   toasts: [],
@@ -28,14 +29,13 @@ export const useToastStore = create<ToastStore>((set) => ({
     const newToast: Toast = {
       id,
       ...toast,
-      duration: toast.duration ?? 5000, // 5s por defecto
+      duration: toast.duration ?? 5000,
     };
 
     set((state) => ({
       toasts: [...state.toasts, newToast],
     }));
 
-    // Auto-eliminar si tiene duración
     if (newToast.duration && newToast.duration > 0) {
       setTimeout(() => {
         set((state) => ({
@@ -55,7 +55,6 @@ export const useToastStore = create<ToastStore>((set) => ({
     set({ toasts: [] });
   },
 
-  // Helpers para tipos específicos
   success: (message, duration) => {
     set((state) => {
       state.addToast({ type: 'success', message, duration });

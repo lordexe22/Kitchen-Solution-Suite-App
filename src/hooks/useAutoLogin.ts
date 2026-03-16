@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { autoLogin } from '../services/authentication/authentication';
 import type { UserResponse } from '../services/authentication/authentication.types';
 import { useUserDataStore } from '../store/userData/UserData.store';
-import { useCompaniesStore } from '../store/Companies.store';
+import { useCompaniesStore } from '../store/Companies';
 import { getAllCompanies } from '../services/companies/companies.service';
 
 export const useAutoLogin = () => {
@@ -28,9 +28,8 @@ export const useAutoLogin = () => {
             hydrateCompanies(companiesResp.companies);
           } catch (err) {
             // Error crítico: bloquear app y mostrar mensaje global
-            alert('Error en el servidor. Por favor intente conectarse más tarde.');
+            console.error('Error fetching companies:', err);
             hydrateCompanies([]); // Dejar el store vacío pero hidratado
-            // Opcional: podrías redirigir a una página de error
             return;
           }
         }
@@ -52,7 +51,8 @@ export const useAutoLogin = () => {
   }, [
     getUserDataFromServer,
     navigate,
-    location,
+    hydrateCompanies,
+    location
   ]);
 
   return { isCheckingAuth };

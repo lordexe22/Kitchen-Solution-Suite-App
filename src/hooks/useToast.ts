@@ -1,5 +1,5 @@
 /* src/hooks/useToast.ts */
-import { useToastStore } from '../store/Toast.store';
+import { useToastStore } from '../store/Toast';
 
 // #hook useToast
 /**

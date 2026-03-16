@@ -1,6 +1,21 @@
 // AuthenticatorButtonWithGoogle.types.ts
-/* #info - This file define the types and interfaces for the component */
-// #interface GoogleUserRaw - Raw user data obtained from decoded Google token
+/* #info - Tipos e interfaces del componente AuthenticatorButtonWithGoogle */
+
+// #interface GoogleUserRaw - Datos crudos del usuario obtenidos del token de Google decodificado
+/**
+ * @description
+ * Estructura cruda del payload de un token de ID de Google tras su decodificación.
+ *
+ * @purpose
+ * Modelar los datos exactos que retorna Google en el token para su procesamiento interno.
+ *
+ * @context
+ * Utilizado internamente por el módulo AuthenticatorButtonWithGoogle al decodificar el token JWT.
+ *
+ * @since 1.0.0
+ *
+ * @author Walter Ezequiel Puig
+ */
 export interface GoogleUserRaw {
   iss: string;              // Issuer (Google)
   nbf: number;              // Not before
@@ -18,7 +33,22 @@ export interface GoogleUserRaw {
   jti: string;              // JWT ID
 }
 // #end-interface
-// #interface AuthSuccessResponse - Complete authentication response
+
+// #interface AuthSuccessResponse - Respuesta completa de autenticación exitosa
+/**
+ * @description
+ * Datos normalizados retornados al componente consumidor luego de una autenticación exitosa con Google.
+ *
+ * @purpose
+ * Proveer al consumidor del componente toda la información del usuario autenticado en una estructura limpia.
+ *
+ * @context
+ * Retornado por el callback onSuccess del componente AuthenticatorButtonWithGoogle.
+ *
+ * @since 1.0.0
+ *
+ * @author Walter Ezequiel Puig
+ */
 export interface AuthSuccessResponse {
   // #v-field email - email address
   /** User email address */
@@ -54,13 +84,29 @@ export interface AuthSuccessResponse {
   // #end-v-field
 }
 // #end-interface
-// #interface ErrorData - Structured error data
+
+// #interface ErrorData - Datos estructurados de un error de autenticación
+/**
+ * @description
+ * Estructura de datos que describe un error ocurrido durante el proceso de autenticación.
+ *
+ * @purpose
+ * Proveer información estructurada y tipada sobre los errores para su manejo por el consumidor.
+ *
+ * @context
+ * Retornado por el callback onError del componente AuthenticatorButtonWithGoogle.
+ *
+ * @since 1.0.0
+ *
+ * @author Walter Ezequiel Puig
+ */
 export interface ErrorData {
   // #v-field message - Error message
   /** Error message describing what went wrong */
   message: string;
   // #end-v-field
-  // #v-field code - Error code identifier
+  // #v-field code - Código identificador del error
+  /** código identificador del tipo de error */
   code: string;
   // #end-v-field
   // #v-field timestamp - ISO timestamp of when the error occurred
@@ -69,7 +115,22 @@ export interface ErrorData {
   // #end-v-field
 }
 // #end-interface
-// #interface AuthenticatorButtonWithGoogleProps - Props for AuthenticatorButtonWithGoogle component
+
+// #interface AuthenticatorButtonWithGoogleProps - Props del componente AuthenticatorButtonWithGoogle
+/**
+ * @description
+ * Props del componente AuthenticatorButtonWithGoogle.
+ *
+ * @purpose
+ * Definir el contrato de entrada del componente de botón de autenticación con Google.
+ *
+ * @context
+ * Utilizado en los componentes de login y registro que incorporan autenticación OAuth con Google.
+ *
+ * @since 1.0.0
+ *
+ * @author Walter Ezequiel Puig
+ */
 export interface AuthenticatorButtonWithGoogleProps {
   // #f-field onSuccess - Callback for successful authentication
   /** Callback that receives the authentication data on success */
