@@ -7,14 +7,8 @@ import { useUserDataStore } from '../../store/userData/UserData.store';
 import { uploadUserAvatar, deleteUserAvatar } from '../../services/users/userAvatar.service';
 import { useToast } from '../../hooks/useToast';
 import styles from './SettingsModal.module.css';
+import type { SettingsModalProps } from './SettingsModal.types';
 // #end-section
-
-// #interface SettingsModalProps
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-// #end-interface
 
 // #component SettingsModal
 const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {

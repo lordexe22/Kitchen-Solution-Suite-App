@@ -13,18 +13,8 @@ import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
 import { detectServerErrorType, getServerErrorMessage } from '../../utils/detectServerError/detectServerError'
 import { useNavigate } from 'react-router-dom';
+import type { LoginFormData, AuthLoginModalWindowProp } from './AuthLoginModalWindow.types';
 // #end-section
-// #interface LoginFormData
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-// #end-interface
-// #interface AuthLoginModalWindowProp
-interface AuthLoginModalWindowProp {
-  onCloseModal: () => void
-}
-// #end-interface
 // #component AuthLoginModalWindow
 const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
   // #variable register, handleSubmit, errors

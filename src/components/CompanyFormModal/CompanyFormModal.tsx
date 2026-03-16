@@ -1,23 +1,13 @@
 /* src/components/CompanyFormModal/CompanyFormModal.tsx */
+// #section imports
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import type { Company, CompanyFormData } from '../../types/companies.types';
+import type { CompanyFormData } from '../../types/companies.types';
+import type { CompanyFormModalProps } from './CompanyFormModal.types';
 import styles from './CompanyFormModal.module.css';
 import '/src/styles/modal.css';
 import '/src/styles/button.css';
-
-interface CompanyFormModalProps {
-  /** Si se está editando una compañía existente */
-  company?: Company;
-  /** Callback para cerrar el modal */
-  onClose: () => void;
-  /** Callback para crear o actualizar - retorna la compañía guardada */
-  onSubmit: (data: CompanyFormData, setFormError: (error: string) => void) => Promise<Company>;
-  /** Callback para subir logo */
-  onUploadLogo?: (companyId: number, file: File) => Promise<Company>;
-  /** Callback para eliminar logo */
-  onDeleteLogo?: (companyId: number) => Promise<Company>;
-}
+// #end-section
 
 const CompanyFormModal = ({
   company,

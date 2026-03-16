@@ -2,43 +2,8 @@
 // #section Imports
 import type { Company, CompanyFormData } from '../../types/companies.types';
 import { httpClient } from '../../api/httpClient.instance';
+import type { GetAllCompaniesParams, GetAllCompaniesResponse, CreateCompanyResponse, UpdateCompanyResponse, DeleteCompanyResponse, CheckNameResponse } from './companies.types';
 // #end-section
-
-// #types
-export interface GetAllCompaniesParams {
-  state?: 'active' | 'archived';
-  page?: number;
-  limit?: number;
-}
-
-export interface GetAllCompaniesResponse {
-  success: boolean;
-  companies: Company[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-export interface CreateCompanyResponse {
-  success: boolean;
-  company: Company;
-}
-
-export interface UpdateCompanyResponse {
-  success: boolean;
-  company: Company;
-}
-
-export interface DeleteCompanyResponse {
-  success: boolean;
-}
-
-export interface CheckNameResponse {
-  success: boolean;
-  available: boolean;
-}
-// #end-types
 
 // #function getAllCompanies
 /**

@@ -1,22 +1,9 @@
 // src/services/users/userAvatar.service.ts
 
+// #section imports
 import { httpClient } from '../../api/httpClient.instance';
-
-// #interface UserAvatarResponse
-interface UserAvatarResponse {
-  user: {
-    id: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    imageUrl: string | null;
-  };
-  cloudinary?: {
-    publicId: string;
-    url: string;
-  };
-}
-// #end-interface
+import type { UserAvatarResponse } from './userAvatar.types';
+// #end-section
 
 // #function uploadUserAvatar
 /**

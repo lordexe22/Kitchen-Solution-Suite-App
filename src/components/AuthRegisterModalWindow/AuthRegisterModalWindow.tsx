@@ -15,21 +15,8 @@ import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
 import { getServerErrorMessage, detectServerErrorType } from '../../utils/detectServerError/detectServerError'
 import { useNavigate } from 'react-router-dom'
+import type { RegisterFormData, AuthRegisterModalWindowProp } from './AuthRegisterModalWindow.types';
 // #end-section
-// #interface RegisterFormData
-interface RegisterFormData{
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-// #end-interface
-// #interface AuthRegisterModalWindowProp
-interface AuthRegisterModalWindowProp {
-  onCloseModal: () => void
-}
-// #end-interface
 // #component AuthRegisterModalWindow
 const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   // #variable register, handleSubmit, errors, watch
