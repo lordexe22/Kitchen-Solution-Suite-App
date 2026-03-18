@@ -42,7 +42,7 @@ const AppHeader = (props: AppHeaderProps) => {
   const { isOpen, toggle, dropdownRef, handleItemClick, close } = useDropdown();
   // #end-hook
 
-  // #function handleLogout
+  // #function handleLogout - Maneja el cierre de sesión del usuario
   /**
    * @description Maneja el cierre de sesión del usuario.
    * @purpose Encapsular el flujo completo de logout: petición al servidor, limpieza del store y redirección.

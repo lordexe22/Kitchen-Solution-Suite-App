@@ -4,7 +4,7 @@ import type { RegisterUserData, UserLoginData, UserResponse } from "./authentica
 import { httpClient } from '../../api/httpClient.instance';
 // #end-section
 
-// #function registerUser
+// #function registerUser - Registra un nuevo usuario en el sistema
 /**
  * @description Registra un nuevo usuario en el sistema.
  * @purpose Centralizar la llamada al endpoint de registro, delegando las validaciones al backend.
@@ -19,7 +19,7 @@ export const registerUser = async (registerUserData: RegisterUserData): Promise<
   return httpClient.post('/public/auth/register', registerUserData);
 };
 // #end-function
-// #function loginUser
+// #function loginUser - Inicia sesión de un usuario en el sistema
 /**
  * @description Inicia sesión de un usuario en el sistema.
  * @purpose Centralizar la llamada al endpoint de login, delegando las validaciones al backend.
@@ -34,7 +34,7 @@ export const loginUser = async (loginUserData: UserLoginData): Promise<UserRespo
   return httpClient.post('/public/auth/login', loginUserData);
 };
 // #end-function
-// #function autoLogin
+// #function autoLogin - Intenta autenticar al usuario usando el JWT almacenado en cookie
 /**
  * @description Intenta autenticar al usuario automáticamente usando el JWT almacenado en cookie.
  * @purpose Recuperar la sesión del usuario al recargar la aplicación sin requerir login manual.
@@ -48,7 +48,7 @@ export const autoLogin = async (): Promise<UserResponse> => {
   return httpClient.post('/public/auth/auto-login');
 };
 // #end-function
-// #function logoutUser
+// #function logoutUser - Cierra la sesión del usuario eliminando el JWT de las cookies
 /**
  * @description Cierra la sesión del usuario eliminando el JWT de las cookies del servidor.
  * @purpose Garantizar que el token sea invalidado en el servidor al cerrar sesión.

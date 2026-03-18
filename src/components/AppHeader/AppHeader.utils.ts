@@ -1,4 +1,4 @@
-// #function getInitials
+// #function getInitials - Obtiene las iniciales de un nombre completo
 /**
  * @description Obtiene las iniciales de un nombre completo.
  * @purpose Generar un placeholder visual para el avatar cuando el usuario no tiene imagen de perfil.
@@ -24,7 +24,7 @@ export const getInitials = (name: string): string => {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };
 // #end-function
-// #function truncateText
+// #function truncateText - Trunca un texto si excede la longitud máxima permitida
 /**
  * @description Trunca un texto si excede la longitud máxima permitida.
  * @purpose Evitar que textos largos rompan el layout del header.
@@ -43,7 +43,7 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.slice(0, maxLength - 3) + '...';
 };
 // #end-function
-// #function buildFullUrl
+// #function buildFullUrl - Construye una URL completa a partir de una URL relativa o absoluta
 /**
  * @description Construye una URL completa a partir de una URL relativa o absoluta.
  * @purpose Normalizar URLs de recursos para que sean siempre absolutas y utilizables por el navegador.
@@ -77,7 +77,7 @@ export const buildFullUrl = (url: string, baseUrl?: string): string => {
   return `${cleanBaseUrl}${cleanUrl}`;
 };
 // #end-function
-// #function isValidUrl
+// #function isValidUrl - Valida si una cadena tiene un formato de URL válido
 /**
  * @description Valida si una cadena tiene un formato de URL válido.
  * @purpose Prevenir que URLs malformadas sean enviadas al navegador o al servidor.
@@ -102,7 +102,7 @@ export const isValidUrl = (url: string): boolean => {
   }
 };
 // #end-function
-// #function getUserDisplayText
+// #function getUserDisplayText - Obtiene el texto del usuario según el modo de visualización
 /**
  * @description Obtiene el texto a mostrar del usuario según el modo de visualización seleccionado.
  * @purpose Centralizar la lógica de selección y truncado del texto del usuario en el header.
@@ -125,7 +125,7 @@ export const getUserDisplayText = (
   return maxLength ? truncateText(text, maxLength) : text;
 };
 // #end-function
-// #function getAvatarSrc
+// #function getAvatarSrc - Obtiene la URL final del avatar con fallback al ícono por defecto
 /**
  * @description Obtiene la URL final del avatar con fallback al ícono por defecto.
  * @purpose Garantizar que siempre haya una imagen válida para el avatar, incluso si el usuario no tiene una asignada.

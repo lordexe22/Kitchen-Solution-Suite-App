@@ -3,7 +3,7 @@
 import { useReducer, useEffect, useRef, useCallback } from 'react';
 import type {DropdownState, DropdownAction, UseDropdownOptions, UseDropdownReturn} from './AppHeader.types'
 // #end-section
-// #function dropdownReducer
+// #function dropdownReducer - Gestiona las transiciones de estado del dropdown
 /**
  * @description Reducer que gestiona las transiciones de estado del dropdown.
  * @purpose Centralizar la lógica de cambio de estado del dropdown mediante acciones definidas.

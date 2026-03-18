@@ -34,7 +34,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
-  // #function handleFileChange
+  // #function handleFileChange - Procesa la selección de archivo de imagen para el avatar del usuario
   /**
    * @description Procesa la selección de archivo de imagen para el avatar del usuario.
    * @purpose Validar el archivo seleccionado y generar una URL de preview antes de la subida.
@@ -71,8 +71,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     reader.readAsDataURL(file);
   };
   // #end-function
-
-  // #function handleUpload
+  // #function handleUpload - Sube el archivo de avatar seleccionado al servidor
   /**
    * @description Sube el archivo de avatar seleccionado al servidor.
    * @purpose Persistir la imagen de avatar del usuario a través del servicio correspondiente y actualizar el store.
@@ -102,8 +101,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     }
   };
   // #end-function
-
-  // #function handleDelete
+  // #function handleDelete - Elimina el avatar actual del usuario
   /**
    * @description Elimina el avatar actual del usuario tras confirmación explícita.
    * @purpose Permitir al usuario remover su foto de perfil y volver al estado sin avatar.
@@ -133,10 +131,13 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     }
   };
   // #end-function
-
-  // #function handleClearSelection
+  // #function handleClearSelection - Limpia la selección de archivo del estado local
   /**
-   * Limpia la selección de archivo.
+   * @description Limpia la selección de archivo del estado local y resetea el input de archivo.
+   * @purpose Permitir al usuario cancelar una selección antes de confirmar la subida del avatar.
+   * @context Utilizado por SettingsModal en el botón de cancelación cuando hay un archivo seleccionado.
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const handleClearSelection = () => {
     setSelectedFile(null);
@@ -147,10 +148,14 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     }
   };
   // #end-function
-
-  // #function handleBackdropClick
+  // #function handleBackdropClick - Cierra el modal al hacer clic en el backdrop
   /**
-   * Cierra el modal al hacer click en el backdrop.
+   * @description Cierra el modal cuando el usuario hace clic directamente sobre el backdrop.
+   * @purpose Proveer un mecanismo intuitivo de cierre sin interferir con clics dentro del contenido del modal.
+   * @context Utilizado por SettingsModal como handler del evento click en el contenedor backdrop exterior.
+   * @param e evento de clic del mouse sobre el elemento backdrop
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {

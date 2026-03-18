@@ -5,7 +5,7 @@ import { httpClient } from '../../api/httpClient.instance';
 import type { GetAllCompaniesParams, GetAllCompaniesResponse, CreateCompanyResponse, UpdateCompanyResponse, DeleteCompanyResponse, CheckNameResponse } from './companies.types';
 // #end-section
 
-// #function getAllCompanies
+// #function getAllCompanies - Obtiene todas las compañías del usuario con filtrado y paginación
 /**
  * @description Obtiene todas las compañías del usuario autenticado con filtrado y paginación.
  * @purpose Proveer al dashboard una lista de compañías paginada y filtrable por estado.
@@ -32,7 +32,7 @@ export const getAllCompanies = async (
 };
 // #end-function
 
-// #function createCompany
+// #function createCompany - Crea una nueva compañía asociada al usuario autenticado
 /**
  * @description Crea una nueva compañía asociada al usuario autenticado.
  * @purpose Permitir al usuario registrar una nueva compañía en el sistema.
@@ -49,7 +49,7 @@ export const createCompany = async (companyData: CompanyFormData): Promise<Creat
 };
 // #end-function
 
-// #function updateCompany
+// #function updateCompany - Actualiza los datos de una compañía existente
 /**
  * @description Actualiza los datos de una compañía existente del usuario autenticado.
  * @purpose Permitir la edición parcial o total de los datos de una compañía.
@@ -70,7 +70,7 @@ export const updateCompany = async (
 };
 // #end-function
 
-// #function deleteCompany
+// #function deleteCompany - Elimina permanentemente una compañía del usuario autenticado
 /**
  * @description Elimina permanentemente una compañía del usuario autenticado.
  * @purpose Proveer la operación de borrado definitivo de una compañía del sistema.
@@ -87,7 +87,7 @@ export const deleteCompany = async (companyId: number): Promise<DeleteCompanyRes
 };
 // #end-function
 
-// #function archiveCompany
+// #function archiveCompany - Archiva una compañía ocultándola de las listas activas
 /**
  * @description Archiva una compañía, ocultándola de las listas activas por defecto.
  * @purpose Proveer una alternativa a la eliminación definitiva que preserve los datos históricos.
@@ -104,7 +104,7 @@ export const archiveCompany = async (companyId: number): Promise<UpdateCompanyRe
 };
 // #end-function
 
-// #function reactivateCompany
+// #function reactivateCompany - Reactiva una compañía previamente archivada
 /**
  * @description Reactiva una compañía previamente archivada.
  * @purpose Restaurar una compañía archivada al estado activo para que vuelva a aparecer en las listas.
@@ -121,7 +121,7 @@ export const reactivateCompany = async (companyId: number): Promise<UpdateCompan
 };
 // #end-function
 
-// #function checkNameAvailability
+// #function checkNameAvailability - Verifica si un nombre de compañía está disponible
 /**
  * @description Verifica si un nombre de compañía está disponible para su uso.
  * @purpose Habilitar la validación en tiempo real del nombre de compañía en formularios de creación/edición.
@@ -138,7 +138,7 @@ export const checkNameAvailability = async (name: string): Promise<CheckNameResp
 };
 // #end-function
 
-// #function uploadCompanyLogo
+// #function uploadCompanyLogo - Sube o reemplaza el logo de una compañía
 /**
  * @description Sube o reemplaza el logo de una compañía enviando el archivo como multipart/form-data.
  * @purpose Permitir a los usuarios personalizar la imagen de su compañía en el sistema.
@@ -165,7 +165,7 @@ export const uploadCompanyLogo = async (
 };
 // #end-function
 
-// #function deleteCompanyLogo
+// #function deleteCompanyLogo - Elimina el logo de una compañía
 /**
  * @description Elimina el logo de una compañía.
  * @purpose Permitir al usuario remover la imagen de su compañía sin afectar otros datos.

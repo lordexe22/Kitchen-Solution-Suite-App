@@ -20,7 +20,7 @@ const ServerErrorBanner = ({
   onClose, 
   autoCloseDelay = 5000 
 }: ServerErrorBannerProps) => {
-  // #function closeBannerAfterDelay
+  // #function closeBannerAfterDelay - Inicia temporizador para cerrar el banner automáticamente
   /**
    * @description Inicia un temporizador para cerrar el banner automáticamente tras el tiempo configurado.
    * @purpose Automatizar el cierre del banner de error sin intervención del usuario.

@@ -175,10 +175,13 @@ export const handleGoogleError = (
 // #end-function
 // #function validateWidth - Validates width prop
 /**
- * Validates that width is a positive pixel number.
- * @param width Width as string
- * @returns boolean true if valid
- * @version 1.0.0
+ * @description Valida que el valor de ancho recibido sea un número de píxeles positivo o esté ausente.
+ * @purpose Prevenir valores inválidos en la prop `width` antes de aplicarlos al botón de Google.
+ * @context Utilizado por el componente AuthenticatorButtonWithGoogle al inicializar las opciones del botón.
+ * @param width valor de ancho como string (opcional)
+ * @returns true si el valor es undefined, vacío o un entero positivo; false en caso contrario
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const validateWidth = (width?: string): boolean => {
   // #step 1 - Allow undefined/empty as valid (auto width)

@@ -77,7 +77,7 @@ export const DEFAULT_EMPLOYEE_PERMISSIONS: EmployeePermissions = {
 };
 // #end-const
 
-// #function hasPermission
+// #function hasPermission - Verifica si un conjunto de permisos incluye una acción en un módulo
 /**
  * @description Verifica si un conjunto de permisos incluye una acción específica en un módulo.
  * @purpose Centralizar la lógica de verificación de permisos con la regla de que canEdit implica canView.
