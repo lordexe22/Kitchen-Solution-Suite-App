@@ -5,7 +5,14 @@ import type {DropdownState, DropdownAction, UseDropdownOptions, UseDropdownRetur
 // #end-section
 // #function dropdownReducer
 /**
- * Reducer logic for handle the drop-down state.
+ * @description Reducer que gestiona las transiciones de estado del dropdown.
+ * @purpose Centralizar la lógica de cambio de estado del dropdown mediante acciones definidas.
+ * @context Utilizado internamente por useDropdown para manejar el estado con useReducer.
+ * @param state estado actual del dropdown
+ * @param action acción despachada que determina la transición
+ * @returns nuevo estado del dropdown tras aplicar la acción
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 const dropdownReducer = (state: DropdownState, action: DropdownAction): DropdownState => {
   switch (action.type) {
@@ -51,21 +58,41 @@ export const useDropdown = (options: UseDropdownOptions = {}): UseDropdownReturn
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // #function open - execute dropdown with type: 'OPEN_DROPDOWN'
+  /**
+   * @description Abre el dropdown despachando la acción OPEN_DROPDOWN.
+   * @purpose Exponer una función estable para abrir el dropdown sin interactuar directamente con dispatch.
+   * @context Utilizado por el componente AppHeader para abrir el menú desplegable del usuario.
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const open = useCallback(() => {
     dispatch({ type: 'OPEN_DROPDOWN' });
   }, []);
   // #end-function
   // #function close - execute dropdown with type: 'CLOSE_DROPDOWN'
+  /**
+   * @description Cierra el dropdown despachando la acción CLOSE_DROPDOWN.
+   * @purpose Exponer una función estable para cerrar el dropdown sin interactuar directamente con dispatch.
+   * @context Utilizado por AppHeader y por handleItemClick para cerrar el menú.
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const close = useCallback(() => {
     dispatch({ type: 'CLOSE_DROPDOWN' });
   }, []);
   // #end-function
   // #function toggle - execute dropdown with type: 'TOGGLE_DROPDOWN'
+  /**
+   * @description Alterna el estado del dropdown entre abierto y cerrado.
+   * @purpose Exponer una función estable para alternar la visibilidad del dropdown sin depender de su estado actual.
+   * @context Utilizado por el componente AppHeader en el botón de usuario para abrir o cerrar el menú.
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const toggle = useCallback(() => {
     dispatch({ type: 'TOGGLE_DROPDOWN' });
   }, []);
   // #end-function
-
   // #event handleItemClick - handle when click in an item of the dropdown 
   const handleItemClick = useCallback((onClick?: () => void) => {
     // #step 1 - if exists, execute callback function for the clicked button

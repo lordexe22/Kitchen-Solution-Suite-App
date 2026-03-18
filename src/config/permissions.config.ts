@@ -79,16 +79,15 @@ export const DEFAULT_EMPLOYEE_PERMISSIONS: EmployeePermissions = {
 
 // #function hasPermission
 /**
- * Verifica si un conjunto de permisos incluye una acción específica en un módulo.
- * 
- * Lógica importante:
- * - canEdit implica automáticamente canView (si puedes editar, puedes ver)
- * - canView solo permite lectura
- * 
- * @param permissions - Objeto de permisos del empleado
- * @param module - Módulo a verificar
- * @param action - Acción a verificar
- * @returns true si el permiso está explícitamente en true, false caso contrario
+ * @description Verifica si un conjunto de permisos incluye una acción específica en un módulo.
+ * @purpose Centralizar la lógica de verificación de permisos con la regla de que canEdit implica canView.
+ * @context Utilizado por componentes y guards del dashboard para controlar el acceso por módulo y acción.
+ * @param permissions objeto de permisos del empleado
+ * @param module módulo a verificar (products, schedules, socials)
+ * @param action acción a verificar (canView, canEdit)
+ * @returns true si el permiso está explícitamente en true, false en caso contrario
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export function hasPermission(
   permissions: EmployeePermissions | null | undefined,

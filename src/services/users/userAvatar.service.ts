@@ -7,14 +7,13 @@ import type { UserAvatarResponse } from './userAvatar.types';
 
 // #function uploadUserAvatar
 /**
- * Sube o actualiza el avatar del usuario.
- * 
- * @param file - Archivo de imagen a subir
- * @returns Usuario actualizado con la nueva URL del avatar
- * 
- * @example
- * const file = input.files[0];
- * const updatedUser = await uploadUserAvatar(file);
+ * @description Sube o actualiza el avatar del usuario.
+ * @purpose Proveer al usuario la capacidad de personalizar su imagen de perfil.
+ * @context Utilizado por SettingsModal al confirmar la subida de una nueva imagen de avatar.
+ * @param file archivo de imagen a subir
+ * @returns datos del usuario actualizados con la nueva URL del avatar
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const uploadUserAvatar = async (file: File): Promise<UserAvatarResponse> => {
   const formData = new FormData();
@@ -29,12 +28,12 @@ export const uploadUserAvatar = async (file: File): Promise<UserAvatarResponse> 
 
 // #function deleteUserAvatar
 /**
- * Elimina el avatar del usuario.
- * 
- * @returns Usuario actualizado sin avatar
- * 
- * @example
- * const updatedUser = await deleteUserAvatar();
+ * @description Elimina el avatar del usuario.
+ * @purpose Permitir al usuario remover su foto de perfil y quedar sin imagen asignada.
+ * @context Utilizado por SettingsModal al confirmar la eliminación del avatar actual.
+ * @returns datos del usuario actualizados sin avatar
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const deleteUserAvatar = async (): Promise<UserAvatarResponse> => {
   return httpClient.delete<UserAvatarResponse>('/users/avatar');

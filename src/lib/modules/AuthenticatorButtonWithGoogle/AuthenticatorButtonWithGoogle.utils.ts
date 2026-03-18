@@ -15,11 +15,14 @@ import {
 // #end-section
 // #function decodeGoogleToken - Decodes a Google JWT and returns its payload
 /**
- * Decodes a Google JWT and returns its payload.
- * @param token JWT token string
- * @returns GoogleUserRaw payload extracted from the token
- * @throws Error if the token is invalid or cannot be decoded
- * @version 1.0.0
+ * @description Decodifica un JWT de Google y retorna su payload.
+ * @purpose Extraer los datos del usuario del token de credencial antes de normalizarlos.
+ * @context Utilizado por handleGoogleSuccess para obtener los datos crudos del usuario de Google.
+ * @param token JWT token string emitido por Google
+ * @returns payload del token con los datos crudos del usuario (GoogleUserRaw)
+ * @throws Error si el token es inválido o no puede ser decodificado
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const decodeGoogleToken = (token: string): GoogleUserRaw => {
   // #step 1 - Split the token and decode the payload
@@ -44,11 +47,14 @@ export const decodeGoogleToken = (token: string): GoogleUserRaw => {
 // #end-function
 // #function normalizeGoogleUser - Converts Google token payload to AuthSuccessResponse
 /**
- * Converts raw Google token data into the final AuthSuccessResponse structure.
- * @param googleUser Raw token payload decoded from the Google credential
- * @param credential JWT issued by Google (ID token)
- * @returns AuthSuccessResponse normalized shape with the required fields
- * @version 1.0.0
+ * @description Convierte el payload crudo del token de Google a la estructura AuthSuccessResponse.
+ * @purpose Normalizar los datos del usuario para que el consumidor reciba un formato consistente.
+ * @context Utilizado por handleGoogleSuccess después de decodificar el token.
+ * @param googleUser payload crudo del token decodificado de Google
+ * @param credential JWT original emitido por Google (ID token completo)
+ * @returns estructura normalizada AuthSuccessResponse con los campos requeridos
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const normalizeGoogleUser = (
   googleUser: GoogleUserRaw,
@@ -75,11 +81,14 @@ export const normalizeGoogleUser = (
 // #end-function
 // #function createError - Creates a structured error object
 /**
- * Builds a structured error object.
- * @param message Error message
- * @param code Error code identifier
- * @returns ErrorData shaped error payload
- * @version 1.0.0
+ * @description Construye un objeto de error estructurado con mensaje, código y timestamp.
+ * @purpose Estandarizar los objetos de error que se envían al callback onError del consumidor.
+ * @context Utilizado por handleGoogleSuccess y handleGoogleError al reportar errores.
+ * @param message mensaje descriptivo del error
+ * @param code identificador del tipo de error (ERROR_CODES)
+ * @returns objeto de error con estructura ErrorData
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const createError = (message: string, code: string): ErrorData => {
   // #step 1 - Build error payload with timestamp
@@ -93,11 +102,14 @@ export const createError = (message: string, code: string): ErrorData => {
 // #end-function
 // #function handleGoogleSuccess - Processes successful Google login
 /**
- * Handles Google auth success: decodes, normalizes, and invokes the success callback.
- * @param response GoogleLogin response
- * @param onSuccess Success callback provided by the consumer
- * @param onError Error callback provided by the consumer
- * @version 1.0.0
+ * @description Procesa el éxito del login con Google: decodifica el token, normaliza los datos e invoca el callback de éxito.
+ * @purpose Encapsular el flujo completo de éxito de Google Auth para que el componente solo exponga callbacks.
+ * @context Utilizado como handler del prop onSuccess del componente GoogleLogin de @react-oauth/google.
+ * @param response respuesta del componente GoogleLogin con la credencial JWT
+ * @param onSuccess callback de éxito provisto por el consumidor
+ * @param onError callback de error provisto por el consumidor
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const handleGoogleSuccess = (
   response: CredentialResponse,
@@ -138,9 +150,12 @@ export const handleGoogleSuccess = (
 // #end-function
 // #function handleGoogleError - Handles Google login errors
 /**
- * Handles Google auth errors by logging and notifying the consumer.
- * @param onError Error callback provided by the consumer
- * @version 1.0.0
+ * @description Maneja los errores del flujo de autenticación con Google, notificando al consumidor.
+ * @purpose Proveer un punto centralizado para el manejo de errores de Google Auth.
+ * @context Utilizado como handler del prop onError del componente GoogleLogin de @react-oauth/google.
+ * @param onError callback de error provisto por el consumidor
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const handleGoogleError = (
   onError: (error: ErrorData) => void

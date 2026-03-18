@@ -96,6 +96,18 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   const [isLoading, setIsLoading] = useState(false);
   // #end-state
   // #function buildUserPayload - creates user object to send to server
+  /**
+   * @description Construye el payload del usuario normalizado para el endpoint de registro.
+   * @purpose Unificar la construcción del objeto de registro para los flujos de formulario y Google OAuth.
+   * @context Utilizado por AuthRegisterModalWindow antes de enviar los datos de registro al servidor.
+   * @param formData datos del formulario de registro (opcional, para flujo local)
+   * @param googlePayload datos del usuario decodificados desde el token de Google (opcional)
+   * @param googleCredential token JWT de Google sin decodificar (opcional)
+   * @returns objeto RegisterUserData listo para enviar al endpoint de registro
+   * @throws Error si no se proveen datos de formulario ni de Google
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const buildUserPayload = (
     formData?: RegisterFormData,
     googlePayload?: GoogleUser | null,
@@ -127,6 +139,15 @@ const AuthRegisterModalWindow = (prop:AuthRegisterModalWindowProp) => {
   };
   // #end-function
   // #function renderErrors - Renderiza todos los errores de un campo
+  /**
+   * @description Renderiza todos los mensajes de error de un campo de formulario.
+   * @purpose Centralizar la lógica de presentación de errores para campos validados con react-hook-form.
+   * @context Utilizado internamente por AuthRegisterModalWindow para mostrar errores bajo cada campo del formulario.
+   * @param fieldErrors errores del campo según react-hook-form
+   * @returns lista de párrafos con mensajes de error, o null si no hay errores
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const renderErrors = (fieldErrors: import('react-hook-form').FieldError | undefined) => {
     if (!fieldErrors) return null;
     

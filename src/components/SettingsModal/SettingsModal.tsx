@@ -13,7 +13,7 @@ import type { SettingsModalProps } from './SettingsModal.types';
 // #component SettingsModal
 const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   // #state user data from store
-  const { imageUrl, setImageUrl } = useUserDataStore();
+  const { user, update } = useUserDataStore();
   // #end-state
 
   // #hook useToast
@@ -36,7 +36,12 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   // #function handleFileChange
   /**
-   * Maneja la selección de archivo.
+   * @description Procesa la selección de archivo de imagen para el avatar del usuario.
+   * @purpose Validar el archivo seleccionado y generar una URL de preview antes de la subida.
+   * @context Utilizado por SettingsModal en el input de tipo file para el cambio de avatar.
+   * @param e evento de cambio del input de archivo
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,7 +74,12 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   // #function handleUpload
   /**
-   * Sube la imagen seleccionada.
+   * @description Sube el archivo de avatar seleccionado al servidor.
+   * @purpose Persistir la imagen de avatar del usuario a través del servicio correspondiente y actualizar el store.
+   * @context Utilizado por SettingsModal en el botón de confirmación de subida de imagen.
+   * @throws Error si el servicio de subida falla (manejado internamente)
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -79,7 +89,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
     try {
       const response = await uploadUserAvatar(selectedFile);
-      setImageUrl(response.user.imageUrl || null);
+      update({ imageUrl: response.user.imageUrl || null });
       setSelectedFile(null);
       setPreviewUrl(null);
       toast.success('Avatar actualizado exitosamente');
@@ -95,10 +105,15 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   // #function handleDelete
   /**
-   * Elimina el avatar actual.
+   * @description Elimina el avatar actual del usuario tras confirmación explícita.
+   * @purpose Permitir al usuario remover su foto de perfil y volver al estado sin avatar.
+   * @context Utilizado por SettingsModal en el botón de eliminación de avatar.
+   * @throws Error si el servicio de eliminación falla (manejado internamente)
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const handleDelete = async () => {
-    if (!imageUrl) return;
+    if (!user?.imageUrl) return;
 
     if (!confirm('¿Estás seguro de eliminar tu foto de perfil?')) return;
 
@@ -107,7 +122,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
     try {
       const response = await deleteUserAvatar();
-      setImageUrl(response.user.imageUrl || null);
+      update({ imageUrl: response.user.imageUrl || null });
       toast.success('Avatar eliminado exitosamente');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al eliminar imagen';
@@ -166,8 +181,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           <div className={styles.imagePreview}>
             {previewUrl ? (
               <img src={previewUrl} alt="Preview" />
-            ) : imageUrl ? (
-              <img src={imageUrl} alt="Avatar actual" />
+            ) : user?.imageUrl ? (
+              <img src={user.imageUrl} alt="Avatar actual" />
             ) : (
               <div className={styles.placeholder}>Sin imagen</div>
             )}
@@ -212,7 +227,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               </>
             )}
 
-            {!selectedFile && imageUrl && (
+            {!selectedFile && user?.imageUrl && (
               <button
                 className="btn-danger btn-md"
                 onClick={handleDelete}

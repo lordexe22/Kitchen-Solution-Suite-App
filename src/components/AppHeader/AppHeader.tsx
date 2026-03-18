@@ -44,10 +44,12 @@ const AppHeader = (props: AppHeaderProps) => {
 
   // #function handleLogout
   /**
-   * Maneja el cierre de sesión del usuario.
-   * 1. Llama al endpoint de logout
-   * 2. Limpia el store de Zustand
-   * 3. Cierra el dropdown
+   * @description Maneja el cierre de sesión del usuario.
+   * @purpose Encapsular el flujo completo de logout: petición al servidor, limpieza del store y redirección.
+   * @context Utilizado por AppHeader en el item "Cerrar sesión" del menú desplegable del usuario.
+   * @throws Error si la petición de logout al servidor falla (manejado internamente con fallback local)
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const handleLogout = async () => {
     setIsLoggingOut(true);

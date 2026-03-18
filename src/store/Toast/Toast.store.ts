@@ -4,7 +4,12 @@ import type { ToastStore, Toast } from './Toast.types';
 
 // #function generateId - genera un ID único para cada toast
 /**
- * Genera un ID único para cada toast.
+ * @description Genera un identificador único para cada instancia de toast.
+ * @purpose Garantizar que cada toast pueda ser referenciado y eliminado individualmente.
+ * @context Utilizado internamente por useToastStore al agregar un nuevo toast a la cola.
+ * @returns string con formato 'toast-{timestamp}-{randomPart}'
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 const generateId = (): string => `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 // #end-function

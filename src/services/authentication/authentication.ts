@@ -6,13 +6,14 @@ import { httpClient } from '../../api/httpClient.instance';
 
 // #function registerUser
 /**
- * Registra un nuevo usuario en el sistema.
- * Las validaciones se realizan en el backend.
- *
- * @async
- * @param {RegisterUserData} registerUserData - Datos del usuario a registrar.
- * @returns {Promise<UserResponse>} Datos del usuario registrado.
- * @throws {Error} Si la solicitud al backend falla.
+ * @description Registra un nuevo usuario en el sistema.
+ * @purpose Centralizar la llamada al endpoint de registro, delegando las validaciones al backend.
+ * @context Utilizado por AuthRegisterModalWindow para crear nuevos usuarios con credenciales locales o Google.
+ * @param registerUserData datos necesarios para crear el usuario
+ * @returns datos del usuario registrado
+ * @throws Error si la solicitud al backend falla
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const registerUser = async (registerUserData: RegisterUserData): Promise<UserResponse> => {
   return httpClient.post('/public/auth/register', registerUserData);
@@ -20,13 +21,14 @@ export const registerUser = async (registerUserData: RegisterUserData): Promise<
 // #end-function
 // #function loginUser
 /**
- * Inicia sesión de un usuario en el sistema.
- * Las validaciones se realizan en el backend.
- *
- * @async
- * @param {UserLoginData} loginUserData - Datos del usuario para iniciar sesión.
- * @returns {Promise<UserResponse>} Datos del usuario autenticado.
- * @throws {Error} Si las credenciales son inválidas o la solicitud falla.
+ * @description Inicia sesión de un usuario en el sistema.
+ * @purpose Centralizar la llamada al endpoint de login, delegando las validaciones al backend.
+ * @context Utilizado por AuthLoginModalWindow para autenticar usuarios con credenciales locales o Google.
+ * @param loginUserData datos del usuario para iniciar sesión
+ * @returns datos del usuario autenticado
+ * @throws Error si las credenciales son inválidas o la solicitud falla
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const loginUser = async (loginUserData: UserLoginData): Promise<UserResponse> => {
   return httpClient.post('/public/auth/login', loginUserData);
@@ -34,12 +36,13 @@ export const loginUser = async (loginUserData: UserLoginData): Promise<UserRespo
 // #end-function
 // #function autoLogin
 /**
- * Intenta autenticar al usuario automáticamente usando el JWT en cookie.
- * Si el token es válido, retorna los datos del usuario.
- *
- * @async
- * @returns {Promise<UserResponse>} Datos del usuario autenticado.
- * @throws {Error} Si el token es inválido o expiró.
+ * @description Intenta autenticar al usuario automáticamente usando el JWT almacenado en cookie.
+ * @purpose Recuperar la sesión del usuario al recargar la aplicación sin requerir login manual.
+ * @context Utilizado por UserData.store al inicializar la aplicación para restaurar la sesión activa.
+ * @returns datos del usuario autenticado si el token es válido
+ * @throws Error si el token es inválido o ha expirado
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const autoLogin = async (): Promise<UserResponse> => {
   return httpClient.post('/public/auth/auto-login');
@@ -47,11 +50,13 @@ export const autoLogin = async (): Promise<UserResponse> => {
 // #end-function
 // #function logoutUser
 /**
- * Cierra la sesión del usuario eliminando el JWT de las cookies.
- *
- * @async
- * @returns {Promise<{ success: boolean }>} Confirmación del logout.
- * @throws {Error} Si la solicitud falla.
+ * @description Cierra la sesión del usuario eliminando el JWT de las cookies del servidor.
+ * @purpose Garantizar que el token sea invalidado en el servidor al cerrar sesión.
+ * @context Utilizado por AppHeader en el flujo de logout del usuario.
+ * @returns confirmación del logout exitoso
+ * @throws Error si la solicitud al servidor falla
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
  */
 export const logoutUser = async (): Promise<{ success: boolean }> => {
   return httpClient.post('/public/auth/logout');

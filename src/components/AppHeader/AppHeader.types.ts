@@ -170,7 +170,7 @@ export interface UseDropdownReturn {
   // #end-f-field
   // #v-field dropdownRef - Ref al elemento del dropdown
   /** referencia al elemento DOM del dropdown para detectar clicks externos */
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
+  dropdownRef: React.RefObject<HTMLDivElement>;
   // #end-v-field
   // #f-field handleItemClick - Maneja el clic en un ítem
   /** maneja el evento de clic sobre un ítem del dropdown */

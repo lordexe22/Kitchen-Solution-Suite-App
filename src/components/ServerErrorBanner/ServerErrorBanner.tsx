@@ -22,11 +22,12 @@ const ServerErrorBanner = ({
 }: ServerErrorBannerProps) => {
   // #function closeBannerAfterDelay
   /**
-   * Inicia un temporizador para cerrar el banner automáticamente después del tiempo definido.
-   * Se limpia el temporizador si el componente se desmonta o cambian las dependencias.
-   *
-   * @function closeBannerAfterDelay
-   * @returns {() => void | undefined} Función de limpieza que cancela el temporizador.
+   * @description Inicia un temporizador para cerrar el banner automáticamente tras el tiempo configurado.
+   * @purpose Automatizar el cierre del banner de error sin intervención del usuario.
+   * @context Utilizado internamente por ServerErrorBanner como efecto reactivo al mensaje de error.
+   * @returns función de limpieza que cancela el temporizador, o undefined si no hay mensaje
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
    */
   const closeBannerAfterDelay = () => {
     if (message) {

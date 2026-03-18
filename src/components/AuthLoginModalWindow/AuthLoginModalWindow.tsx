@@ -66,6 +66,15 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
   const navigate = useNavigate();
   // #end-hook
   // #function renderErrors - Renderiza todos los errores de un campo
+  /**
+   * @description Renderiza todos los mensajes de error de un campo de formulario.
+   * @purpose Centralizar la lógica de presentación de errores para campos validados con react-hook-form.
+   * @context Utilizado internamente por AuthLoginModalWindow para mostrar errores bajo cada campo del formulario.
+   * @param fieldErrors errores del campo según react-hook-form
+   * @returns lista de párrafos con mensajes de error, o null si no hay errores
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const renderErrors = (fieldErrors: import('react-hook-form').FieldError | undefined) => {
     if (!fieldErrors) return null;
     
@@ -90,6 +99,15 @@ const AuthLoginModalWindow = (prop: AuthLoginModalWindowProp) => {
   };
   // #end-function
   // #function handleGoogleAuth - Maneja la autenticación con Google
+  /**
+   * @description Maneja la autenticación exitosa con Google, enviando el token al servidor para validación.
+   * @purpose Centralizar el flujo de login con Google: validación del credential, petición al servidor y actualización del store.
+   * @context Utilizado por AuthLoginModalWindow como callback del componente AuthenticatorWithGoogle en modo login.
+   * @param response respuesta de GoogleLogin con el credential JWT del usuario
+   * @throws Error si el credential es inválido o si la petición al servidor falla
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const handleGoogleAuth = async (response: CredentialResponse) => {
     // Limpiar errores previos
     setServerError(null);

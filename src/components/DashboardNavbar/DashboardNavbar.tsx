@@ -20,6 +20,14 @@ const DashboardNavbar = () => {
   const userType = user?.type ?? null;
 
   // #function filterNavItems - filtrar items según tipo de usuario
+  /**
+   * @description Filtra los items de navegación según el tipo de usuario autenticado.
+   * @purpose Controlar la visibilidad de las secciones del sidebar según el rol del usuario.
+   * @context Utilizado por DashboardNavbar para determinar qué items mostrar en la barra de navegación lateral.
+   * @returns array de items de navegación visibles para el usuario actual
+   * @since 1.0.0
+   * @author Walter Ezequiel Puig
+   */
   const visibleItems = useMemo(() => {
     // Admin: acceso completo a todos los items
     if (userType === 'admin') {
