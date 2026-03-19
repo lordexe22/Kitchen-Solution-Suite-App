@@ -5,7 +5,7 @@ import { httpClient } from '../../api/httpClient.instance';
 import type { GetAllCompaniesParams, GetAllCompaniesResponse, CreateCompanyResponse, UpdateCompanyResponse, DeleteCompanyResponse, CheckNameResponse } from './companies.types';
 // #end-section
 
-// #function getAllCompanies - Obtiene todas las compañías del usuario con filtrado y paginación
+// #service getAllCompanies - Obtiene todas las compañías del usuario con filtrado y paginación
 /**
  * @description Obtiene todas las compañías del usuario autenticado con filtrado y paginación.
  * @purpose Proveer al dashboard una lista de compañías paginada y filtrable por estado.
@@ -30,9 +30,9 @@ export const getAllCompanies = async (
   const response = await httpClient.get<{ data: GetAllCompaniesResponse }>(url);
   return response.data;
 };
-// #end-function
+// #end-service
 
-// #function createCompany - Crea una nueva compañía asociada al usuario autenticado
+// #service createCompany - Crea una nueva compañía asociada al usuario autenticado
 /**
  * @description Crea una nueva compañía asociada al usuario autenticado.
  * @purpose Permitir al usuario registrar una nueva compañía en el sistema.
@@ -47,9 +47,9 @@ export const createCompany = async (companyData: CompanyFormData): Promise<Creat
   const response = await httpClient.post<{ data: Company }>('/dashboard/company', companyData);
   return { success: true, company: response.data };
 };
-// #end-function
+// #end-service
 
-// #function updateCompany - Actualiza los datos de una compañía existente
+// #service updateCompany - Actualiza los datos de una compañía existente
 /**
  * @description Actualiza los datos de una compañía existente del usuario autenticado.
  * @purpose Permitir la edición parcial o total de los datos de una compañía.
@@ -68,9 +68,9 @@ export const updateCompany = async (
   const response = await httpClient.patch<{ data: Company }>(`/dashboard/company/${companyId}`, companyData);
   return { success: true, company: response.data };
 };
-// #end-function
+// #end-service
 
-// #function deleteCompany - Elimina permanentemente una compañía del usuario autenticado
+// #service deleteCompany - Elimina permanentemente una compañía del usuario autenticado
 /**
  * @description Elimina permanentemente una compañía del usuario autenticado.
  * @purpose Proveer la operación de borrado definitivo de una compañía del sistema.
@@ -85,9 +85,9 @@ export const deleteCompany = async (companyId: number): Promise<DeleteCompanyRes
   await httpClient.delete(`/dashboard/company/${companyId}`);
   return { success: true };
 };
-// #end-function
+// #end-service
 
-// #function archiveCompany - Archiva una compañía ocultándola de las listas activas
+// #service archiveCompany - Archiva una compañía ocultándola de las listas activas
 /**
  * @description Archiva una compañía, ocultándola de las listas activas por defecto.
  * @purpose Proveer una alternativa a la eliminación definitiva que preserve los datos históricos.
@@ -102,9 +102,9 @@ export const archiveCompany = async (companyId: number): Promise<UpdateCompanyRe
   const response = await httpClient.post<{ data: { company: Company; message: string } }>(`/dashboard/company/${companyId}/archive`);
   return { success: true, company: response.data.company };
 };
-// #end-function
+// #end-service
 
-// #function reactivateCompany - Reactiva una compañía previamente archivada
+// #service reactivateCompany - Reactiva una compañía previamente archivada
 /**
  * @description Reactiva una compañía previamente archivada.
  * @purpose Restaurar una compañía archivada al estado activo para que vuelva a aparecer en las listas.
@@ -119,9 +119,9 @@ export const reactivateCompany = async (companyId: number): Promise<UpdateCompan
   const response = await httpClient.post<{ data: { company: Company; message: string } }>(`/dashboard/company/${companyId}/reactivate`);
   return { success: true, company: response.data.company };
 };
-// #end-function
+// #end-service
 
-// #function checkNameAvailability - Verifica si un nombre de compañía está disponible
+// #service checkNameAvailability - Verifica si un nombre de compañía está disponible
 /**
  * @description Verifica si un nombre de compañía está disponible para su uso.
  * @purpose Habilitar la validación en tiempo real del nombre de compañía en formularios de creación/edición.
@@ -136,9 +136,9 @@ export const checkNameAvailability = async (name: string): Promise<CheckNameResp
   const response = await httpClient.get<{ data: { available: boolean } }>(`/dashboard/company/check-name?name=${encodeURIComponent(name)}`);
   return { success: true, available: response.data.available };
 };
-// #end-function
+// #end-service
 
-// #function uploadCompanyLogo - Sube o reemplaza el logo de una compañía
+// #service uploadCompanyLogo - Sube o reemplaza el logo de una compañía
 /**
  * @description Sube o reemplaza el logo de una compañía enviando el archivo como multipart/form-data.
  * @purpose Permitir a los usuarios personalizar la imagen de su compañía en el sistema.
@@ -163,9 +163,9 @@ export const uploadCompanyLogo = async (
   );
   return { success: true, company: response.data.company };
 };
-// #end-function
+// #end-service
 
-// #function deleteCompanyLogo - Elimina el logo de una compañía
+// #service deleteCompanyLogo - Elimina el logo de una compañía
 /**
  * @description Elimina el logo de una compañía.
  * @purpose Permitir al usuario remover la imagen de su compañía sin afectar otros datos.
@@ -182,4 +182,5 @@ export const deleteCompanyLogo = async (companyId: number): Promise<UpdateCompan
   );
   return { success: true, company: response.data.company };
 };
+// #end-service
 // #end-function

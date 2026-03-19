@@ -1,8 +1,8 @@
 // src/hooks/useAutoLogin.ts
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { autoLogin } from '../services/authentication/authentication';
-import type { UserResponse } from '../services/authentication/authentication.types';
+import { autoLogin } from '../services/authentication';
+import type { UserResponse } from '../services/authentication';
 import { useUserDataStore } from '../store/userData/UserData.store';
 import { useCompaniesStore } from '../store/Companies';
 import { getAllCompanies } from '../services/companies/companies.service';

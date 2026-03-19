@@ -11,7 +11,7 @@ import AuthLoginModalWindow from '../AuthLoginModalWindow/AuthLoginModalWindow';
 import SettingsModal from '../SettingsModal/SettingsModal';
 import { useDropdown } from './AppHeader.hooks';
 import { getInitials } from './AppHeader.utils';
-import { logoutUser } from '../../services/authentication/authentication';
+import { logoutUser } from '../../services/authentication';
 import { useNavigate } from 'react-router-dom';
 // #end-section
 

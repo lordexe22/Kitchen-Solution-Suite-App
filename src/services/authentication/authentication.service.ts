@@ -1,10 +1,10 @@
-/* src/services/authentication/authentication.ts */
+/* src/services/authentication/authentication.service.ts */
 // #section Imports
 import type { RegisterUserData, UserLoginData, UserResponse } from "./authentication.types";
 import { httpClient } from '../../api/httpClient.instance';
 // #end-section
 
-// #function registerUser - Registra un nuevo usuario en el sistema
+// #service registerUser - Registra un nuevo usuario en el sistema
 /**
  * @description Registra un nuevo usuario en el sistema.
  * @purpose Centralizar la llamada al endpoint de registro, delegando las validaciones al backend.
@@ -18,8 +18,8 @@ import { httpClient } from '../../api/httpClient.instance';
 export const registerUser = async (registerUserData: RegisterUserData): Promise<UserResponse> => {
   return httpClient.post('/public/auth/register', registerUserData);
 };
-// #end-function
-// #function loginUser - Inicia sesión de un usuario en el sistema
+// #end-service
+// #service loginUser - Inicia sesión de un usuario en el sistema
 /**
  * @description Inicia sesión de un usuario en el sistema.
  * @purpose Centralizar la llamada al endpoint de login, delegando las validaciones al backend.
@@ -33,8 +33,8 @@ export const registerUser = async (registerUserData: RegisterUserData): Promise<
 export const loginUser = async (loginUserData: UserLoginData): Promise<UserResponse> => {
   return httpClient.post('/public/auth/login', loginUserData);
 };
-// #end-function
-// #function autoLogin - Intenta autenticar al usuario usando el JWT almacenado en cookie
+// #end-service
+// #service autoLogin - Intenta autenticar al usuario usando el JWT almacenado en cookie
 /**
  * @description Intenta autenticar al usuario automáticamente usando el JWT almacenado en cookie.
  * @purpose Recuperar la sesión del usuario al recargar la aplicación sin requerir login manual.
@@ -47,8 +47,8 @@ export const loginUser = async (loginUserData: UserLoginData): Promise<UserRespo
 export const autoLogin = async (): Promise<UserResponse> => {
   return httpClient.post('/public/auth/auto-login');
 };
-// #end-function
-// #function logoutUser - Cierra la sesión del usuario eliminando el JWT de las cookies
+// #end-service
+// #service logoutUser - Cierra la sesión del usuario eliminando el JWT de las cookies
 /**
  * @description Cierra la sesión del usuario eliminando el JWT de las cookies del servidor.
  * @purpose Garantizar que el token sea invalidado en el servidor al cerrar sesión.
@@ -61,4 +61,4 @@ export const autoLogin = async (): Promise<UserResponse> => {
 export const logoutUser = async (): Promise<{ success: boolean }> => {
   return httpClient.post('/public/auth/logout');
 };
-// #end-function
+// #end-service
