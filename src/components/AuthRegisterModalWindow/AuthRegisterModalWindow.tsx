@@ -13,7 +13,7 @@ import styles from './AuthRegisterModalWindow.module.css'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
-import { getServerErrorMessage, detectServerErrorType } from '../../utils/detectServerError/detectServerError'
+import { getServerErrorMessage, detectServerErrorType } from '../../utils/detectServerError'
 import { useNavigate } from 'react-router-dom'
 import type { RegisterFormData, AuthRegisterModalWindowProp } from './AuthRegisterModalWindow.types';
 // #end-section

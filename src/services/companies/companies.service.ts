@@ -4,7 +4,6 @@ import type { Company, CompanyFormData } from '../../types/companies.types';
 import { httpClient } from '../../api/httpClient.instance';
 import type { GetAllCompaniesParams, GetAllCompaniesResponse, CreateCompanyResponse, UpdateCompanyResponse, DeleteCompanyResponse, CheckNameResponse } from './companies.types';
 // #end-section
-
 // #service getAllCompanies - Obtiene todas las compañías del usuario con filtrado y paginación
 /**
  * @description Obtiene todas las compañías del usuario autenticado con filtrado y paginación.
@@ -31,7 +30,6 @@ export const getAllCompanies = async (
   return response.data;
 };
 // #end-service
-
 // #service createCompany - Crea una nueva compañía asociada al usuario autenticado
 /**
  * @description Crea una nueva compañía asociada al usuario autenticado.
@@ -48,7 +46,6 @@ export const createCompany = async (companyData: CompanyFormData): Promise<Creat
   return { success: true, company: response.data };
 };
 // #end-service
-
 // #service updateCompany - Actualiza los datos de una compañía existente
 /**
  * @description Actualiza los datos de una compañía existente del usuario autenticado.
@@ -69,7 +66,6 @@ export const updateCompany = async (
   return { success: true, company: response.data };
 };
 // #end-service
-
 // #service deleteCompany - Elimina permanentemente una compañía del usuario autenticado
 /**
  * @description Elimina permanentemente una compañía del usuario autenticado.
@@ -86,7 +82,6 @@ export const deleteCompany = async (companyId: number): Promise<DeleteCompanyRes
   return { success: true };
 };
 // #end-service
-
 // #service archiveCompany - Archiva una compañía ocultándola de las listas activas
 /**
  * @description Archiva una compañía, ocultándola de las listas activas por defecto.
@@ -103,7 +98,6 @@ export const archiveCompany = async (companyId: number): Promise<UpdateCompanyRe
   return { success: true, company: response.data.company };
 };
 // #end-service
-
 // #service reactivateCompany - Reactiva una compañía previamente archivada
 /**
  * @description Reactiva una compañía previamente archivada.
@@ -120,7 +114,6 @@ export const reactivateCompany = async (companyId: number): Promise<UpdateCompan
   return { success: true, company: response.data.company };
 };
 // #end-service
-
 // #service checkNameAvailability - Verifica si un nombre de compañía está disponible
 /**
  * @description Verifica si un nombre de compañía está disponible para su uso.
@@ -137,7 +130,6 @@ export const checkNameAvailability = async (name: string): Promise<CheckNameResp
   return { success: true, available: response.data.available };
 };
 // #end-service
-
 // #service uploadCompanyLogo - Sube o reemplaza el logo de una compañía
 /**
  * @description Sube o reemplaza el logo de una compañía enviando el archivo como multipart/form-data.
@@ -164,7 +156,6 @@ export const uploadCompanyLogo = async (
   return { success: true, company: response.data.company };
 };
 // #end-service
-
 // #service deleteCompanyLogo - Elimina el logo de una compañía
 /**
  * @description Elimina el logo de una compañía.
@@ -183,4 +174,3 @@ export const deleteCompanyLogo = async (companyId: number): Promise<UpdateCompan
   return { success: true, company: response.data.company };
 };
 // #end-service
-// #end-function

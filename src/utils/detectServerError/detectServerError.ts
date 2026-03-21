@@ -1,17 +1,17 @@
-// src/utils/detectServerError.ts
+// src/utils/detectServerError/detectServerError.ts
 
-export type ServerErrorType = 
-  | 'network'    // Sin conexión
-  | 'timeout'    // Timeout
-  | 'server'     // Error 500+
-  | 'unknown';   // Otros
+import type { ServerErrorType, ErrorWithStatus } from './detectServerError.types';
 
-interface ErrorWithStatus {
-  status?: number;
-  name?: string;
-  message?: string;
-}
-
+// #function detectServerErrorType - Clasifica el tipo de error de servidor según su origen técnico
+/**
+ * @description Analiza un error desconocido y determina su categoría de origen.
+ * @purpose Proveer una clasificación uniforme de errores que permita a los consumidores responder de forma diferenciada.
+ * @context Utilizado por componentes de autenticación y cualquier flujo que realice llamadas al servidor.
+ * @param error error capturado en un bloque catch cuyo origen se desconoce
+ * @returns categoría del error según su naturaleza técnica
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
+ */
 export const detectServerErrorType = (error: unknown): ServerErrorType => {
   // Error de red (sin conexión)
   if (error instanceof TypeError) {
@@ -43,7 +43,18 @@ export const detectServerErrorType = (error: unknown): ServerErrorType => {
 
   return 'unknown';
 };
+// #end-function
 
+// #function getServerErrorMessage - Obtiene el mensaje de error legible según el tipo de error
+/**
+ * @description Retorna un mensaje descriptivo en inglés correspondiente al tipo de error recibido.
+ * @purpose Centralizar los mensajes de error de servidor para garantizar consistencia en la UI.
+ * @context Utilizado por componentes de autenticación tras clasificar el error con detectServerErrorType.
+ * @param errorType categoría del error previamente clasificada
+ * @returns mensaje descriptivo listo para mostrar al usuario
+ * @since 1.0.0
+ * @author Walter Ezequiel Puig
+ */
 export const getServerErrorMessage = (errorType: ServerErrorType): string => {
   const messages = {
     network: 'Unable to connect to the server. Please check your internet connection and try again.',
@@ -54,3 +65,4 @@ export const getServerErrorMessage = (errorType: ServerErrorType): string => {
 
   return messages[errorType];
 };
+// #end-function

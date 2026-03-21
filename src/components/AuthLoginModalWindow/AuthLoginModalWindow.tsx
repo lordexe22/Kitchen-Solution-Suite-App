@@ -11,7 +11,7 @@ import { useUserDataStore } from '../../store/userData/UserData.store'
 import '/src/styles/modal.css'
 import '/src/styles/button.css'
 import ServerErrorBanner from '../ServerErrorBanner';
-import { detectServerErrorType, getServerErrorMessage } from '../../utils/detectServerError/detectServerError'
+import { detectServerErrorType, getServerErrorMessage } from '../../utils/detectServerError'
 import { useNavigate } from 'react-router-dom';
 import type { LoginFormData, AuthLoginModalWindowProp } from './AuthLoginModalWindow.types';
 // #end-section
