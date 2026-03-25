@@ -54,6 +54,7 @@ const WelcomePage = () => {
                 src={user.imageUrl} 
                 alt={`${user.firstName} ${user.lastName}`}
                 className={styles.avatar}
+                referrerPolicy="no-referrer"
               />
             )}
             

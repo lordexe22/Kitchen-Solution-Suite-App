@@ -114,6 +114,7 @@ const AppHeader = (props: AppHeaderProps) => {
                     src={user.imageUrl} 
                     alt={`${user.firstName} ${user.lastName}`}
                     className={styles['user-avatar']}
+                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className={styles['user-avatar-placeholder']}>

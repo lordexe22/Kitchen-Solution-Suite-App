@@ -187,7 +187,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             {previewUrl ? (
               <img src={previewUrl} alt="Preview" />
             ) : user?.imageUrl ? (
-              <img src={user.imageUrl} alt="Avatar actual" />
+              <img src={user.imageUrl} alt="Avatar actual" referrerPolicy="no-referrer" />
             ) : (
               <div className={styles.placeholder}>Sin imagen</div>
             )}
